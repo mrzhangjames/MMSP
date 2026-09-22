@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/App/">
+    <Project Path="MMSP.App.Main/MMSP.App.Main.csproj" />
+    <Project Path="MMSP.App.Shared/MMSP.App.Shared.csproj" />
+    <Project Path="MMSP.App.TemplateMatch/MMSP.App.TemplateMatch.csproj" />
+    <Project Path="MMSP.App.WpfBase/MMSP.App.WpfBase.csproj" />
+  </Folder>
+  <Folder Name="/Common/">
+    <Project Path="MMSP.Common.Helper/MMSP.Common.Helper.csproj" />
+  </Folder>
+  <Folder Name="/Core/">
+    <Project Path="MMSP.Core.License/MMSP.Core.License.csproj" />
+    <Project Path="MMSP.Core.Model/MMSP.Core.Model.csproj" />
+  </Folder>
+  <Folder Name="/Plugin/">
+    <Project Path="MMSP.Plugin.Lux/MMSP.Plugin.Lux.csproj" />
+  </Folder>
+  <Folder Name="/Service/">
+    <Project Path="MMSP.Service.Database/MMSP.Service.Database.csproj" />
+    <Project Path="MMSP.Service.Device/MMSP.Service.Device.csproj" />
+  </Folder>
+</Solution>

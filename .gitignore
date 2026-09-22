@@ -1,0 +1,123 @@
+# Dependencies
+node_modules/
+packages/
+**/packages/*
+!**/packages/build/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.json
+appsettings.*.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+*.egg-info/
+
+# Visual Studio / MSBuild
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+*.rsuser
+
+# Build outputs
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+[Dd]ebugPublic/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+*.log
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Test / coverage
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+coverage*/
+TestResults/
+# 图表导出测试运行产物（夹具 CSV 仍入库）
+MESP.Tests/TestData/ChartExport/output/
+
+# Publish / installers
+publish/
+*.msi
+*.msix
+*.appx
+*.appxbundle
+# InnoSetup：生成物与 Desktop Runtime 红包不入库
+# （根目录 artifacts/ 已在上方忽略；此处写明 InnoSetup 子路径便于查阅）
+InnoSetup/artifacts/**
+!InnoSetup/artifacts/.gitkeep
+InnoSetup/redist/*.exe
+!InnoSetup/redist/.gitkeep
+installer/redist/*.exe
+!installer/redist/.gitkeep
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+*.swp
+*~
+
+# Temporary / local
+*.tmp
+*.temp
+*.cache
+*.bak
+*.orig
+*.local
+
+# WPF / generated
+*_wpftmp.csproj
+*.g.cs
+*.g.i.cs
+*.baml
+
+# Local runtime data / databases (optional local artifacts)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Project local docs, demos & tools (not versioned)
+/docs/
+/demos/
+/tools/
+
+# local upstream snapshots
+_ref/
+
