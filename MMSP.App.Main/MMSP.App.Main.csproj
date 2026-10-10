@@ -28,4 +28,12 @@
     <ProjectReference Include="..\MMSP.Core.License\MMSP.Core.License.csproj" />
   </ItemGroup>
 
+  <!-- 系统配置放在解决方案 Lib\Config。编译时拷到程序目录的 Config。 -->
+  <ItemGroup>
+    <Content Include="..\Lib\Config\**\*.*">
+      <Link>Config\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
