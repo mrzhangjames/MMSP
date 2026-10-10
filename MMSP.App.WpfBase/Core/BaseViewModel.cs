@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace MMSP.App.WpfBase.Core
-{  /// <summary>
+{  
+    /// <summary>
    /// 导航基类
    /// </summary>
     // IConfirmNavigationRequest接口用于确认导航请求
@@ -13,11 +14,6 @@ namespace MMSP.App.WpfBase.Core
 
     public class BaseViewModel : BindableBase, INavigationAware
     {
-        /// <summary>
-        /// 服务
-        /// </summary>
-        //protected readonly IServiceManaged Service;
-
         /// <summary>
         /// 事件聚合器
         /// </summary>
@@ -40,7 +36,6 @@ namespace MMSP.App.WpfBase.Core
             ContainerExt = container;
             EventAggregatorBase = eventAggregator;
 
-            //Service = container.Resolve<ServiceManaged>();
         }
 
         /// <summary>

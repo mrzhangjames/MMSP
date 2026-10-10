@@ -1,0 +1,47 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--  主界面颜色主题  -->
+
+    <SolidColorBrush x:Key="ThemeBrushColorMajor">#767676</SolidColorBrush>
+    <SolidColorBrush x:Key="ThemeBrushColorAssist">#FCC800</SolidColorBrush>
+    <Color x:Key="ThemeColorMajor">#767676</Color>
+    <Color x:Key="ThemeColorAssist">#FCC800</Color>
+
+    <!--
+     用于特别需要强调和突出的文字、按钮和icon
+     如选项卡文字选中状态、列表标题标签、icon文字、可交互文字等
+ -->
+    <SolidColorBrush x:Key="HighestRed">#CE3D3A</SolidColorBrush>
+
+    <!--
+     用于重要及文字信息、内容标题信息
+     如列表标题名称、大板块标题、正文内容等重要的文字内容
+ -->
+    <SolidColorBrush x:Key="HighestBlack">#333333</SolidColorBrush>
+
+    <!--
+     小面积使用、用于重要链接文字颜色
+     如动态界面用户昵称、其他内容等
+ -->
+    <SolidColorBrush x:Key="HighestBlue">#477AAC</SolidColorBrush>
+
+    <!--
+     用于普通级别段落、用户名、icon等
+     如DataGrid正文内容
+ -->
+    <SolidColorBrush x:Key="MediumDarkGray ">#666666</SolidColorBrush>
+
+    <!--
+     用于辅助、次要的文字信息
+     如次级标题
+ -->
+    <SolidColorBrush x:Key="MediumNormalGray">#888888</SolidColorBrush>
+
+    <!--  用于辅助、更次要的文字信息、排序  -->
+    <SolidColorBrush x:Key="MediumLightGray">#999999</SolidColorBrush>
+
+    <!--  用于输入框提示文本  -->
+    <SolidColorBrush x:Key="LowerGray">#B2B2B2</SolidColorBrush>
+
+
+</ResourceDictionary>

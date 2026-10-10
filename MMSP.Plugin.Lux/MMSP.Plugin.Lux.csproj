@@ -7,4 +7,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="MES\SFC\" />
+    <Folder Include="MES\WMI\" />
+    <Folder Include="MES\IOT\" />
+    <Folder Include="MES\" />
+    <Folder Include="Views\" />
+    <Folder Include="ViewModels\" />
+  </ItemGroup>
+
 </Project>

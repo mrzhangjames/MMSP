@@ -3,11 +3,52 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:MMSP.App.Main.Views"
         mc:Ignorable="d"
-        Title="MainView" Height="450" Width="800">
+        x:Name="win"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        ShowIconOnTitleBar="True"
+        ShowMaxRestoreButton="False"
+        ShowMinButton="False"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        WindowStyle="None">
+
+    <mah:MetroWindow.Triggers />
+
+    <mah:MetroWindow.Resources />
+
+    <!--  顶部 菜单区域  左侧  -->
+    <mah:MetroWindow.LeftWindowCommands>
+        <mah:WindowCommands ShowSeparators="False">
+            <TextBlock VerticalAlignment="Center" Text="LD Software Platform" />
+        </mah:WindowCommands>
+    </mah:MetroWindow.LeftWindowCommands>
+
+    <!--  顶部 菜单区域  右侧  -->
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands ShowLastSeparator="False" />
+    </mah:MetroWindow.RightWindowCommands>
+
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" MaxHeight="50" />
+        </Grid.RowDefinitions>
+
+        <!--  主体区域  -->
+        <ContentControl
+            x:Name="MainViewContent"
+            Grid.Row="1"
+            prism:RegionManager.RegionName="MainViewContentRegion" />
+
+        <!--  底部区域  -->
+        <ContentControl
+            x:Name="MainViewFooter"
+            Grid.Row="2"
+            prism:RegionManager.RegionName="MainViewFooterRegion" />
+
     </Grid>
 </mah:MetroWindow>

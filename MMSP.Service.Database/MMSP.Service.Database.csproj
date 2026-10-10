@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SqlSugarCore" Version="5.1.4.221" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MMSP.Core.Model\MMSP.Core.Model.csproj" />
   </ItemGroup>
 

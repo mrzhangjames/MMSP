@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
@@ -8,8 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Assets\Fonts\" />
-    <Folder Include="Themes\Styles\" />
+    <None Remove="Assets\Fonts\Gotham-Medium.otf" />
+    <None Remove="Assets\Fonts\SourceHanSansCN-Normal.otf" />
+    <None Remove="Assets\Fonts\SourceHanSerifCN-Regular.otf" />
+    <None Remove="Assets\Fonts\汉仪综艺体简.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Fonts\Gotham-Medium.otf" />
+    <Resource Include="Assets\Fonts\SourceHanSansCN-Normal.otf" />
+    <Resource Include="Assets\Fonts\SourceHanSerifCN-Regular.otf" />
+    <Resource Include="Assets\Fonts\汉仪综艺体简.ttf" />
   </ItemGroup>
 
 </Project>
