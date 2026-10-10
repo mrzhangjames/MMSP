@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <!--  主界面颜色主题  -->
 
     <SolidColorBrush x:Key="ThemeBrushColorMajor">#767676</SolidColorBrush>
@@ -43,5 +44,20 @@
     <!--  用于输入框提示文本  -->
     <SolidColorBrush x:Key="LowerGray">#B2B2B2</SolidColorBrush>
 
+    <!--  主壳导航和内容区  -->
+    <SolidColorBrush x:Key="NavSelectedBackground">#FFF6D2</SolidColorBrush>
+    <SolidColorBrush x:Key="PageBackground">#F0F1EF</SolidColorBrush>
+    <SolidColorBrush x:Key="CardBorderBrush">#E4E4E4</SolidColorBrush>
+    <SolidColorBrush x:Key="CardBodyBrush">#FAFAF8</SolidColorBrush>
+    <SolidColorBrush x:Key="HeaderDividerBrush">#EEEEEE</SolidColorBrush>
+    <SolidColorBrush x:Key="StatusConnectedBrush">#49C46A</SolidColorBrush>
+
+    <sys:Double x:Key="NavBarHeight">120</sys:Double>
+    <sys:Double x:Key="NavButtonWidth">112</sys:Double>
+    <sys:Double x:Key="NavButtonHeight">87</sys:Double>
+    <sys:Double x:Key="NavIconSize">34</sys:Double>
+    <sys:Double x:Key="NavLabelFontSize">16</sys:Double>
+    <sys:Double x:Key="NavSelectedBarHeight">7</sys:Double>
+    <CornerRadius x:Key="NavCornerRadius">8</CornerRadius>
 
 </ResourceDictionary>

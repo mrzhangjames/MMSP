@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 
-namespace MMSP.Core.Model.User
+namespace MMSP.Core.Model.Sys
 {
     public enum UserRole : uint
     {

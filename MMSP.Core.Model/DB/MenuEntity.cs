@@ -1,4 +1,5 @@
 ﻿using MMSP.Core.Model.Base;
+using MMSP.Core.Model.Sys;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ namespace MMSP.Core.Model.DB
 {
 
     /// <summary>
-    /// 用户实体类
+    /// 菜单实体类
     /// </summary>
     [SugarTable("sys_menus")]
     public class MenuEntity : BaseDBEntity
@@ -30,6 +31,12 @@ namespace MMSP.Core.Model.DB
         /// </summary>
         [SugarColumn(ColumnName = "is_valid")]
         public bool IsValid { get; set; }
+
+        /// <summary>
+        /// 菜单编码
+        /// </summary>
+        [SugarColumn(ColumnName = "menu_code")]
+        public MenuCode Code { get; set; }
 
         /// <summary>
         /// 选中图标

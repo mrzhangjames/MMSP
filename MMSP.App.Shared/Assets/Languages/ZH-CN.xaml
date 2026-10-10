@@ -8,4 +8,23 @@
     <sys:String x:Key="FileOpen">打开文件</sys:String>
     <sys:String x:Key="Account">账户</sys:String>
     <sys:String x:Key="Setting">设置</sys:String>
+
+    <sys:String x:Key="Nav_Home">主页</sys:String>
+    <sys:String x:Key="Nav_Flow">流程</sys:String>
+    <sys:String x:Key="Nav_Device">设备</sys:String>
+    <sys:String x:Key="Nav_Chart">图表</sys:String>
+    <sys:String x:Key="Nav_Config">配置</sys:String>
+    <sys:String x:Key="Nav_User">用户</sys:String>
+    <sys:String x:Key="Footer_Version">版本</sys:String>
+    <sys:String x:Key="Footer_DeviceConnected">设备 已连接</sys:String>
+    <sys:String x:Key="Footer_LoginUser">登录人</sys:String>
+    <sys:String x:Key="Footer_Time">时间</sys:String>
+    <sys:String x:Key="Footer_Run">运行</sys:String>
+    <sys:String x:Key="Run_Start">启动</sys:String>
+    <sys:String x:Key="Run_Stop">停止</sys:String>
+    <sys:String x:Key="Run_Refresh">刷新</sys:String>
+    <sys:String x:Key="Exit_Title">退出</sys:String>
+    <sys:String x:Key="Exit_Message">是否确认退出？</sys:String>
+    <sys:String x:Key="Exit_Confirm">确认</sys:String>
+    <sys:String x:Key="Exit_Cancel">取消</sys:String>
 </ResourceDictionary>

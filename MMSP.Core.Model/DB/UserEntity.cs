@@ -1,5 +1,5 @@
 ﻿using MMSP.Core.Model.Base;
-using MMSP.Core.Model.User;
+using MMSP.Core.Model.Sys;
 using SqlSugar;
 using System;
 using System.Collections.Generic;

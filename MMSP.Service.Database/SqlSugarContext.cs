@@ -1,42 +1,116 @@
 ﻿using MMSP.Core.Model.Base;
 using MMSP.Core.Model.DB;
 using SqlSugar;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MMSP.Service.Database
 {
+    /// <summary>
+    /// 两套 SQLite。系统配置库是程序目录下的 Config\sys.cfg，客户库是程序目录上一层的 Data\DB\ldm.db。
+    /// </summary>
     public class SqlSugarContext : IDisposable
     {
-        public static SqlSugarScope Db = new SqlSugarScope(new ConnectionConfig()
+        /// <summary>
+        /// 防止重复打开。
+        /// </summary>
+        private static readonly object Gate = new();
+
+        /// <summary>
+        /// 系统配置库。未打开时为空。
+        /// </summary>
+        private static SqlSugarScope? _systemDb;
+
+        /// <summary>
+        /// 客户数据库。未打开时为空。
+        /// </summary>
+        private static SqlSugarScope? _customerDb;
+
+        /// <summary>
+        /// 是否已经打开。
+        /// </summary>
+        private static bool _opened;
+
+        /// <summary>
+        /// 系统配置库。菜单和用户表建在这里。
+        /// </summary>
+        public static SqlSugarScope SystemDb => _systemDb ?? throw new InvalidOperationException("系统配置库尚未打开。");
+
+        /// <summary>
+        /// 客户数据库。客户业务表随后注册到这个库。
+        /// </summary>
+        public static SqlSugarScope CustomerDb => _customerDb ?? throw new InvalidOperationException("客户数据库尚未打开。");
+
+        /// <summary>
+        /// 创建目录并打开两个库。重复调用直接返回。
+        /// </summary>
+        public static void Open()
         {
-            DbType = SqlSugar.DbType.Sqlite,// 数据库类型
-            ConnectionString = PathCore.ConnectionString_Sqlite,
-            LanguageType = LanguageType.Default,//中&英
-            IsAutoCloseConnection = true// 是否自动关闭数据库连接
-        },
-         db =>
-         {
-             //单例参数配置，所有上下文生效
-             db.Aop.OnLogExecuting = (s, p) =>
-             {
-                 //writeLog(s, p);
-                 Console.WriteLine(s);
-             };
+            lock (Gate)
+            {
+                if (_opened)
+                    return;
 
-             //Sql超时
-             db.Ado.CommandTimeOut = 10;//单位秒
+                _systemDb = CreateScope(PathCore.SystemDbFilePath, InitSystemTables);
+                _customerDb = CreateScope(PathCore.CustomerDbFilePath, InitCustomerTables);
+                _opened = true;
+            }
+        }
 
-             // 建库：如果不存在创建数据库,存在不会重复创建 createdb
-             db.DbMaintenance.CreateDatabase();
-             db.CodeFirst.InitTables(typeof(UserEntity));
-             db.CodeFirst.InitTables(typeof(MenuEntity));
-         });
+        /// <summary>
+        /// 建系统表。当前平台表都放在系统配置库。
+        /// </summary>
+        private static void InitSystemTables(SqlSugarScope db)
+        {
+            db.CodeFirst.InitTables(typeof(MenuEntity), typeof(UserEntity));
+            MenuSeed.Ensure(db);
+        }
 
+        /// <summary>
+        /// 建客户表。现在还没有客户业务实体。
+        /// </summary>
+        private static void InitCustomerTables(SqlSugarScope db)
+        {
+        }
+
+        /// <summary>
+        /// 确保目录存在，然后创建 SQLite 文件。
+        /// </summary>
+        private static SqlSugarScope CreateScope(string filePath, Action<SqlSugarScope> initTables)
+        {
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+
+            var scope = new SqlSugarScope(new ConnectionConfig
+            {
+                DbType = DbType.Sqlite,
+                ConnectionString = $"Data Source={filePath}",
+                LanguageType = LanguageType.Default,
+                IsAutoCloseConnection = true
+            },
+            db =>
+            {
+                db.Aop.OnLogExecuting = (sql, _) => Console.WriteLine(sql);
+                db.Ado.CommandTimeOut = 10;
+            });
+
+            scope.DbMaintenance.CreateDatabase();
+            initTables(scope);
+            return scope;
+        }
+
+        /// <summary>
+        /// 关闭两个库。
+        /// </summary>
         public void Dispose()
         {
-            throw new NotImplementedException();
+            lock (Gate)
+            {
+                _systemDb?.Dispose();
+                _customerDb?.Dispose();
+                _systemDb = null;
+                _customerDb = null;
+                _opened = false;
+            }
         }
     }
 }

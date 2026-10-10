@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:MMSP.App.Main.Views"
         mc:Ignorable="d"
         x:Name="win"
@@ -14,6 +15,7 @@
         ShowMinButton="False"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
+    
         WindowStyle="None">
 
     <mah:MetroWindow.Triggers />
@@ -23,7 +25,7 @@
     <!--  顶部 菜单区域  左侧  -->
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands ShowSeparators="False">
-            <TextBlock VerticalAlignment="Center" Text="LD Software Platform" />
+            <!--<TextBlock VerticalAlignment="Center" Text="LD Software Platform" />-->
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
 
@@ -34,21 +36,207 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="auto" MaxHeight="50" />
+            <RowDefinition Height="32" />
         </Grid.RowDefinitions>
 
-        <!--  主体区域  -->
-        <ContentControl
-            x:Name="MainViewContent"
-            Grid.Row="1"
-            prism:RegionManager.RegionName="MainViewContentRegion" />
+        <!--  导航。右侧三个按钮不进 Menus  -->
+        <Grid Grid.Row="0"
+              Height="{StaticResource NavBarHeight}"
+              Background="White">
+            <Grid Margin="24,17,24,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <!--  底部区域  -->
-        <ContentControl
-            x:Name="MainViewFooter"
-            Grid.Row="2"
-            prism:RegionManager.RegionName="MainViewFooterRegion" />
+                <ListBox Grid.Column="0"
+                         HorizontalAlignment="Left"
+                         VerticalAlignment="Top"
+                         Style="{StaticResource NavListBoxStyle}"
+                         ItemsSource="{Binding Menus}"
+                         SelectedItem="{Binding SelectedMenu}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <iconPacks:PackIconPhosphorIcons Width="{StaticResource NavIconSize}"
+                                                                 Height="{StaticResource NavIconSize}"
+                                                                 HorizontalAlignment="Center">
+                                    <iconPacks:PackIconPhosphorIcons.Style>
+                                        <Style TargetType="iconPacks:PackIconPhosphorIcons">
+                                            <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                            <Setter Property="Kind" Value="{Binding UnselectedIcon}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                    <Setter Property="Kind" Value="{Binding SelectedIcon}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </iconPacks:PackIconPhosphorIcons.Style>
+                                </iconPacks:PackIconPhosphorIcons>
+                                <TextBlock Text="{Binding Title}"
+                                           FontSize="{StaticResource NavLabelFontSize}"
+                                           FontWeight="Bold"
+                                           LineHeight="30"
+                                           LineStackingStrategy="BlockLineHeight"
+                                           Margin="0,6,0,0"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
+                <ListBox Grid.Column="1"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Top"
+                         Style="{StaticResource NavRunListBoxStyle}"
+                         ItemsSource="{Binding RunCommands}"
+                         SelectedItem="{Binding SelectedRun}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconPhosphorIcons Kind="{Binding Icon}"
+                                                             Width="70"
+                                                             Height="70"
+                                                             Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Grid>
+
+        <!--  内容区。这一批正文保持空白，只切换标题  -->
+        <Border Grid.Row="1"
+                Background="{StaticResource PageBackground}"
+                Padding="12">
+            <Border Background="White"
+                    BorderBrush="{StaticResource CardBorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48" />
+                        <RowDefinition Height="1" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Background="White">
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    Margin="16,0,0,0">
+                            <Border Width="3"
+                                    Height="16"
+                                    Margin="0,0,10,0"
+                                    Background="{StaticResource ThemeBrushColorAssist}" />
+                            <TextBlock Text="{Binding ContentTitle}"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       VerticalAlignment="Center"
+                                       Foreground="{StaticResource HighestBlack}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Grid.Row="1" Background="{StaticResource HeaderDividerBrush}" />
+
+                    <Border Grid.Row="2" Background="{StaticResource CardBodyBrush}">
+                        <ContentControl x:Name="MainViewContent"
+                                        Background="Transparent"
+                                        prism:RegionManager.RegionName="MainViewContentRegion" />
+                    </Border>
+                </Grid>
+            </Border>
+        </Border>
+
+        <!--  底栏。文字绑 MainViewModel。区域留在同一行，不盖住底栏  -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{StaticResource ThemeBrushColorAssist}" />
+
+            <Border Grid.Row="1" Background="{StaticResource ThemeBrushColorMajor}">
+                <DockPanel Margin="12,0" LastChildFill="False">
+                    <StackPanel DockPanel.Dock="Right"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock FontSize="12" Foreground="White" VerticalAlignment="Center">
+                            <Run Text="{StaticResource Footer_LoginUser}" />
+                            <Run Text=" " />
+                            <Run Text="{Binding LoginName, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Text="|"
+                                   Margin="10,0"
+                                   FontSize="12"
+                                   Opacity="0.7"
+                                   Foreground="White"
+                                   VerticalAlignment="Center" />
+                        <TextBlock FontSize="12" Foreground="White" VerticalAlignment="Center">
+                            <Run Text="{StaticResource Footer_Time}" />
+                            <Run Text=" " />
+                            <Run Text="{Binding CurrentTimeText, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock FontSize="12" Foreground="White" VerticalAlignment="Center">
+                            <Run Text="{StaticResource Footer_Version}" />
+                            <Run Text=" " />
+                            <Run Text="{Binding VersionText, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Text="|"
+                                   Margin="10,0"
+                                   FontSize="12"
+                                   Opacity="0.7"
+                                   Foreground="White"
+                                   VerticalAlignment="Center" />
+                        <Ellipse Width="8"
+                                 Height="8"
+                                 Margin="0,0,6,0"
+                                 VerticalAlignment="Center"
+                                 Fill="{StaticResource StatusConnectedBrush}" />
+                        <TextBlock Text="{StaticResource Footer_DeviceConnected}"
+                                   FontSize="12"
+                                   Foreground="White"
+                                   VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RunStatusText}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="|"
+                                       Margin="10,0"
+                                       FontSize="12"
+                                       Opacity="0.7"
+                                       Foreground="White"
+                                       VerticalAlignment="Center" />
+                            <TextBlock FontSize="12" Foreground="White" VerticalAlignment="Center">
+                                <Run Text="{StaticResource Footer_Run}" />
+                                <Run Text=" " />
+                                <Run Text="{Binding RunStatusText, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <ContentControl x:Name="MainViewFooter"
+                            Grid.RowSpan="2"
+                            Width="0"
+                            Height="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Background="Transparent"
+                            Focusable="False"
+                            IsHitTestVisible="False"
+                            prism:RegionManager.RegionName="MainViewFooterRegion" />
+        </Grid>
     </Grid>
 </mah:MetroWindow>

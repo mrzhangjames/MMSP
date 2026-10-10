@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <!-- 版本前三位在 ProductVersion.cs 手写。关闭确定性编译，编译器才能展开最后一位。 -->
+    <Deterministic>false</Deterministic>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,8 +21,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MMSP.App.Shared\MMSP.App.Shared.csproj" />
+    <ProjectReference Include="..\MMSP.Common.Helper\MMSP.Common.Helper.csproj" />
     <ProjectReference Include="..\MMSP.App.TemplateMatch\MMSP.App.TemplateMatch.csproj" />
     <ProjectReference Include="..\MMSP.App.WpfBase\MMSP.App.WpfBase.csproj" />
+    <ProjectReference Include="..\MMSP.Service.Database\MMSP.Service.Database.csproj" />
     <ProjectReference Include="..\MMSP.Core.License\MMSP.Core.License.csproj" />
   </ItemGroup>
 

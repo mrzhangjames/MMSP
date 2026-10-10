@@ -30,6 +30,11 @@ namespace MMSP.Core.Model.Base
         public const string Folder_Config = "Config";
 
         /// <summary>
+        /// 客户数据根目录名。位于程序目录的上一层。
+        /// </summary>
+        public const string Folder_Data = "Data";
+
+        /// <summary>
         /// 应用程序根目录
         /// </summary>
         public static readonly string Folder_App = AppDomain.CurrentDomain.BaseDirectory;
@@ -49,6 +54,11 @@ namespace MMSP.Core.Model.Base
         public static readonly string File_Config = "Config.cfg";
 
         /// <summary>
+        /// 系统配置库文件名。
+        /// </summary>
+        public const string File_SysConfig = "sys.cfg";
+
+        /// <summary>
         /// 日志文件全名称，包含扩展名
         /// </summary>
         public static readonly string File_Log = "NLog.config";
@@ -58,9 +68,35 @@ namespace MMSP.Core.Model.Base
         #region << 全路径 >>
 
         /// <summary>
-        /// sqlite数据库连接字符串
+        /// 系统配置库全路径：程序目录\Config\sys.cfg。
         /// </summary>
-        public static readonly string ConnectionString_Sqlite = $"Data Source={Path.Combine(Folder_App, Folder_DB, File_SqliteDB)}";
+        public static string SystemDbFilePath => Path.Combine(Folder_App, Folder_Config, File_SysConfig);
+
+        /// <summary>
+        /// 客户数据库全路径：程序目录上一层\Data\DB\ldm.db。
+        /// </summary>
+        public static string CustomerDbFilePath
+        {
+            get
+            {
+                var baseDir = Folder_App.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                var parent = Directory.GetParent(baseDir);
+                if (parent is null)
+                    throw new InvalidOperationException("找不到程序目录的上一层，无法定位客户数据库。");
+
+                return Path.Combine(parent.FullName, Folder_Data, Folder_DB, File_SqliteDB);
+            }
+        }
+
+        /// <summary>
+        /// 客户数据库连接字符串。
+        /// </summary>
+        public static string ConnectionString_Sqlite => $"Data Source={CustomerDbFilePath}";
+
+        /// <summary>
+        /// 系统配置库连接字符串。
+        /// </summary>
+        public static string ConnectionString_SysConfig => $"Data Source={SystemDbFilePath}";
 
         /// <summary>
         /// 配置全路径

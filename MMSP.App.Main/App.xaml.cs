@@ -1,6 +1,7 @@
 ﻿using MMSP.App.Main.ViewModels;
 using MMSP.App.Main.Views;
 using MMSP.App.TemplateMatch;
+using MMSP.Service.Database;
 using System.Configuration;
 using System.Data;
 using System.Windows;
@@ -44,6 +45,8 @@ namespace MMSP.App.Main
 
         protected override void OnInitialized()
         {
+            SqlSugarContext.Open();
+
             //从容器换取MainView实例对象
             var container = ContainerLocator.Container;
 
@@ -59,8 +62,10 @@ namespace MMSP.App.Main
                 if (view.DataContext is INavigationAware navigationAware)
                 {
                     navigationAware.OnNavigatedTo(null);
-                    App.Current.MainWindow = view;
                 }
+
+                App.Current.MainWindow = view;
+                view.Show();
             }
             base.OnInitialized();
         }

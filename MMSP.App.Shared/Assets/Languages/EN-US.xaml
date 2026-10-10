@@ -9,4 +9,23 @@
     <sys:String x:Key="FileOpen">FileOpen</sys:String>
     <sys:String x:Key="Account">Account</sys:String>
     <sys:String x:Key="Setting">Setting</sys:String>
+
+    <sys:String x:Key="Nav_Home">Home</sys:String>
+    <sys:String x:Key="Nav_Flow">Flow</sys:String>
+    <sys:String x:Key="Nav_Device">Device</sys:String>
+    <sys:String x:Key="Nav_Chart">Chart</sys:String>
+    <sys:String x:Key="Nav_Config">Config</sys:String>
+    <sys:String x:Key="Nav_User">User</sys:String>
+    <sys:String x:Key="Footer_Version">Version</sys:String>
+    <sys:String x:Key="Footer_DeviceConnected">Device connected</sys:String>
+    <sys:String x:Key="Footer_LoginUser">User</sys:String>
+    <sys:String x:Key="Footer_Time">Time</sys:String>
+    <sys:String x:Key="Footer_Run">Run</sys:String>
+    <sys:String x:Key="Run_Start">Start</sys:String>
+    <sys:String x:Key="Run_Stop">Stop</sys:String>
+    <sys:String x:Key="Run_Refresh">Refresh</sys:String>
+    <sys:String x:Key="Exit_Title">Exit</sys:String>
+    <sys:String x:Key="Exit_Message">Confirm exit?</sys:String>
+    <sys:String x:Key="Exit_Confirm">Confirm</sys:String>
+    <sys:String x:Key="Exit_Cancel">Cancel</sys:String>
 </ResourceDictionary>
