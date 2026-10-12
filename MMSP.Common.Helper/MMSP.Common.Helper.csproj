@@ -6,4 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="5.5.1" />
+    <PackageReference Include="Prism.Core" Version="9.0.537" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MMSP.Core.Model\MMSP.Core.Model.csproj" />
+    <ProjectReference Include="..\MMSP.Service.Database\MMSP.Service.Database.csproj" />
+  </ItemGroup>
+
 </Project>

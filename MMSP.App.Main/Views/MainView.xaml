@@ -6,6 +6,7 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:MMSP.App.Main.Views"
+        xmlns:svc="clr-namespace:MMSP.App.WpfBase.Services;assembly=MMSP.App.WpfBase"
         mc:Ignorable="d"
         x:Name="win"
         xmlns:prism="http://prismlibrary.com/"
@@ -20,7 +21,145 @@
 
     <mah:MetroWindow.Triggers />
 
-    <mah:MetroWindow.Resources />
+    <mah:MetroWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVis" />
+
+        <!--  右侧登录和退出。Flat 无边框，只放图标。  -->
+        <!--  基于 Flat。换掉模板，避免 Metro 的 ContentControlEx 不画出图标。  -->
+        <Style x:Key="NavAuthButtonStyle" TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Flat}">
+            <Setter Property="Width" Value="{StaticResource NavButtonWidth}" />
+            <Setter Property="Height" Value="{StaticResource NavButtonHeight}" />
+            <Setter Property="Margin" Value="12,0,0,0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Box"
+                                Background="{TemplateBinding Background}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="#F2F2F2" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="#E6E6E6" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LoginFieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#666666" />
+            <Setter Property="Margin" Value="0,14,0,4" />
+        </Style>
+
+        <Style x:Key="LoginUnderline" TargetType="TextBox">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="CaretBrush" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Line"
+                                Background="Transparent"
+                                BorderBrush="#E0E0E0"
+                                BorderThickness="0,0,0,2"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,4,0,4" Focusable="False" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="Line" Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LoginPasswordBox" TargetType="PasswordBox">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="CaretBrush" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border x:Name="Line"
+                                Background="Transparent"
+                                BorderBrush="#E0E0E0"
+                                BorderThickness="0,0,0,2"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,4,0,4" Focusable="False" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="Line" Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  基于 Flat。换掉模板，图标和文字才能画出来。  -->
+        <Style x:Key="LoginActionButton" TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Flat}">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="MinWidth" Value="88" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#CCCCCC" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Box"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="#E6E6E6" />
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#BDBDBD" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </mah:MetroWindow.Resources>
 
     <!--  顶部 菜单区域  左侧  -->
     <mah:MetroWindow.LeftWindowCommands>
@@ -47,9 +186,42 @@
               Background="White">
             <Grid Margin="24,17,24,16">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="2"
+                            MinWidth="236"
+                            Panel.ZIndex="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top">
+                    <Button Width="112"
+                            Height="87"
+                            Margin="0"
+                            Padding="0"
+                            Style="{StaticResource NavAuthButtonStyle}"
+                            Command="{Binding SessionCommand}"
+                            ToolTip="{Binding SessionToolTip}"
+                            AutomationProperties.Name="{Binding SessionToolTip}">
+                        <iconPacks:PackIconPhosphorIcons Kind="{Binding SessionIcon}"
+                                                         Width="{StaticResource NavIconSize}"
+                                                         Height="{StaticResource NavIconSize}"
+                                                         Foreground="{StaticResource HighestBlack}" />
+                    </Button>
+                    <Button Width="112"
+                            Height="87"
+                            Padding="0"
+                            Style="{StaticResource NavAuthButtonStyle}"
+                            Click="OnExitClick"
+                            ToolTip="{StaticResource Shell_Exit}"
+                            AutomationProperties.Name="{StaticResource Shell_Exit}">
+                        <iconPacks:PackIconPhosphorIcons Kind="Power"
+                                                         Width="{StaticResource NavIconSize}"
+                                                         Height="{StaticResource NavIconSize}"
+                                                         Foreground="{StaticResource HighestBlack}" />
+                    </Button>
+                </StackPanel>
 
                 <ListBox Grid.Column="0"
                          HorizontalAlignment="Left"
@@ -89,16 +261,17 @@
                 </ListBox>
 
                 <ListBox Grid.Column="1"
-                         HorizontalAlignment="Right"
+                         HorizontalAlignment="Center"
                          VerticalAlignment="Top"
+                         ClipToBounds="True"
                          Style="{StaticResource NavRunListBoxStyle}"
                          ItemsSource="{Binding RunCommands}"
                          SelectedItem="{Binding SelectedRun}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <iconPacks:PackIconPhosphorIcons Kind="{Binding Icon}"
-                                                             Width="70"
-                                                             Height="70"
+                                                             Width="{StaticResource NavIconSize}"
+                                                             Height="{StaticResource NavIconSize}"
                                                              Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -106,11 +279,12 @@
             </Grid>
         </Grid>
 
-        <!--  内容区。这一批正文保持空白，只切换标题  -->
+        <!--  内容区。标题跟随菜单，正文切换对应页面。登录窗只盖住内容区。  -->
         <Border Grid.Row="1"
                 Background="{StaticResource PageBackground}"
                 Padding="12">
-            <Border Background="White"
+            <Grid>
+            <!--<Border Background="White"
                     BorderBrush="{StaticResource CardBorderBrush}"
                     BorderThickness="1">
                 <Grid>
@@ -138,13 +312,100 @@
 
                     <Border Grid.Row="1" Background="{StaticResource HeaderDividerBrush}" />
 
-                    <Border Grid.Row="2" Background="{StaticResource CardBodyBrush}">
-                        <ContentControl x:Name="MainViewContent"
+                </Grid>
+            </Border>-->
+            <Border Background="{StaticResource CardBodyBrush}">
+                <ContentControl x:Name="MainViewContent"
                                         Background="Transparent"
                                         prism:RegionManager.RegionName="MainViewContentRegion" />
-                    </Border>
-                </Grid>
             </Border>
+
+            <Grid Background="#2E333333"
+                  Visibility="{Binding IsLoginOpen, Converter={StaticResource BoolVis}}"
+                  IsVisibleChanged="OnLoginOverlayVisibleChanged"
+                  AutomationProperties.AutomationId="LoginOverlay">
+                <Border Width="440"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="White"
+                        BorderBrush="{StaticResource CardBorderBrush}"
+                        BorderThickness="1"
+                        SnapsToDevicePixels="True">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="32" ShadowDepth="8" Opacity="0.16" Color="Black" />
+                    </Border.Effect>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="48" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="16,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Width="3" Height="16" Margin="0,0,10,0" Background="{StaticResource ThemeBrushColorAssist}" />
+                                <TextBlock Text="{StaticResource Shell_Login}"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource HighestBlack}" />
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Grid.Row="1" Margin="24,0,24,20">
+                            <TextBlock Text="{StaticResource User_LoginName}" Style="{StaticResource LoginFieldLabel}" />
+                            <TextBox x:Name="LoginNameBox"
+                                     Style="{StaticResource LoginUnderline}"
+                                     Text="{Binding DraftLoginName, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.AutomationId="LoginName" />
+
+                            <TextBlock Text="{StaticResource User_Password}" Style="{StaticResource LoginFieldLabel}" />
+                            <PasswordBox x:Name="LoginPasswordBox"
+                                         Style="{StaticResource LoginPasswordBox}"
+                                         svc:PasswordService.BindPassword="True"
+                                         svc:PasswordService.BoundPassword="{Binding DraftPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.AutomationId="LoginPassword" />
+
+                            <TextBlock Text="{Binding LoginError}"
+                                       Foreground="{StaticResource HighestRed}"
+                                       FontSize="12"
+                                       Margin="0,12,0,0"
+                                       TextWrapping="Wrap"
+                                       AutomationProperties.AutomationId="LoginError">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding LoginError}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+                                <Button Style="{StaticResource LoginActionButton}"
+                                        Command="{Binding ConfirmLoginCommand}"
+                                        AutomationProperties.Name="{StaticResource Shell_Login}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconPhosphorIcons Kind="ArrowRight" Width="16" Height="16" VerticalAlignment="Center" />
+                                        <TextBlock Text="{StaticResource Shell_Login}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource LoginActionButton}"
+                                        Margin="0"
+                                        Command="{Binding CancelLoginCommand}"
+                                        AutomationProperties.Name="{StaticResource User_Cancel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconPhosphorIcons Kind="X" Width="16" Height="16" VerticalAlignment="Center" />
+                                        <TextBlock Text="{StaticResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+            </Grid>
         </Border>
 
         <!--  底栏。文字绑 MainViewModel。区域留在同一行，不盖住底栏  -->

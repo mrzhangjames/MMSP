@@ -40,6 +40,11 @@ namespace MMSP.Service.Database
         public static SqlSugarScope CustomerDb => _customerDb ?? throw new InvalidOperationException("客户数据库尚未打开。");
 
         /// <summary>
+        /// 两个库是否已经打开。
+        /// </summary>
+        public static bool IsOpen => _opened;
+
+        /// <summary>
         /// 创建目录并打开两个库。重复调用直接返回。
         /// </summary>
         public static void Open()
@@ -51,6 +56,7 @@ namespace MMSP.Service.Database
 
                 _systemDb = CreateScope(PathCore.SystemDbFilePath, InitSystemTables);
                 _customerDb = CreateScope(PathCore.CustomerDbFilePath, InitCustomerTables);
+                _customerDb.Ado.GetScalar("PRAGMA journal_mode=WAL;");
                 _opened = true;
             }
         }
@@ -62,13 +68,31 @@ namespace MMSP.Service.Database
         {
             db.CodeFirst.InitTables(typeof(MenuEntity), typeof(UserEntity));
             MenuSeed.Ensure(db);
+            UserSeed.Ensure(db);
         }
 
         /// <summary>
-        /// 建客户表。现在还没有客户业务实体。
+        /// 建客户表。运行日志放在客户库。
         /// </summary>
         private static void InitCustomerTables(SqlSugarScope db)
         {
+            if (db.DbMaintenance.IsAnyTable("biz_logs", false))
+                EnsureBizTypeColumn(db);
+
+            db.CodeFirst.InitTables(typeof(RunLogEntity));
+            db.Ado.ExecuteCommand("CREATE INDEX IF NOT EXISTS idx_biz_logs_log_time ON biz_logs (log_time);");
+        }
+
+        /// <summary>
+        /// 给已经存在的运行日志表补业务类型列。没有这列时，旧行记为 Sys。
+        /// </summary>
+        private static void EnsureBizTypeColumn(SqlSugarScope db)
+        {
+            var count = db.Ado.GetInt("SELECT COUNT(1) FROM pragma_table_info('biz_logs') WHERE name = 'biz_type'");
+            if (count > 0)
+                return;
+
+            db.Ado.ExecuteCommand("ALTER TABLE biz_logs ADD COLUMN biz_type INTEGER NOT NULL DEFAULT 0");
         }
 
         /// <summary>

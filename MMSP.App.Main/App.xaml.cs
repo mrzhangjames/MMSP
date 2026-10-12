@@ -1,6 +1,7 @@
 ﻿using MMSP.App.Main.ViewModels;
 using MMSP.App.Main.Views;
 using MMSP.App.TemplateMatch;
+using MMSP.Common.Helper.Logger;
 using MMSP.Service.Database;
 using System.Configuration;
 using System.Data;
@@ -46,6 +47,8 @@ namespace MMSP.App.Main
         protected override void OnInitialized()
         {
             SqlSugarContext.Open();
+            LogHelper.Use(Container.Resolve<IEventAggregator>());
+            LogHelper.SysInfo("程序启动");
 
             //从容器换取MainView实例对象
             var container = ContainerLocator.Container;

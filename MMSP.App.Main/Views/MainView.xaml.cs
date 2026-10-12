@@ -2,6 +2,7 @@
 using System.Windows;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
+using MMSP.App.WpfBase.Services;
 
 namespace MMSP.App.Main.Views
 {
@@ -29,6 +30,23 @@ namespace MMSP.App.Main.Views
         }
 
         /// <summary>
+        /// 退出按钮走和标题栏关闭相同的确认框。
+        /// </summary>
+        private void OnExitClick(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        /// <summary>
+        /// 登录窗打开后把焦点放在登录名。按名字查找，不依赖生成字段。
+        /// </summary>
+        private void OnLoginOverlayVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is true && FindName("LoginNameBox") is IInputElement box)
+                box.Focus();
+        }
+
+        /// <summary>
         /// 关闭前用 Metro 对话框确认。取消则留下窗口。
         /// </summary>
         protected override async void OnClosing(CancelEventArgs e)
@@ -52,12 +70,11 @@ namespace MMSP.App.Main.Views
                     NegativeButtonText = Text("Exit_Cancel", "取消"),
                     OwnerCanCloseWithDialog = false
                 };
-                var result = await this.ShowMessageAsync(
+                var confirmed = await MetroDialogService.ConfirmAsync(
                     Text("Exit_Title", "退出"),
                     Text("Exit_Message", "是否确认退出？"),
-                    MessageDialogStyle.AffirmativeAndNegative,
                     settings);
-                if (result == MessageDialogResult.Affirmative)
+                if (confirmed)
                 {
                     _exitConfirmed = true;
                     Close();

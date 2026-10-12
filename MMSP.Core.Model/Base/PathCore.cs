@@ -59,7 +59,7 @@ namespace MMSP.Core.Model.Base
         public const string File_SysConfig = "sys.cfg";
 
         /// <summary>
-        /// 日志文件全名称，包含扩展名
+        /// NLog 配置文件名。源文件在 Lib\Config，编译后位于程序目录。
         /// </summary>
         public static readonly string File_Log = "NLog.config";
 
@@ -73,20 +73,30 @@ namespace MMSP.Core.Model.Base
         public static string SystemDbFilePath => Path.Combine(Folder_App, Folder_Config, File_SysConfig);
 
         /// <summary>
-        /// 客户数据库全路径：程序目录上一层\Data\DB\ldm.db。
+        /// 客户数据根目录：程序目录上一层\Data。
         /// </summary>
-        public static string CustomerDbFilePath
+        public static string DataDirectory
         {
             get
             {
                 var baseDir = Folder_App.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
                 var parent = Directory.GetParent(baseDir);
                 if (parent is null)
-                    throw new InvalidOperationException("找不到程序目录的上一层，无法定位客户数据库。");
+                    throw new InvalidOperationException("找不到程序目录的上一层，无法定位客户数据目录。");
 
-                return Path.Combine(parent.FullName, Folder_Data, Folder_DB, File_SqliteDB);
+                return Path.Combine(parent.FullName, Folder_Data);
             }
         }
+
+        /// <summary>
+        /// 客户数据库全路径：程序目录上一层\Data\DB\ldm.db。
+        /// </summary>
+        public static string CustomerDbFilePath => Path.Combine(DataDirectory, Folder_DB, File_SqliteDB);
+
+        /// <summary>
+        /// 日志目录：程序目录上一层\Data\Log。按年月日各写一个文件。
+        /// </summary>
+        public static string LogDirectory => Path.Combine(DataDirectory, Folder_Log);
 
         /// <summary>
         /// 客户数据库连接字符串。
@@ -104,7 +114,7 @@ namespace MMSP.Core.Model.Base
         public static readonly string ConfigPath = Path.Combine(Folder_App, Folder_Config, File_Config);
 
         /// <summary>
-        /// 日志全路径
+        /// 程序目录下的 NLog.config。日志内容写到 <see cref="LogDirectory"/>。
         /// </summary>
         public static readonly string LogFilePath = Path.Combine(Folder_App, File_Log);
 
