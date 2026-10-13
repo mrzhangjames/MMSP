@@ -1,5 +1,6 @@
 ﻿using MMSP.Core.Model.Base;
 using MMSP.Core.Model.DB;
+using MMSP.Service.Database.Seed;
 using SqlSugar;
 
 namespace MMSP.Service.Database

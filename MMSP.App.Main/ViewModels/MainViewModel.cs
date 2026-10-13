@@ -4,6 +4,7 @@ using System.Windows.Threading;
 using MahApps.Metro.IconPacks;
 using MMSP.App.Main.Models;
 using MMSP.App.WpfBase.Core;
+using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper;
 using MMSP.Common.Helper.Logger;
 using System.ComponentModel;
@@ -50,9 +51,19 @@ namespace MMSP.App.Main.ViewModels
         private string _currentTimeText = "";
 
         /// <summary>
-        /// 界面上是否已登录。这一批不查用户表。
+        /// 界面上是否已登录。
         /// </summary>
         private bool _isLoggedIn;
+
+        /// <summary>
+        /// 注销确认框正在显示，避免重复弹出。
+        /// </summary>
+        private bool _logoutPromptOpen;
+
+        /// <summary>
+        /// 当前登录角色。未登录时为空，导航只留主页。
+        /// </summary>
+        private UserRole? _currentRole;
 
         /// <summary>
         /// 登录窗是否打开。
@@ -80,7 +91,7 @@ namespace MMSP.App.Main.ViewModels
         private string _loginError = "";
 
         /// <summary>
-        /// 创建主壳数据，并选中主页。
+        /// 创建主壳数据。未登录时只打开主页。
         /// </summary>
         public MainViewModel(
             IRegionManager region,
@@ -89,9 +100,7 @@ namespace MMSP.App.Main.ViewModels
             : base(region, container, eventAggregator)
         {
             Menus = new ObservableCollection<ShellMenuItem>();
-            CreateMenus();
-            if (Menus.Count > 0)
-                SelectedMenu = Menus[0];
+            LoadMenus();
             RunCommands = new ObservableCollection<ShellRunItem>();
             CreateRunCommands();
             VersionText = AppVersionHelper.GetVersionText();
@@ -263,10 +272,13 @@ namespace MMSP.App.Main.ViewModels
         }
 
         /// <summary>
-        /// 从系统库读取启用的菜单。
+        /// 按当前角色重算导航。主页每个角色都保留。未登录只留主页。
         /// </summary>
-        private void CreateMenus()
+        private void LoadMenus()
         {
+            var currentView = _selectedMenu?.ViewName;
+            Menus.Clear();
+
             var rows = SqlSugarContext.SystemDb.Queryable<MenuEntity>()
                 .Where(item => item.IsValid)
                 .OrderBy(item => item.SortIndex)
@@ -274,17 +286,68 @@ namespace MMSP.App.Main.ViewModels
 
             foreach (var row in rows)
             {
-                if (!Enum.TryParse(row.SelectedIcon, out PackIconPhosphorIconsKind selected))
+                if (_currentRole is UserRole role)
+                {
+                    if (row.Code != MenuCode.Home && !UserRoleAccess.CanOpen(role, row.MinRole))
+                        continue;
+                }
+                else if (row.Code != MenuCode.Home)
+                {
                     continue;
-                if (!Enum.TryParse(row.UnSelectedIcon, out PackIconPhosphorIconsKind unselected))
+                }
+
+                var item = CreateMenuItem(row);
+                if (item is null)
                     continue;
 
-                var title = Application.Current?.TryFindResource(row.PageName) as string;
-                if (string.IsNullOrEmpty(title))
-                    title = string.IsNullOrEmpty(row.Name) ? row.Code.ToString() : row.Name;
-
-                Menus.Add(new ShellMenuItem(title, selected, unselected, $"{row.Code}View"));
+                Menus.Add(item);
             }
+
+            var keep = Menus.FirstOrDefault(item => item.ViewName == currentView);
+            if (keep is not null)
+            {
+                SelectedMenu = keep;
+                return;
+            }
+
+            if (Menus.Count > 0)
+            {
+                SelectedMenu = Menus[0];
+                return;
+            }
+
+            ClearContent();
+        }
+
+        /// <summary>
+        /// 把一条菜单变成导航项。图标名对不上时返回空。
+        /// </summary>
+        private static ShellMenuItem? CreateMenuItem(MenuEntity row)
+        {
+            if (!Enum.TryParse(row.SelectedIcon, out PackIconPhosphorIconsKind selected))
+                return null;
+            if (!Enum.TryParse(row.UnSelectedIcon, out PackIconPhosphorIconsKind unselected))
+                return null;
+
+            var title = Application.Current?.TryFindResource(row.PageName) as string;
+            if (string.IsNullOrEmpty(title))
+                title = string.IsNullOrEmpty(row.Name) ? row.Code.ToString() : row.Name;
+
+            return new ShellMenuItem(title, selected, unselected, $"{row.Code}View");
+        }
+
+        /// <summary>
+        /// 去掉当前菜单和内容区里的页面。列表重绑时的空选不走这里。
+        /// </summary>
+        private void ClearContent()
+        {
+            _selectedMenu = null;
+            RaisePropertyChanged(nameof(SelectedMenu));
+            RaisePropertyChanged(nameof(ContentTitle));
+            if (!RegionManager.Regions.ContainsRegionWithName(ContentRegionName))
+                return;
+
+            RegionManager.Regions[ContentRegionName].RemoveAll();
         }
 
         /// <summary>
@@ -357,14 +420,37 @@ namespace MMSP.App.Main.ViewModels
         }
 
         /// <summary>
-        /// 未登录时打开登录窗。已登录时只把界面改回未登录。
+        /// 未登录时打开登录窗。已登录时先确认，确认后写日志并回到未登录。
         /// </summary>
-        private void OnSession()
+        private async void OnSession()
         {
             if (IsLoggedIn)
             {
-                IsLoggedIn = false;
-                LoginName = ReadText("Footer_NotLoggedIn", "未登录");
+                if (_logoutPromptOpen)
+                    return;
+
+                _logoutPromptOpen = true;
+                try
+                {
+                    var confirmed = await MetroDialogService.ConfirmAsync(
+                        ReadText("Logout_Title", "注销"),
+                        ReadText("Logout_Message", "是否确认注销？"));
+                    if (!confirmed)
+                        return;
+
+                    var loginName = LoginName;
+                    var role = _currentRole;
+                    IsLoggedIn = false;
+                    _currentRole = null;
+                    LoginName = ReadText("Footer_NotLoggedIn", "未登录");
+                    LogHelper.SysInfo($"注销成功 {loginName} 角色={role}");
+                    LoadMenus();
+                }
+                finally
+                {
+                    _logoutPromptOpen = false;
+                }
+
                 return;
             }
 
@@ -379,21 +465,24 @@ namespace MMSP.App.Main.ViewModels
         /// </summary>
         private void ConfirmLogin()
         {
-            if (!TryLogin(out var loginName))
+            if (!TryLogin(out var loginName, out var role))
                 return;
 
+            _currentRole = role;
             IsLoggedIn = true;
             LoginName = loginName;
-            LogHelper.SysInfo($"登录成功 {loginName}");
+            LogHelper.SysInfo($"登录成功 {loginName} 角色={role}");
             CloseLogin();
+            LoadMenus();
         }
 
         /// <summary>
         /// 用系统库里的登录名和密码核对。密码不写日志。
         /// </summary>
-        private bool TryLogin(out string loginName)
+        private bool TryLogin(out string loginName, out UserRole role)
         {
             loginName = DraftLoginName.Trim();
+            role = UserRole.Admin;
             LoginError = "";
 
             if (loginName.Length == 0)
@@ -436,6 +525,7 @@ namespace MMSP.App.Main.ViewModels
                 var storedName = matches[0].LoginName?.Trim();
                 if (!string.IsNullOrEmpty(storedName))
                     loginName = storedName;
+                role = matches[0].RoleLevel;
                 return true;
             }
             catch (Exception ex)

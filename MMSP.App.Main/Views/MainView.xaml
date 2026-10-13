@@ -191,7 +191,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="2"
-                            MinWidth="236"
+                            Width="{StaticResource NavAuthAreaWidth}"
                             Panel.ZIndex="1"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
@@ -224,6 +224,7 @@
                 </StackPanel>
 
                 <ListBox Grid.Column="0"
+                         Width="{StaticResource NavMenuAreaWidth}"
                          HorizontalAlignment="Left"
                          VerticalAlignment="Top"
                          Style="{StaticResource NavListBoxStyle}"
@@ -261,6 +262,7 @@
                 </ListBox>
 
                 <ListBox Grid.Column="1"
+                         Width="{StaticResource NavRunAreaWidth}"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Top"
                          ClipToBounds="True"

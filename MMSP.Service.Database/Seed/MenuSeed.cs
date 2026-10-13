@@ -4,15 +4,15 @@ using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using SqlSugar;
 
-namespace MMSP.Service.Database
+namespace MMSP.Service.Database.Seed
 {
     /// <summary>
-    /// 按 <see cref="MenuCode"/> 把当前主界面菜单写入系统库。已有编码不覆盖。
+    /// 按 <see cref="MenuCode"/> 把当前主界面菜单写入系统库。已有编码不改名称和图标，但会把最低角色写成枚举上的值。
     /// </summary>
     public static class MenuSeed
     {
         /// <summary>
-        /// 补齐还没有的菜单行。
+        /// 补齐还没有的菜单行，并把已有行的最低角色写成枚举特性。
         /// </summary>
         public static void Ensure(SqlSugarScope db)
         {
@@ -20,6 +20,23 @@ namespace MMSP.Service.Database
             var missing = Build().Where(item => !existing.Contains(item.Code)).ToList();
             if (missing.Count > 0)
                 db.Insertable(missing).ExecuteCommand();
+
+            ApplyMinRoles(db);
+        }
+
+        /// <summary>
+        /// 按菜单编码更新最低角色。不改名称、图标、启用和排序。
+        /// </summary>
+        private static void ApplyMinRoles(SqlSugarScope db)
+        {
+            foreach (var code in Enum.GetValues<MenuCode>())
+            {
+                var minRole = ReadRole(code);
+                db.Updateable<MenuEntity>()
+                    .SetColumns(item => item.MinRole == minRole)
+                    .Where(item => item.Code == code)
+                    .ExecuteCommand();
+            }
         }
 
         /// <summary>
@@ -49,8 +66,18 @@ namespace MMSP.Service.Database
                 PageName = "Nav_" + code,
                 SelectedIcon = icons.SelectedIcon,
                 UnSelectedIcon = icons.UnselectedIcon,
-                SortIndex = (int)code
+                SortIndex = (int)code,
+                MinRole = ReadRole(code)
             };
+        }
+
+        /// <summary>
+        /// 读取枚举上的最低角色。没有特性时抛出。
+        /// </summary>
+        private static UserRole ReadRole(MenuCode code)
+        {
+            return ReadField(code)?.GetCustomAttribute<MenuRoleAttribute>()?.MinRole
+                ?? throw new InvalidOperationException($"菜单 {code} 没有最低角色。");
         }
 
         /// <summary>

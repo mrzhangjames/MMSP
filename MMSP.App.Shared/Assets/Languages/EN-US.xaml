@@ -29,6 +29,8 @@
     <sys:String x:Key="Footer_NotLoggedIn">Signed out</sys:String>
     <sys:String x:Key="Shell_Login">Sign in</sys:String>
     <sys:String x:Key="Shell_Logout">Sign out</sys:String>
+    <sys:String x:Key="Logout_Title">Sign out</sys:String>
+    <sys:String x:Key="Logout_Message">Confirm sign out?</sys:String>
     <sys:String x:Key="Shell_Exit">Exit</sys:String>
     <sys:String x:Key="Exit_Title">Exit</sys:String>
     <sys:String x:Key="Exit_Message">Confirm exit?</sys:String>

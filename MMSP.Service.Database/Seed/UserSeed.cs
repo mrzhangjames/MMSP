@@ -4,7 +4,7 @@ using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using SqlSugar;
 
-namespace MMSP.Service.Database
+namespace MMSP.Service.Database.Seed
 {
     /// <summary>
     /// 按 <see cref="UserRole"/> 补默认账号。已有登录名不覆盖。

@@ -68,5 +68,11 @@ namespace MMSP.Core.Model.DB
         [SugarColumn(ColumnName = "sort_index")]
         public int SortIndex { get; set; }
 
+        /// <summary>
+        /// 打开这个菜单要求的最低角色。
+        /// </summary>
+        [SugarColumn(ColumnName = "min_role")]
+        public UserRole MinRole { get; set; }
+
     }
 }

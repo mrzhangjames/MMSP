@@ -55,6 +55,12 @@
     <sys:Double x:Key="NavBarHeight">120</sys:Double>
     <sys:Double x:Key="NavButtonWidth">112</sys:Double>
     <sys:Double x:Key="NavButtonHeight">87</sys:Double>
+    <!--  六个菜单，每项宽 112、右间距 12  -->
+    <sys:Double x:Key="NavMenuAreaWidth">744</sys:Double>
+    <!--  启动、停止、恢复，每项左间距 12、宽 112  -->
+    <sys:Double x:Key="NavRunAreaWidth">372</sys:Double>
+    <!--  登录、退出，每项左间距 12、宽 112  -->
+    <sys:Double x:Key="NavAuthAreaWidth">248</sys:Double>
     <sys:Double x:Key="NavIconSize">34</sys:Double>
     <sys:Double x:Key="NavLabelFontSize">16</sys:Double>
     <sys:Double x:Key="NavSelectedBarHeight">7</sys:Double>

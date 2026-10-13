@@ -31,6 +31,27 @@ namespace MMSP.Core.Model.Sys
     }
 
     /// <summary>
+    /// 菜单的最低角色。登录角色能否打开由 <see cref="UserRoleAccess.CanOpen"/> 决定。
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class MenuRoleAttribute : Attribute
+    {
+        /// <summary>
+        /// 记录这个菜单要求的最低角色。
+        /// </summary>
+        /// <param name="minRole">最低角色。</param>
+        public MenuRoleAttribute(UserRole minRole)
+        {
+            MinRole = minRole;
+        }
+
+        /// <summary>
+        /// 最低角色。
+        /// </summary>
+        public UserRole MinRole { get; }
+    }
+
+    /// <summary>
     /// 主界面菜单。顺序与导航从左到右一致。
     /// </summary>
     public enum MenuCode : uint
@@ -39,20 +60,23 @@ namespace MMSP.Core.Model.Sys
         /// 主页
         /// </summary>
         [Description("主页")]
+        [MenuRole(UserRole.Operator)]
         [MenuIcons("HouseFill", "House")]
         Home = 0,
 
         /// <summary>
-        /// 流程
+        /// 流程。操作员和供应商不能打开。
         /// </summary>
         [Description("流程")]
+        [MenuRole(UserRole.Engineer)]
         [MenuIcons("FlowArrowFill", "FlowArrow")]
         Flow = 1,
 
         /// <summary>
-        /// 设备
+        /// 设备。操作员和供应商不能打开。
         /// </summary>
         [Description("设备")]
+        [MenuRole(UserRole.Engineer)]
         [MenuIcons("MonitorFill", "Monitor")]
         Device = 2,
 
@@ -60,13 +84,15 @@ namespace MMSP.Core.Model.Sys
         /// 图表
         /// </summary>
         [Description("图表")]
+        [MenuRole(UserRole.Operator)]
         [MenuIcons("ChartBarFill", "ChartBar")]
         Chart = 3,
 
         /// <summary>
-        /// 配置
+        /// 配置。操作员和供应商不能打开。
         /// </summary>
         [Description("配置")]
+        [MenuRole(UserRole.Engineer)]
         [MenuIcons("SlidersFill", "Sliders")]
         Config = 4,
 
@@ -74,6 +100,7 @@ namespace MMSP.Core.Model.Sys
         /// 用户
         /// </summary>
         [Description("用户")]
+        [MenuRole(UserRole.Admin)]
         [MenuIcons("UserFill", "User")]
         User = 5
     }

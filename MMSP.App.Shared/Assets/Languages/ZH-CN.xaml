@@ -28,6 +28,8 @@
     <sys:String x:Key="Footer_NotLoggedIn">未登录</sys:String>
     <sys:String x:Key="Shell_Login">登录</sys:String>
     <sys:String x:Key="Shell_Logout">注销</sys:String>
+    <sys:String x:Key="Logout_Title">注销</sys:String>
+    <sys:String x:Key="Logout_Message">是否确认注销？</sys:String>
     <sys:String x:Key="Shell_Exit">退出程序</sys:String>
     <sys:String x:Key="Exit_Title">退出</sys:String>
     <sys:String x:Key="Exit_Message">是否确认退出？</sys:String>
