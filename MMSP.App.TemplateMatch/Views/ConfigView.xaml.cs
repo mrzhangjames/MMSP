@@ -3,7 +3,7 @@
 namespace MMSP.App.TemplateMatch.Views
 {
     /// <summary>
-    /// 配置。只占位，不实现业务。
+    /// 配置页。只排界面，不读取许可证。
     /// </summary>
     public partial class ConfigView : UserControl
     {

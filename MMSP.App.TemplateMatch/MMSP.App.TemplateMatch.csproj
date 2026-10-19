@@ -1,17 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.5" />
 		<PackageReference Include="MahApps.Metro" Version="2.4.11" />
 		<PackageReference Include="MahApps.Metro.IconPacks" Version="6.2.1" />
 		<PackageReference Include="Prism.Core" Version="9.0.537" />
 		<PackageReference Include="Prism.DryIoc" Version="9.0.537" />
+		<PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
 		<PackageReference Include="Prism.Wpf" Version="9.0.537" />
 	</ItemGroup>
 
@@ -20,6 +22,8 @@
     <ProjectReference Include="..\MMSP.App.WpfBase\MMSP.App.WpfBase.csproj" />
     <ProjectReference Include="..\MMSP.Common.Helper\MMSP.Common.Helper.csproj" />
     <ProjectReference Include="..\MMSP.Service.Database\MMSP.Service.Database.csproj" />
+    <ProjectReference Include="..\MMSP.Service.Device\MMSP.Service.Device.csproj" />
+    <ProjectReference Include="..\MMSP.Plugin.Tool\MMSP.Plugin.Tool.csproj" />
   </ItemGroup>
 
 </Project>

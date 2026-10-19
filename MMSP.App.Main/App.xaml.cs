@@ -3,6 +3,7 @@ using MMSP.App.Main.Views;
 using MMSP.App.TemplateMatch;
 using MMSP.Common.Helper.Logger;
 using MMSP.Service.Database;
+using MMSP.Service.Device.Plc;
 using System.Configuration;
 using System.Data;
 using System.Windows;
@@ -48,6 +49,15 @@ namespace MMSP.App.Main
         {
             SqlSugarContext.Open();
             LogHelper.Use(Container.Resolve<IEventAggregator>());
+            if (HslLicense.Apply())
+                LogHelper.SysInfo("HSL 授权成功");
+            else
+                LogHelper.SysError("HSL 授权失败");
+
+            var missing = PlcClients.MissingProtocols();
+            if (missing.Count > 0)
+                LogHelper.SysError("PLC 协议未登记 " + string.Join(", ", missing));
+
             LogHelper.SysInfo("程序启动");
 
             //从容器换取MainView实例对象

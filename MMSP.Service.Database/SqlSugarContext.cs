@@ -36,7 +36,7 @@ namespace MMSP.Service.Database
         public static SqlSugarScope SystemDb => _systemDb ?? throw new InvalidOperationException("系统配置库尚未打开。");
 
         /// <summary>
-        /// 客户数据库。客户业务表随后注册到这个库。
+        /// 客户数据库。运行日志、图表、UPH、PLC 连接、PLC 点位、扫码枪、流程和 MES 连接建在这里。
         /// </summary>
         public static SqlSugarScope CustomerDb => _customerDb ?? throw new InvalidOperationException("客户数据库尚未打开。");
 
@@ -73,15 +73,39 @@ namespace MMSP.Service.Database
         }
 
         /// <summary>
-        /// 建客户表。运行日志放在客户库。
+        /// 建客户表。运行日志、图表、UPH、PLC 连接、PLC 点位、扫码枪、流程和 MES 连接放在客户库。
         /// </summary>
         private static void InitCustomerTables(SqlSugarScope db)
         {
             if (db.DbMaintenance.IsAnyTable("biz_logs", false))
                 EnsureBizTypeColumn(db);
 
-            db.CodeFirst.InitTables(typeof(RunLogEntity));
+            db.CodeFirst.InitTables(
+                typeof(RunLogEntity),
+                typeof(ChartEntity),
+                typeof(UphEntity),
+                typeof(PlcLinkEntity),
+                typeof(PlcPointEntity),
+                typeof(ScannerEntity),
+                typeof(FlowEntity),
+                typeof(FlowStepEntity),
+                typeof(FlowMesEntity));
             db.Ado.ExecuteCommand("CREATE INDEX IF NOT EXISTS idx_biz_logs_log_time ON biz_logs (log_time);");
+            db.Ado.ExecuteCommand("CREATE UNIQUE INDEX IF NOT EXISTS idx_biz_uph_hour_time ON biz_uph (hour_time);");
+            if (db.DbMaintenance.IsAnyTable("biz_flow_steps", false))
+                EnsureCfgValueColumn(db);
+        }
+
+        /// <summary>
+        /// 给已经存在的流程步表补工具配置列。
+        /// </summary>
+        private static void EnsureCfgValueColumn(SqlSugarScope db)
+        {
+            var count = db.Ado.GetInt("SELECT COUNT(1) FROM pragma_table_info('biz_flow_steps') WHERE name = 'cfg_value'");
+            if (count > 0)
+                return;
+
+            db.Ado.ExecuteCommand("ALTER TABLE biz_flow_steps ADD COLUMN cfg_value TEXT NOT NULL DEFAULT ''");
         }
 
         /// <summary>

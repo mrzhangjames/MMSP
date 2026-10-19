@@ -3,7 +3,7 @@
 namespace MMSP.App.TemplateMatch.Views
 {
     /// <summary>
-    /// 图表。只占位，不实现业务。
+    /// 图表页。卡片、图形和小时数据。
     /// </summary>
     public partial class ChartView : UserControl
     {

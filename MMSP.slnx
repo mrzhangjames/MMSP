@@ -14,6 +14,7 @@
   </Folder>
   <Folder Name="/Plugin/">
     <Project Path="MMSP.Plugin.Lux/MMSP.Plugin.Lux.csproj" />
+    <Project Path="MMSP.Plugin.Tool/MMSP.Plugin.Tool.csproj" Id="ea8133ff-731c-48a5-9b20-3a983965f65a" />
   </Folder>
   <Folder Name="/Service/">
     <Project Path="MMSP.Service.Database/MMSP.Service.Database.csproj" />

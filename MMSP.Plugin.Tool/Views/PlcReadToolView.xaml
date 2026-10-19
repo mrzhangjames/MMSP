@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="MMSP.Plugin.Tool.Views.PlcReadToolView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White"
+             FontFamily="Segoe UI, Microsoft YaHei"
+             FontSize="14"
+             Foreground="#333333">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MMSP.Plugin.Tool;component/Themes/ToolForm.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <StackPanel Margin="16">
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
+                <TextBox Style="{StaticResource ToolBox}"
+                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="地址" Style="{StaticResource ToolLabel}" />
+                <TextBox Style="{StaticResource ToolBox}"
+                         Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="数据类型" Style="{StaticResource ToolLabel}" />
+                <ComboBox Style="{StaticResource ToolCombo}"
+                          ItemsSource="{Binding DataTypes}"
+                          SelectedItem="{Binding DataType}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="长度" Style="{StaticResource ToolLabel}" />
+                <TextBox Style="{StaticResource ToolBox}"
+                         Text="{Binding Length, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+    </StackPanel>
+</UserControl>

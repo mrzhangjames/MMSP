@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="MMSP.Plugin.Tool.Views.SingleScanToolView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White"
+             FontFamily="Segoe UI, Microsoft YaHei"
+             FontSize="14"
+             Foreground="#333333">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MMSP.Plugin.Tool;component/Themes/ToolForm.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <StackPanel Margin="16">
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
+                <TextBox Style="{StaticResource ToolBox}"
+                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="扫码枪" Style="{StaticResource ToolLabel}" />
+                <ComboBox Style="{StaticResource ToolCombo}"
+                          ItemsSource="{Binding Scanners}"
+                          SelectedItem="{Binding Scanner}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="触发字符串" Style="{StaticResource ToolLabel}" />
+                <TextBox Style="{StaticResource ToolBox}"
+                         Text="{Binding Trigger, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+    </StackPanel>
+</UserControl>
