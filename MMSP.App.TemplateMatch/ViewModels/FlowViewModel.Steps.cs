@@ -3,6 +3,7 @@ using GongSolutions.Wpf.DragDrop;
 using MMSP.App.TemplateMatch.Models;
 using MMSP.App.TemplateMatch.Views;
 using MMSP.App.WpfBase.Services;
+using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Service.Database;
 using SqlSugar;
@@ -113,7 +114,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 return;
 
             SelectStep(step);
-            var window = new ToolPropertyWindow(step.ToolKind, step.CfgValue, step.Kind);
+            CustomerPluginCatalog? catalog = IContainerProviderExtensions.IsRegistered<CustomerPluginCatalog>(ContainerExt)
+                ? ContainerExt.Resolve<CustomerPluginCatalog>()
+                : null;
+            var window = new ToolPropertyWindow(step.ToolKind, step.CfgValue, step.Kind, catalog);
             var owner = Application.Current?.MainWindow;
             if (owner is not null && owner.IsLoaded)
                 window.Owner = owner;
@@ -123,6 +127,59 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             if (!SaveProperty(step, window.Result))
                 await MetroDialogService.ShowMessageAsync(Text("Flow_Property", "属性"), Text("User_SaveFailed", "保存失败"));
+        }
+
+        /// <summary>
+        /// 确认后删除这一步，并重写后面的顺序。取消则不删除。
+        /// </summary>
+        private async void DeleteStep(FlowStep? step)
+        {
+            var flow = SelectedFlow;
+            if (flow is null || step is null || !flow.Steps.Contains(step))
+                return;
+
+            SelectStep(step);
+            var confirmed = await MetroDialogService.ConfirmAsync(
+                Text("Flow_DeleteStepTitle", "删除步骤"),
+                Text("Flow_DeleteMessage", "是否确认删除？"));
+            if (!confirmed)
+                return;
+
+            var index = flow.Steps.IndexOf(step);
+            var title = step.Title;
+            flow.Steps.Remove(step);
+            Renumber(flow.Steps);
+            if (flow.Steps.Count > 0)
+                SelectStep(flow.Steps[Math.Min(index, flow.Steps.Count - 1)]);
+
+            if (!SqlSugarContext.IsOpen)
+                return;
+
+            try
+            {
+                var db = SqlSugarContext.CustomerDb;
+                db.Ado.BeginTran();
+                try
+                {
+                    db.Deleteable<FlowStepEntity>().Where(item => item.Id == step.Id).ExecuteCommand();
+                    WriteOrder(db, flow);
+                    db.Ado.CommitTran();
+                }
+                catch (Exception)
+                {
+                    db.Ado.RollbackTran();
+                    throw;
+                }
+
+                LogHelper.FlowInfo($"删除流程步 {title}");
+            }
+            catch (Exception)
+            {
+                await MetroDialogService.ShowMessageAsync(
+                    Text("Flow_DeleteStepTitle", "删除步骤"),
+                    Text("Flow_DeleteFailed", "删除失败"));
+                Load(flow.Id);
+            }
         }
 
         /// <summary>

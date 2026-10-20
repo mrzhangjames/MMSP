@@ -10,6 +10,11 @@ packages/
 !.env.example
 *.pem
 *.key
+*.pkcs8
+MMSP.App.LicenseIssuer/Key/
+*.lic
+*.spki
+license-seen.dat
 secrets.json
 appsettings.*.local.json
 

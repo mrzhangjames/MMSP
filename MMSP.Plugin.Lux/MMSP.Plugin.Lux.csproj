@@ -17,6 +17,8 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\MMSP.Core.Model\MMSP.Core.Model.csproj" />
+		<ProjectReference Include="..\MMSP.Common.Helper\MMSP.Common.Helper.csproj" />
+		<ProjectReference Include="..\MMSP.App.WpfBase\MMSP.App.WpfBase.csproj" />
 	</ItemGroup>
 	
   <ItemGroup>

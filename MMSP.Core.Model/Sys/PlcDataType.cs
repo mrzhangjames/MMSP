@@ -29,6 +29,12 @@ namespace MMSP.Core.Model.Sys
         /// 字符串。
         /// </summary>
         [Description("String")]
-        String = 3
+        String = 3,
+
+        /// <summary>
+        /// 16 位无符号整数。
+        /// </summary>
+        [Description("UInt16")]
+        UInt16 = 4
     }
 }

@@ -3,13 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:model="clr-namespace:MMSP.App.TemplateMatch.Models"
-             xmlns:local="clr-namespace:MMSP.App.TemplateMatch.Views"
+             xmlns:base="clr-namespace:MMSP.App.WpfBase.Services;assembly=MMSP.App.WpfBase"
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             Background="{StaticResource CardBodyBrush}"
+             Background="{DynamicResource CardBodyBrush}"
              FontFamily="Segoe UI, Microsoft YaHei"
              FontSize="14"
-             Foreground="{StaticResource HighestBlack}">
+             Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVis" />
 
@@ -20,7 +20,7 @@
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderBrush" Value="#CCCCCC" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -52,7 +52,7 @@
             <Setter Property="Margin" Value="0,0,8,0" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Foreground" Value="{StaticResource MediumNormalGray}" />
+            <Setter Property="Foreground" Value="{DynamicResource MediumNormalGray}" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Cursor" Value="Hand" />
@@ -76,8 +76,8 @@
         <Style x:Key="DeviceUnderlineBox" TargetType="TextBox">
             <Setter Property="Height" Value="30" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
-            <Setter Property="CaretBrush" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -105,7 +105,7 @@
         <Style x:Key="DeviceComboItem" TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="8,6" />
             <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -131,7 +131,7 @@
         <Style x:Key="DeviceCombo" TargetType="ComboBox">
             <Setter Property="Height" Value="30" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -165,7 +165,7 @@
                                                            Text="&#x25BE;"
                                                            HorizontalAlignment="Right"
                                                            VerticalAlignment="Center"
-                                                           Foreground="#666666"
+                                                           Foreground="{DynamicResource FieldLabelBrush}"
                                                            FontSize="12" />
                                             </Grid>
                                         </Border>
@@ -183,7 +183,7 @@
                                    Focusable="False"
                                    IsOpen="{TemplateBinding IsDropDownOpen}">
                                 <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
-                                        Background="White"
+                                        Background="{DynamicResource CardBackground}"
                                         BorderBrush="#E0E0E0"
                                         BorderThickness="1">
                                     <ScrollViewer MaxHeight="160">
@@ -199,7 +199,7 @@
 
         <Style x:Key="DeviceGridHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="#F5F5F5" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Height" Value="36" />
@@ -227,7 +227,7 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Padding" Value="12,0" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DataGridCell">
@@ -240,7 +240,7 @@
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="{StaticResource ThemeBrushColorAssist}" />
-                    <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                    <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -261,7 +261,7 @@
                 </DataTrigger>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="{StaticResource ThemeBrushColorAssist}" />
-                    <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                    <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -281,11 +281,11 @@
 
         <DataTemplate x:Key="DeviceLogTemplate">
             <StackPanel Orientation="Horizontal" Margin="0,1">
-                <TextBlock Text="{Binding TimeText}" Foreground="{StaticResource MediumNormalGray}" Margin="0,0,8,0" />
+                <TextBlock Text="{Binding TimeText}" Foreground="{DynamicResource MediumNormalGray}" Margin="0,0,8,0" />
                 <TextBlock Text="{Binding DirectionText}" Margin="0,0,8,0">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding DirectionText}" Value="">
                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -303,7 +303,7 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <TextBlock Text="{Binding Message}" Foreground="{StaticResource HighestBlack}" />
+                <TextBlock Text="{Binding Message}" Foreground="{DynamicResource HighestBlack}" />
             </StackPanel>
         </DataTemplate>
 
@@ -312,14 +312,14 @@
             <Setter Property="Margin" Value="0,0,0,6" />
             <Setter Property="Padding" Value="10,0" />
             <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="MenuItem">
                         <Border x:Name="Box"
                                 Height="32"
                                 Margin="0,0,0,6"
-                                Background="White"
+                                Background="{DynamicResource CardBackground}"
                                 BorderBrush="#CCCCCC"
                                 BorderThickness="1"
                                 Padding="10,0">
@@ -346,17 +346,17 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="16,0,8,0">
+        <Border Grid.Row="0" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="16,0,8,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
                     <Button Command="{Binding ShowPlcCommand}"
                             AutomationProperties.AutomationId="DevicePlcTab"
-                            AutomationProperties.Name="{StaticResource Device_Plc}">
+                            AutomationProperties.Name="{DynamicResource Device_Plc}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource DeviceTabButtonStyle}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsPlcPage}" Value="True">
                                         <Setter Property="Background" Value="#FFF6D2" />
-                                        <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                                         <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
                                         <Setter Property="BorderThickness" Value="0,0,0,3" />
                                     </DataTrigger>
@@ -365,18 +365,18 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconPhosphorIcons Kind="Monitor" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="{StaticResource Device_Plc}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Device_Plc}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                     <Button Command="{Binding ShowScannerCommand}"
                             AutomationProperties.AutomationId="DeviceScannerTab"
-                            AutomationProperties.Name="{StaticResource Device_Scanner}">
+                            AutomationProperties.Name="{DynamicResource Device_Scanner}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource DeviceTabButtonStyle}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsScannerPage}" Value="True">
                                         <Setter Property="Background" Value="#FFF6D2" />
-                                        <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                                         <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
                                         <Setter Property="BorderThickness" Value="0,0,0,3" />
                                     </DataTrigger>
@@ -385,7 +385,7 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconPhosphorIcons Kind="Barcode" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="{StaticResource Device_Scanner}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Device_Scanner}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
             </StackPanel>
@@ -405,47 +405,47 @@
                         <RowDefinition Height="3*" />
                     </Grid.RowDefinitions>
 
-                    <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1">
+                    <Border Grid.Row="0" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Border BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="8,0,8,0">
+                            <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="8,0,8,0">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
                                     <Button Command="{Binding ShowPlcConfigCommand}"
                                             AutomationProperties.AutomationId="DeviceConfigTab"
-                                            AutomationProperties.Name="{StaticResource Device_Config}">
+                                            AutomationProperties.Name="{DynamicResource Device_Config}">
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource DeviceTabButtonStyle}">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsPlcConfigTab}" Value="True">
                                                         <Setter Property="Background" Value="#FFF6D2" />
-                                                        <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                                                        <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                                                         <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
                                                         <Setter Property="BorderThickness" Value="0,0,0,3" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Button.Style>
-                                        <TextBlock Text="{StaticResource Device_Config}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{DynamicResource Device_Config}" VerticalAlignment="Center" />
                                     </Button>
                                     <Button Command="{Binding ShowPlcTestCommand}"
                                             AutomationProperties.AutomationId="DeviceTestTab"
-                                            AutomationProperties.Name="{StaticResource Device_Test}">
+                                            AutomationProperties.Name="{DynamicResource Device_Test}">
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource DeviceTabButtonStyle}">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsPlcTestTab}" Value="True">
                                                         <Setter Property="Background" Value="#FFF6D2" />
-                                                        <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                                                        <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                                                         <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
                                                         <Setter Property="BorderThickness" Value="0,0,0,3" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Button.Style>
-                                        <TextBlock Text="{StaticResource Device_Test}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{DynamicResource Device_Test}" VerticalAlignment="Center" />
                                     </Button>
                                 </StackPanel>
                             </Border>
@@ -455,39 +455,39 @@
                                           Visibility="{Binding IsPlcConfigTab, Converter={StaticResource BoolVis}}">
                                 <UniformGrid Columns="2" Margin="18,14,18,8">
                                     <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{StaticResource Device_Ip}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_Ip}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcIp, UpdateSourceTrigger=LostFocus}" />
                                     </StackPanel>
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="{StaticResource Device_ConnType}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_ConnType}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding ConnectionTypes}" SelectedItem="{Binding PlcConnectionType}" />
                                     </StackPanel>
                                     <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{StaticResource Device_Port}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_Port}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcPort, UpdateSourceTrigger=LostFocus}" />
                                     </StackPanel>
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="{StaticResource Device_DataFormat}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_DataFormat}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding DataFormats}" SelectedItem="{Binding PlcDataFormat}" />
                                     </StackPanel>
                                     <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{StaticResource Device_Poll}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_Poll}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcPoll, UpdateSourceTrigger=LostFocus}" />
                                     </StackPanel>
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="{StaticResource Device_ReadTimeout}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_ReadTimeout}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcReadTimeout, UpdateSourceTrigger=LostFocus}" />
                                     </StackPanel>
                                     <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{StaticResource Device_WriteTimeout}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_WriteTimeout}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcWriteTimeout, UpdateSourceTrigger=LostFocus}" />
                                     </StackPanel>
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="{StaticResource Device_ReconnectInterval}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_ReconnectInterval}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcReconnectInterval, UpdateSourceTrigger=LostFocus}" />
                                     </StackPanel>
                                     <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{StaticResource Device_ReconnectCount}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_ReconnectCount}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcReconnectCount, UpdateSourceTrigger=LostFocus}" />
                                     </StackPanel>
                                 </UniformGrid>
@@ -503,19 +503,19 @@
                                               HorizontalScrollBarVisibility="Disabled">
                                     <UniformGrid Columns="2" Margin="18,14,18,0">
                                         <StackPanel Margin="0,0,16,12">
-                                            <TextBlock Text="{StaticResource Device_Address}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                            <TextBlock Text="{DynamicResource Device_Address}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding TestAddress, UpdateSourceTrigger=PropertyChanged}" />
                                         </StackPanel>
                                         <StackPanel Margin="0,0,0,12">
-                                            <TextBlock Text="{StaticResource Device_DataType}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                            <TextBlock Text="{DynamicResource Device_DataType}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                             <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding DataTypes}" SelectedItem="{Binding TestDataType}" />
                                         </StackPanel>
                                         <StackPanel Margin="0,0,16,4">
-                                            <TextBlock Text="{StaticResource Device_Length}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                            <TextBlock Text="{DynamicResource Device_Length}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding TestLength, UpdateSourceTrigger=PropertyChanged}" />
                                         </StackPanel>
                                         <StackPanel Margin="0,0,0,4">
-                                            <TextBlock Text="{StaticResource Device_WriteValue}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                            <TextBlock Text="{DynamicResource Device_WriteValue}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding TestWriteValue, UpdateSourceTrigger=PropertyChanged}" />
                                         </StackPanel>
                                     </UniformGrid>
@@ -525,43 +525,43 @@
                                             Margin="0,0,8,0"
                                             Command="{Binding ReadCustomCommand}"
                                             AutomationProperties.AutomationId="DeviceReadButton"
-                                            AutomationProperties.Name="{StaticResource Device_Read}">
+                                            AutomationProperties.Name="{DynamicResource Device_Read}">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="DownloadSimple" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource Device_Read}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource Device_Read}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
                                             Command="{Binding WriteCustomCommand}"
                                             AutomationProperties.AutomationId="DeviceWriteButton"
-                                            AutomationProperties.Name="{StaticResource Device_Write}">
+                                            AutomationProperties.Name="{DynamicResource Device_Write}">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="UploadSimple" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource Device_Write}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource Device_Write}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
-                                <Border Grid.Row="2" Margin="18,0,18,14" Background="{StaticResource CardBodyBrush}" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1" Padding="16,12">
+                                <Border Grid.Row="2" Margin="18,0,18,14" Background="{DynamicResource CardBodyBrush}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Padding="16,12">
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{StaticResource Device_CurrentValue}" FontSize="12" Foreground="{StaticResource MediumNormalGray}" />
+                                        <TextBlock Text="{DynamicResource Device_CurrentValue}" FontSize="12" Foreground="{DynamicResource MediumNormalGray}" />
                                         <TextBlock Text="{Binding CurrentValue}" FontSize="28" FontWeight="Bold" Margin="0,4,0,0" />
-                                        <TextBlock Text="{Binding CurrentDetail}" FontSize="12" Foreground="{StaticResource MediumNormalGray}" Margin="0,4,0,0" />
+                                        <TextBlock Text="{Binding CurrentDetail}" FontSize="12" Foreground="{DynamicResource MediumNormalGray}" Margin="0,4,0,0" />
                                     </StackPanel>
                                 </Border>
                             </Grid>
                         </Grid>
                     </Border>
 
-                    <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1">
+                    <Border Grid.Row="2" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Border BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="14,0">
+                            <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="14,0">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Border Width="3" Height="14" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" />
-                                    <TextBlock Text="{StaticResource Device_PlcLog}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource Device_PlcLog}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                             <ListBox Grid.Row="1"
@@ -569,7 +569,7 @@
                                      ItemTemplate="{StaticResource DeviceLogTemplate}"
                                      ItemContainerStyle="{StaticResource DeviceLogItem}"
                                      BorderThickness="0"
-                                     Background="White"
+                                     Background="{DynamicResource CardBackground}"
                                      Padding="14,8"
                                      FontFamily="Consolas, Microsoft YaHei"
                                      FontSize="13"
@@ -578,17 +578,17 @@
                     </Border>
                 </Grid>
 
-                <Border Grid.Column="2" Background="White" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1">
+                <Border Grid.Column="2" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="48" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <Border BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="14,0">
+                        <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="14,0">
                             <Grid>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Border Width="3" Height="14" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" />
-                                    <TextBlock Text="{StaticResource Device_Points}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource Device_Points}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
@@ -597,7 +597,7 @@
                                             AutomationProperties.AutomationId="DevicePointAdd">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="Plus" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
@@ -606,7 +606,7 @@
                                             AutomationProperties.AutomationId="DevicePointEdit">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="PencilSimple" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
@@ -615,26 +615,26 @@
                                             AutomationProperties.AutomationId="DevicePointDelete">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="Trash" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
                                             Margin="0,0,8,0"
                                             Command="{Binding ImportPointsCommand}"
                                             AutomationProperties.AutomationId="DevicePointImport"
-                                            AutomationProperties.Name="{StaticResource Device_Import}">
+                                            AutomationProperties.Name="{DynamicResource Device_Import}">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="FileArrowDown" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource Device_Import}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource Device_Import}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
                                             Command="{Binding ExportPointsCommand}"
                                             AutomationProperties.AutomationId="DevicePointExport"
-                                            AutomationProperties.Name="{StaticResource Device_Export}">
+                                            AutomationProperties.Name="{DynamicResource Device_Export}">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="FileArrowUp" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource Device_Export}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource Device_Export}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
@@ -654,8 +654,8 @@
                                   GridLinesVisibility="Horizontal"
                                   HorizontalGridLinesBrush="#EEEEEE"
                                   BorderThickness="0"
-                                  Background="White"
-                                  RowBackground="White"
+                                  Background="{DynamicResource CardBackground}"
+                                  RowBackground="{DynamicResource CardBackground}"
                                   AlternatingRowBackground="#FAFAFA"
                                   AlternationCount="2"
                                   RowHeight="36"
@@ -670,22 +670,22 @@
                             <DataGrid.ContextMenu>
                                 <ContextMenu Placement="MousePoint"
                                              DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                                             Background="White"
+                                             Background="{DynamicResource CardBackground}"
                                              BorderBrush="#CCCCCC"
                                              BorderThickness="1"
                                              Padding="6,6,6,0">
-                                    <MenuItem Header="{StaticResource Device_Read}"
+                                    <MenuItem Header="{DynamicResource Device_Read}"
                                               Style="{StaticResource PointMenuItem}"
                                               Command="{Binding ReadPointCommand}">
                                         <MenuItem.Icon>
-                                            <iconPacks:PackIconPhosphorIcons Kind="DownloadSimple" Width="16" Height="16" Foreground="{StaticResource HighestBlack}" />
+                                            <iconPacks:PackIconPhosphorIcons Kind="DownloadSimple" Width="16" Height="16" Foreground="{DynamicResource HighestBlack}" />
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="{StaticResource Device_Write}"
+                                    <MenuItem Header="{DynamicResource Device_Write}"
                                               Style="{StaticResource PointMenuItem}"
                                               Command="{Binding WritePointCommand}">
                                         <MenuItem.Icon>
-                                            <iconPacks:PackIconPhosphorIcons Kind="UploadSimple" Width="16" Height="16" Foreground="{StaticResource HighestBlack}" />
+                                            <iconPacks:PackIconPhosphorIcons Kind="UploadSimple" Width="16" Height="16" Foreground="{DynamicResource HighestBlack}" />
                                         </MenuItem.Icon>
                                     </MenuItem>
                                 </ContextMenu>
@@ -695,12 +695,12 @@
                                                         Width="46"
                                                         Binding="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}"
                                                         CellStyle="{StaticResource DeviceCheckCellStyle}" />
-                                <DataGridTextColumn Header="{StaticResource Device_PointName}" Width="*" Binding="{Binding Name}" IsReadOnly="True" />
-                                <DataGridTextColumn Header="{StaticResource Device_Address}" Width="140" Binding="{Binding Address}" IsReadOnly="True" />
-                                <DataGridTextColumn Header="{StaticResource Device_DataType}" Width="140" Binding="{Binding DataType}" IsReadOnly="True" />
-                                <DataGridTextColumn Header="{StaticResource Device_Length}" Width="90" Binding="{Binding LengthText}" IsReadOnly="True" />
-                                <DataGridTextColumn Header="{StaticResource Device_Access}" Width="100" Binding="{Binding AccessText}" IsReadOnly="True" />
-                                <DataGridTemplateColumn Header="{StaticResource Device_On}" Width="100">
+                                <DataGridTextColumn Header="{DynamicResource Device_PointName}" Width="*" Binding="{Binding Name}" IsReadOnly="True" />
+                                <DataGridTextColumn Header="{DynamicResource Device_Address}" Width="140" Binding="{Binding Address}" IsReadOnly="True" />
+                                <DataGridTextColumn Header="{DynamicResource Device_DataType}" Width="140" Binding="{Binding DataType}" IsReadOnly="True" />
+                                <DataGridTextColumn Header="{DynamicResource Device_Length}" Width="90" Binding="{Binding LengthText}" IsReadOnly="True" />
+                                <DataGridTextColumn Header="{DynamicResource Device_Access}" Width="100" Binding="{Binding AccessText}" IsReadOnly="True" />
+                                <DataGridTemplateColumn Header="{DynamicResource Device_On}" Width="100">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border HorizontalAlignment="Left" Padding="6,0" Height="20">
@@ -742,7 +742,7 @@
                     <ColumnDefinition Width="12" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Background="White" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1">
+                <Border Grid.Column="0" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="64" />
@@ -756,7 +756,7 @@
                                         AutomationProperties.AutomationId="DeviceScannerAdd">
                                     <StackPanel Orientation="Horizontal">
                                         <iconPacks:PackIconPhosphorIcons Kind="Plus" Width="16" Height="16" VerticalAlignment="Center" />
-                                        <TextBlock Text="{StaticResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="{DynamicResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource DeviceToolButtonStyle}"
@@ -765,7 +765,7 @@
                                         AutomationProperties.AutomationId="DeviceScannerEdit">
                                     <StackPanel Orientation="Horizontal">
                                         <iconPacks:PackIconPhosphorIcons Kind="PencilSimple" Width="16" Height="16" VerticalAlignment="Center" />
-                                        <TextBlock Text="{StaticResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="{DynamicResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource DeviceToolButtonStyle}"
@@ -773,7 +773,7 @@
                                         AutomationProperties.AutomationId="DeviceScannerDelete">
                                     <StackPanel Orientation="Horizontal">
                                         <iconPacks:PackIconPhosphorIcons Kind="Trash" Width="16" Height="16" VerticalAlignment="Center" />
-                                        <TextBlock Text="{StaticResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="{DynamicResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -782,7 +782,7 @@
                                  ItemsSource="{Binding Scanners}"
                                  SelectedItem="{Binding SelectedScanner}"
                                  BorderThickness="0"
-                                 Background="{StaticResource CardBodyBrush}"
+                                 Background="{DynamicResource CardBodyBrush}"
                                  Padding="16,16,16,4"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                             <ListBox.ItemContainerStyle>
@@ -798,8 +798,8 @@
                                                 <Grid>
                                                     <Border x:Name="Card"
                                                             MinHeight="132"
-                                                            Background="White"
-                                                            BorderBrush="{StaticResource CardBorderBrush}"
+                                                            Background="{DynamicResource CardBackground}"
+                                                            BorderBrush="{DynamicResource CardBorderBrush}"
                                                             BorderThickness="1"
                                                             CornerRadius="8"
                                                             Padding="16,14">
@@ -850,13 +850,13 @@
                                             </Border>
                                         </Grid>
                                         <Grid Margin="0,8,0,0">
-                                            <TextBlock FontSize="13" Foreground="{StaticResource MediumNormalGray}">
+                                            <TextBlock FontSize="13" Foreground="{DynamicResource MediumNormalGray}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
-                                                        <Setter Property="Text" Value="{StaticResource Device_Ip}" />
+                                                        <Setter Property="Text" Value="{DynamicResource Device_Ip}" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsTcp}" Value="False">
-                                                                <Setter Property="Text" Value="{StaticResource Device_Com}" />
+                                                                <Setter Property="Text" Value="{DynamicResource Device_Com}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -865,11 +865,11 @@
                                             <TextBlock Text="{Binding Ip}" HorizontalAlignment="Right" />
                                         </Grid>
                                         <Grid Margin="0,6,0,0" Visibility="{Binding IsTcp, Converter={StaticResource BoolVis}}">
-                                            <TextBlock Text="{StaticResource Device_Port}" FontSize="13" Foreground="{StaticResource MediumNormalGray}" />
+                                            <TextBlock Text="{DynamicResource Device_Port}" FontSize="13" Foreground="{DynamicResource MediumNormalGray}" />
                                             <TextBlock Text="{Binding Port}" HorizontalAlignment="Right" />
                                         </Grid>
                                         <Grid Margin="0,6,0,0">
-                                            <TextBlock Text="{StaticResource Device_TriggerText}" FontSize="13" Foreground="{StaticResource MediumNormalGray}" />
+                                            <TextBlock Text="{DynamicResource Device_TriggerText}" FontSize="13" Foreground="{DynamicResource MediumNormalGray}" />
                                             <TextBlock Text="{Binding TriggerText}" HorizontalAlignment="Right" />
                                         </Grid>
                                     </StackPanel>
@@ -885,16 +885,16 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Border Background="White" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1">
+                    <Border Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <Border BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="14,0">
+                            <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="14,0">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Border Width="3" Height="14" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" />
-                                    <TextBlock Text="{StaticResource Device_TriggerRead}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource Device_TriggerRead}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                             <Grid Grid.Row="1" Margin="20,16,20,16">
@@ -905,19 +905,19 @@
                                 </Grid.RowDefinitions>
                                 <UniformGrid Columns="2" IsHitTestVisible="False">
                                     <StackPanel Margin="0,0,20,14">
-                                        <TextBlock Text="{StaticResource Device_Scanner}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_Scanner}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,2" Height="30">
                                             <TextBlock Text="{Binding SelectedScanner.Name}" FontSize="15" VerticalAlignment="Center" Margin="0,4,0,2" />
                                         </Border>
                                     </StackPanel>
                                     <StackPanel Margin="0,0,0,14">
-                                        <TextBlock FontSize="12" Foreground="#666666" Margin="0,0,0,2">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="{StaticResource Device_Ip}" />
+                                                    <Setter Property="Text" Value="{DynamicResource Device_Ip}" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding SelectedScanner.IsTcp}" Value="False">
-                                                            <Setter Property="Text" Value="{StaticResource Device_Com}" />
+                                                            <Setter Property="Text" Value="{DynamicResource Device_Com}" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -928,13 +928,13 @@
                                         </Border>
                                     </StackPanel>
                                     <StackPanel Margin="0,0,20,0" Visibility="{Binding SelectedScanner.IsTcp, Converter={StaticResource BoolVis}}">
-                                        <TextBlock Text="{StaticResource Device_Port}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_Port}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,2" Height="30">
                                             <TextBlock Text="{Binding SelectedScanner.Port}" FontSize="15" VerticalAlignment="Center" Margin="0,4,0,2" />
                                         </Border>
                                     </StackPanel>
                                     <StackPanel>
-                                        <TextBlock Text="{StaticResource Device_TriggerText}" FontSize="12" Foreground="#666666" Margin="0,0,0,2" />
+                                        <TextBlock Text="{DynamicResource Device_TriggerText}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                         <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,2" Height="30">
                                             <TextBlock Text="{Binding SelectedScanner.TriggerText}" FontSize="15" VerticalAlignment="Center" Margin="0,4,0,2" />
                                         </Border>
@@ -944,14 +944,14 @@
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
                                             Command="{Binding TriggerCommand}"
                                             AutomationProperties.AutomationId="DeviceTriggerButton"
-                                            AutomationProperties.Name="{StaticResource Device_Trigger}">
+                                            AutomationProperties.Name="{DynamicResource Device_Trigger}">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="Play" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource Device_Trigger}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource Device_Trigger}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
-                                <Border Grid.Row="2" Margin="0,16,0,0" BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,1,0,0" Padding="0,14,0,0">
+                                <Border Grid.Row="2" Margin="0,16,0,0" BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,1,0,0" Padding="0,14,0,0">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
@@ -960,10 +960,10 @@
                                         </Grid.RowDefinitions>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                             <Border Width="3" Height="14" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" />
-                                            <TextBlock Text="{StaticResource Device_ScanResult}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource Device_ScanResult}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
                                         </StackPanel>
-                                        <Border Grid.Row="1" Background="White" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1" Padding="16,12">
-                                            <local:BarcodeBlock Text="{Binding ScanResult}" Height="72" />
+                                        <Border Grid.Row="1" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Padding="16,12">
+                                            <base:BarcodeBlock Text="{Binding ScanResult}" Height="72" />
                                         </Border>
                                         <TextBlock Grid.Row="2"
                                                    Text="{Binding ScanResult}"
@@ -977,16 +977,16 @@
                             </Grid>
                         </Grid>
                     </Border>
-                    <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1">
+                    <Border Grid.Row="2" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Border BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="14,0">
+                            <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="14,0">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Border Width="3" Height="14" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" />
-                                    <TextBlock Text="{StaticResource Device_ScanLog}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource Device_ScanLog}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                             <ListBox Grid.Row="1"
@@ -994,7 +994,7 @@
                                      ItemTemplate="{StaticResource DeviceLogTemplate}"
                                      ItemContainerStyle="{StaticResource DeviceLogItem}"
                                      BorderThickness="0"
-                                     Background="White"
+                                     Background="{DynamicResource CardBackground}"
                                      Padding="16,10"
                                      FontFamily="Consolas, Microsoft YaHei"
                                      FontSize="13"
@@ -1012,7 +1012,7 @@
             <Border Width="480"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Background="White">
+                    Background="{DynamicResource CardBackground}">
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="40" ShadowDepth="10" Opacity="0.28" Color="Black" />
                 </Border.Effect>
@@ -1027,29 +1027,29 @@
                     </Border>
                     <StackPanel Grid.Row="1" Margin="24,18,24,8">
                         <StackPanel Visibility="{Binding IsPointEditor, Converter={StaticResource BoolVis}}">
-                            <TextBlock Text="{StaticResource Device_PointName}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+                            <TextBlock Text="{DynamicResource Device_PointName}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorName, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Text="{StaticResource Device_Address}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                            <TextBlock Text="{DynamicResource Device_Address}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorAddress, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Text="{StaticResource Device_DataType}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                            <TextBlock Text="{DynamicResource Device_DataType}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding DataTypes}" SelectedItem="{Binding EditorDataType}" />
-                            <TextBlock Text="{StaticResource Device_Length}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                            <TextBlock Text="{DynamicResource Device_Length}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorLength, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Text="{StaticResource Device_Access}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                            <TextBlock Text="{DynamicResource Device_Access}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding AccessModes}" SelectedItem="{Binding EditorAccess}" />
                         </StackPanel>
                         <StackPanel Visibility="{Binding IsScannerEditor, Converter={StaticResource BoolVis}}">
-                            <TextBlock Text="{StaticResource Device_ScannerName}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+                            <TextBlock Text="{DynamicResource Device_ScannerName}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorName, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Text="{StaticResource Device_Transport}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                            <TextBlock Text="{DynamicResource Device_Transport}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding ScanTransports}" SelectedItem="{Binding EditorTransport}" />
-                            <TextBlock FontSize="12" Foreground="#666666" Margin="0,14,0,4">
+                            <TextBlock FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="{StaticResource Device_Ip}" />
+                                        <Setter Property="Text" Value="{DynamicResource Device_Ip}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsEditorTcp}" Value="False">
-                                                <Setter Property="Text" Value="{StaticResource Device_Com}" />
+                                                <Setter Property="Text" Value="{DynamicResource Device_Com}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -1057,16 +1057,16 @@
                             </TextBlock>
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorIp, UpdateSourceTrigger=PropertyChanged}" />
                             <StackPanel Visibility="{Binding IsEditorTcp, Converter={StaticResource BoolVis}}">
-                                <TextBlock Text="{StaticResource Device_Port}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                                <TextBlock Text="{DynamicResource Device_Port}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                                 <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorPort, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
-                            <TextBlock Text="{StaticResource Device_TriggerText}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                            <TextBlock Text="{DynamicResource Device_TriggerText}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorTrigger, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <CheckBox Margin="0,16,0,0"
-                                  Content="{StaticResource Device_On}"
+                                  Content="{DynamicResource Device_On}"
                                   IsChecked="{Binding EditorEnabled}"
-                                  Foreground="{StaticResource HighestBlack}" />
+                                  Foreground="{DynamicResource HighestBlack}" />
                         <TextBlock Text="{Binding EditorError}" Margin="0,10,0,0" Foreground="#CE3D3A" FontSize="12" />
                     </StackPanel>
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,16,0">
@@ -1076,7 +1076,7 @@
                                 AutomationProperties.AutomationId="DeviceEditorSave">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="FloppyDisk" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource User_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource User_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource DeviceToolButtonStyle}"
@@ -1084,7 +1084,7 @@
                                 AutomationProperties.AutomationId="DeviceEditorCancel">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="X" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </StackPanel>

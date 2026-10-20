@@ -23,6 +23,7 @@ namespace MMSP.Service.Device.Plc
                 return dataType switch
                 {
                     PlcDataType.Int16 => From(device.ReadInt16(address)),
+                    PlcDataType.UInt16 => From(device.ReadUInt16(address)),
                     PlcDataType.Int32 => From(device.ReadInt32(address)),
                     PlcDataType.Float => From(device.ReadFloat(address)),
                     PlcDataType.String => From(device.ReadString(address, ToLength(length))),
@@ -49,6 +50,7 @@ namespace MMSP.Service.Device.Plc
                 OperateResult result = dataType switch
                 {
                     PlcDataType.Int16 when short.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var int16) => device.Write(address, int16),
+                    PlcDataType.UInt16 when ushort.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var uint16) => device.Write(address, uint16),
                     PlcDataType.Int32 when int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var int32) => device.Write(address, int32),
                     PlcDataType.Float when TryFloat(text, out var real) => device.Write(address, real),
                     PlcDataType.String => device.Write(address, text),

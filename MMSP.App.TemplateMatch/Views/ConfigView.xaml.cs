@@ -3,7 +3,7 @@
 namespace MMSP.App.TemplateMatch.Views
 {
     /// <summary>
-    /// 配置页。只排界面，不读取许可证。
+    /// 配置页。许可证内容来自当前校验结果。
     /// </summary>
     public partial class ConfigView : UserControl
     {

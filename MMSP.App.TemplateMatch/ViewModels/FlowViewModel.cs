@@ -7,6 +7,7 @@ using GongSolutions.Wpf.DragDrop;
 using MahApps.Metro.IconPacks;
 using MMSP.App.TemplateMatch.Models;
 using MMSP.App.WpfBase.Core;
+using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
@@ -50,13 +51,16 @@ namespace MMSP.App.TemplateMatch.ViewModels
             : base(region, container, eventAggregator)
         {
             Flows = [];
-            Tools = [];
+            GeneralTools = [];
+            CustomerTools = [];
             EnabledChoices = [Text("User_Yes", "是"), Text("User_No", "否")];
+            AppAppearance.LanguageChanged += OnLanguageChanged;
             _mesEnabled = NoText();
             _draftEnabled = _mesEnabled;
             SelectCommand = new DelegateCommand<FlowCard?>(Select);
             SelectStepCommand = new DelegateCommand<FlowStep?>(SelectStep);
             ShowPropertyCommand = new DelegateCommand<FlowStep?>(ShowProperty);
+            DeleteStepCommand = new DelegateCommand<FlowStep?>(DeleteStep);
             SaveMesCommand = new DelegateCommand(SaveMes);
             CancelMesCommand = new DelegateCommand(CloseMes);
             AddCommand = new DelegateCommand(OpenAdd);
@@ -75,9 +79,24 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public ObservableCollection<FlowCard> Flows { get; }
 
         /// <summary>
-        /// 已加载工具。打开流程页时按枚举填入。
+        /// 通用工具。编号 0 到 8。
         /// </summary>
-        public ObservableCollection<FlowTool> Tools { get; }
+        public ObservableCollection<FlowTool> GeneralTools { get; }
+
+        /// <summary>
+        /// 当前客户插件登记的工具。没有登记结果时为空。
+        /// </summary>
+        public ObservableCollection<FlowTool> CustomerTools { get; }
+
+        /// <summary>
+        /// 客户工具组标题。没有客户工具时不显示。
+        /// </summary>
+        public string CustomerToolGroup { get; private set; } = "";
+
+        /// <summary>
+        /// 是否显示客户工具组。
+        /// </summary>
+        public bool HasCustomerTools => CustomerTools.Count > 0;
 
         /// <summary>
         /// 选中一张流程步卡片。
@@ -90,14 +109,67 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public DelegateCommand<FlowStep?> ShowPropertyCommand { get; }
 
         /// <summary>
-        /// 工具数量。
+        /// 删除选中的流程步。
         /// </summary>
-        public int ToolCount => Tools.Count;
+        public DelegateCommand<FlowStep?> DeleteStepCommand { get; }
 
         /// <summary>
         /// 启用下拉项。是、否。
         /// </summary>
-        public IReadOnlyList<string> EnabledChoices { get; }
+        private IReadOnlyList<string> _enabledChoices = [];
+
+        /// <summary>
+        /// 启用下拉项。是、否。
+        /// </summary>
+        public IReadOnlyList<string> EnabledChoices
+        {
+            get => _enabledChoices;
+            private set => SetProperty(ref _enabledChoices, value);
+        }
+
+        /// <summary>
+        /// 语言切换后重写“是/否”，并保住当前选中项。
+        /// </summary>
+        private void OnLanguageChanged()
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+            {
+                dispatcher.BeginInvoke(new Action(OnLanguageChanged));
+                return;
+            }
+
+            var draftIndex = ChoiceIndex(EnabledChoices, DraftEnabled);
+            var savedIndex = ChoiceIndex(EnabledChoices, _mesEnabled);
+            EnabledChoices = [Text("User_Yes", "是"), Text("User_No", "否")];
+            DraftEnabled = ChoiceAt(EnabledChoices, draftIndex);
+            _mesEnabled = ChoiceAt(EnabledChoices, savedIndex);
+        }
+
+        /// <summary>
+        /// 在下拉里找当前文字的位置。没有时返回 -1。
+        /// </summary>
+        private static int ChoiceIndex(IReadOnlyList<string> choices, string value)
+        {
+            for (var index = 0; index < choices.Count; index++)
+            {
+                if (choices[index] == value)
+                    return index;
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// 按下标取下拉文字。下标无效时取第一项。
+        /// </summary>
+        private static string ChoiceAt(IReadOnlyList<string> choices, int index)
+        {
+            if (index >= 0 && index < choices.Count)
+                return choices[index];
+
+            return choices.Count > 0 ? choices[0] : "";
+        }
 
         /// <summary>
         /// 当前流程。流程数据页右侧标题和步骤跟着它。没有流程时为空。
@@ -238,17 +310,44 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 按工具枚举生成中间工具区。同一次运行里再次进入不重复生成。
+        /// 通用工具固定为 0 到 8。客户工具只取当前插件登记的种类。同一次运行里再次进入不重复生成。
         /// </summary>
         private void LoadTools()
         {
-            if (Tools.Count > 0)
+            if (GeneralTools.Count > 0 || CustomerTools.Count > 0)
                 return;
 
-            foreach (var tool in CreateTools())
-                Tools.Add(tool);
+            foreach (var kind in Enum.GetValues<FlowToolKind>())
+            {
+                if ((int)kind > (int)FlowToolKind.Script)
+                    continue;
 
-            RaisePropertyChanged(nameof(ToolCount));
+                GeneralTools.Add(MakeTool(kind));
+            }
+
+            if (IContainerProviderExtensions.IsRegistered<CustomerPluginCatalog>(ContainerExt))
+            {
+                var catalog = ContainerExt.Resolve<CustomerPluginCatalog>();
+                CustomerToolGroup = catalog.ToolGroupName;
+                foreach (var tool in catalog.Tools)
+                    CustomerTools.Add(MakeTool(tool.Kind));
+            }
+
+            RaisePropertyChanged(nameof(CustomerToolGroup));
+            RaisePropertyChanged(nameof(HasCustomerTools));
+        }
+
+        /// <summary>
+        /// 做成工具箱里的一张卡片。
+        /// </summary>
+        private static FlowTool MakeTool(FlowToolKind kind)
+        {
+            return new FlowTool
+            {
+                ToolKind = kind,
+                Name = Describe(kind),
+                Icon = Icon(kind)
+            };
         }
 
         private void Load(Guid? selectId)
@@ -572,18 +671,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
             return string.IsNullOrWhiteSpace(text) ? value.ToString() : text;
         }
 
-        private static IReadOnlyList<FlowTool> CreateTools()
-        {
-            return Enum.GetValues<FlowToolKind>()
-                .Select(kind => new FlowTool
-                {
-                    ToolKind = kind,
-                    Name = Describe(kind),
-                    Icon = Icon(kind)
-                })
-                .ToArray();
-        }
-
         private static PackIconPhosphorIconsKind Icon(FlowToolKind kind)
         {
             return kind switch
@@ -596,6 +683,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 FlowToolKind.Delay => PackIconPhosphorIconsKind.Timer,
                 FlowToolKind.JsonParse => PackIconPhosphorIconsKind.BracketsCurly,
                 FlowToolKind.Condition => PackIconPhosphorIconsKind.GitFork,
+                FlowToolKind.Lux_AlarmLogTool => PackIconPhosphorIconsKind.Warning,
                 _ => PackIconPhosphorIconsKind.Code
             };
         }

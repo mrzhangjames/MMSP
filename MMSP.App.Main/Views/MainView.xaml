@@ -35,7 +35,7 @@
             <Setter Property="MinHeight" Value="0" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -70,8 +70,8 @@
         <Style x:Key="LoginUnderline" TargetType="TextBox">
             <Setter Property="Height" Value="36" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
-            <Setter Property="CaretBrush" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -99,8 +99,8 @@
         <Style x:Key="LoginPasswordBox" TargetType="PasswordBox">
             <Setter Property="Height" Value="36" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
-            <Setter Property="CaretBrush" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -134,7 +134,7 @@
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderBrush" Value="#CCCCCC" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -183,7 +183,7 @@
         <!--  导航。右侧三个按钮不进 Menus  -->
         <Grid Grid.Row="0"
               Height="{StaticResource NavBarHeight}"
-              Background="White">
+              Background="{DynamicResource CardBackground}">
             <Grid Margin="24,17,24,16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -207,19 +207,19 @@
                         <iconPacks:PackIconPhosphorIcons Kind="{Binding SessionIcon}"
                                                          Width="{StaticResource NavIconSize}"
                                                          Height="{StaticResource NavIconSize}"
-                                                         Foreground="{StaticResource HighestBlack}" />
+                                                         Foreground="{DynamicResource HighestBlack}" />
                     </Button>
                     <Button Width="112"
                             Height="87"
                             Padding="0"
                             Style="{StaticResource NavAuthButtonStyle}"
                             Click="OnExitClick"
-                            ToolTip="{StaticResource Shell_Exit}"
-                            AutomationProperties.Name="{StaticResource Shell_Exit}">
+                            ToolTip="{DynamicResource Shell_Exit}"
+                            AutomationProperties.Name="{DynamicResource Shell_Exit}">
                         <iconPacks:PackIconPhosphorIcons Kind="Power"
                                                          Width="{StaticResource NavIconSize}"
                                                          Height="{StaticResource NavIconSize}"
-                                                         Foreground="{StaticResource HighestBlack}" />
+                                                         Foreground="{DynamicResource HighestBlack}" />
                     </Button>
                 </StackPanel>
 
@@ -283,11 +283,11 @@
 
         <!--  内容区。标题跟随菜单，正文切换对应页面。登录窗只盖住内容区。  -->
         <Border Grid.Row="1"
-                Background="{StaticResource PageBackground}"
+                Background="{DynamicResource PageBackground}"
                 Padding="12">
             <Grid>
-            <!--<Border Background="White"
-                    BorderBrush="{StaticResource CardBorderBrush}"
+            <!--<Border Background="{DynamicResource CardBackground}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
                     BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -296,7 +296,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0" Background="White">
+                    <Grid Grid.Row="0" Background="{DynamicResource CardBackground}">
                         <StackPanel Orientation="Horizontal"
                                     VerticalAlignment="Center"
                                     Margin="16,0,0,0">
@@ -308,15 +308,15 @@
                                        FontSize="16"
                                        FontWeight="Bold"
                                        VerticalAlignment="Center"
-                                       Foreground="{StaticResource HighestBlack}" />
+                                       Foreground="{DynamicResource HighestBlack}" />
                         </StackPanel>
                     </Grid>
 
-                    <Border Grid.Row="1" Background="{StaticResource HeaderDividerBrush}" />
+                    <Border Grid.Row="1" Background="{DynamicResource HeaderDividerBrush}" />
 
                 </Grid>
             </Border>-->
-            <Border Background="{StaticResource CardBodyBrush}">
+            <Border Background="{DynamicResource CardBodyBrush}">
                 <ContentControl x:Name="MainViewContent"
                                         Background="Transparent"
                                         prism:RegionManager.RegionName="MainViewContentRegion" />
@@ -329,8 +329,8 @@
                 <Border Width="440"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Background="White"
-                        BorderBrush="{StaticResource CardBorderBrush}"
+                        Background="{DynamicResource CardBackground}"
+                        BorderBrush="{DynamicResource CardBorderBrush}"
                         BorderThickness="1"
                         SnapsToDevicePixels="True">
                     <Border.Effect>
@@ -342,24 +342,24 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <Border Grid.Row="0" BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="16,0">
+                        <Border Grid.Row="0" BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="16,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Border Width="3" Height="16" Margin="0,0,10,0" Background="{StaticResource ThemeBrushColorAssist}" />
-                                <TextBlock Text="{StaticResource Shell_Login}"
+                                <TextBlock Text="{DynamicResource Shell_Login}"
                                            FontSize="16"
                                            FontWeight="Bold"
-                                           Foreground="{StaticResource HighestBlack}" />
+                                           Foreground="{DynamicResource HighestBlack}" />
                             </StackPanel>
                         </Border>
 
                         <StackPanel Grid.Row="1" Margin="24,0,24,20">
-                            <TextBlock Text="{StaticResource User_LoginName}" Style="{StaticResource LoginFieldLabel}" />
+                            <TextBlock Text="{DynamicResource User_LoginName}" Style="{StaticResource LoginFieldLabel}" />
                             <TextBox x:Name="LoginNameBox"
                                      Style="{StaticResource LoginUnderline}"
                                      Text="{Binding DraftLoginName, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.AutomationId="LoginName" />
 
-                            <TextBlock Text="{StaticResource User_Password}" Style="{StaticResource LoginFieldLabel}" />
+                            <TextBlock Text="{DynamicResource User_Password}" Style="{StaticResource LoginFieldLabel}" />
                             <PasswordBox x:Name="LoginPasswordBox"
                                          Style="{StaticResource LoginPasswordBox}"
                                          svc:PasswordService.BindPassword="True"
@@ -387,19 +387,19 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
                                 <Button Style="{StaticResource LoginActionButton}"
                                         Command="{Binding ConfirmLoginCommand}"
-                                        AutomationProperties.Name="{StaticResource Shell_Login}">
+                                        AutomationProperties.Name="{DynamicResource Shell_Login}">
                                     <StackPanel Orientation="Horizontal">
                                         <iconPacks:PackIconPhosphorIcons Kind="ArrowRight" Width="16" Height="16" VerticalAlignment="Center" />
-                                        <TextBlock Text="{StaticResource Shell_Login}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="{DynamicResource Shell_Login}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource LoginActionButton}"
                                         Margin="0"
                                         Command="{Binding CancelLoginCommand}"
-                                        AutomationProperties.Name="{StaticResource User_Cancel}">
+                                        AutomationProperties.Name="{DynamicResource User_Cancel}">
                                     <StackPanel Orientation="Horizontal">
                                         <iconPacks:PackIconPhosphorIcons Kind="X" Width="16" Height="16" VerticalAlignment="Center" />
-                                        <TextBlock Text="{StaticResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="{DynamicResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -425,7 +425,7 @@
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center">
                         <TextBlock FontSize="12" Foreground="White" VerticalAlignment="Center">
-                            <Run Text="{StaticResource Footer_LoginUser}" />
+                            <Run Text="{DynamicResource Footer_LoginUser}" />
                             <Run Text=" " />
                             <Run Text="{Binding LoginName, Mode=OneWay}" />
                         </TextBlock>
@@ -436,7 +436,7 @@
                                    Foreground="White"
                                    VerticalAlignment="Center" />
                         <TextBlock FontSize="12" Foreground="White" VerticalAlignment="Center">
-                            <Run Text="{StaticResource Footer_Time}" />
+                            <Run Text="{DynamicResource Footer_Time}" />
                             <Run Text=" " />
                             <Run Text="{Binding CurrentTimeText, Mode=OneWay}" />
                         </TextBlock>
@@ -444,9 +444,11 @@
 
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock FontSize="12" Foreground="White" VerticalAlignment="Center">
-                            <Run Text="{StaticResource Footer_Version}" />
+                            <Run Text="{DynamicResource Footer_Version}" />
                             <Run Text=" " />
                             <Run Text="{Binding VersionText, Mode=OneWay}" />
+                            <Run Text="  " />
+                            <Run Text="{Binding LicenseStatusText, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock Text="|"
                                    Margin="10,0"
@@ -459,7 +461,7 @@
                                  Margin="0,0,6,0"
                                  VerticalAlignment="Center"
                                  Fill="{StaticResource StatusConnectedBrush}" />
-                        <TextBlock Text="{StaticResource Footer_DeviceConnected}"
+                        <TextBlock Text="{DynamicResource Footer_DeviceConnected}"
                                    FontSize="12"
                                    Foreground="White"
                                    VerticalAlignment="Center" />
@@ -481,7 +483,7 @@
                                        Foreground="White"
                                        VerticalAlignment="Center" />
                             <TextBlock FontSize="12" Foreground="White" VerticalAlignment="Center">
-                                <Run Text="{StaticResource Footer_Run}" />
+                                <Run Text="{DynamicResource Footer_Run}" />
                                 <Run Text=" " />
                                 <Run Text="{Binding RunStatusText, Mode=OneWay}" />
                             </TextBlock>

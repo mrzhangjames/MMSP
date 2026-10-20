@@ -67,9 +67,10 @@ namespace MMSP.Service.Database
         /// </summary>
         private static void InitSystemTables(SqlSugarScope db)
         {
-            db.CodeFirst.InitTables(typeof(MenuEntity), typeof(UserEntity));
+            db.CodeFirst.InitTables(typeof(MenuEntity), typeof(UserEntity), typeof(AppConfigEntity));
             MenuSeed.Ensure(db);
             UserSeed.Ensure(db);
+            AppConfigSeed.Ensure(db);
         }
 
         /// <summary>

@@ -17,7 +17,7 @@ using SkiaSharp;
 namespace MMSP.App.TemplateMatch.ViewModels
 {
     /// <summary>
-    /// 图表页。卡片定义在客户库，UPH 图读 biz_uph。MES 还没有数据表。
+    /// 图表页。卡片定义在客户库，UPH 图读 biz_uph。MES 还没有数据表，有来源时只显示来源名称。
     /// </summary>
     public class ChartViewModel : BaseViewModel
     {
@@ -75,6 +75,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
             {
                 DefaultTypeface = LabelFace
             }));
+            MesSourceName = "";
+            if (IContainerProviderExtensions.IsRegistered<CustomerPluginCatalog>(container))
+                MesSourceName = container.Resolve<CustomerPluginCatalog>().Mes?.Name ?? "";
             Charts = new ObservableCollection<ChartCard>();
             Points = new ObservableCollection<UphPointRow>();
             CartesianSeries = [];
@@ -84,6 +87,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             SourceKinds = [Text("Chart_SourceUph"), Text("Chart_SourceMes")];
             SubtitleStyles = [Text("Chart_StyleDefault"), Text("Chart_StyleUp"), Text("Chart_StyleDown")];
             CollapseText = Text("Chart_Collapse");
+            AppAppearance.LanguageChanged += OnLanguageChanged;
             AddCommand = new DelegateCommand(OpenAdd);
             EditCommand = new DelegateCommand(OpenEdit);
             DeleteCommand = new DelegateCommand(Delete);
@@ -127,12 +131,30 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// <summary>
         /// 来源类型下拉。
         /// </summary>
-        public IReadOnlyList<string> SourceKinds { get; }
+        private IReadOnlyList<string> _sourceKinds = [];
 
         /// <summary>
         /// 副标题样式下拉。
         /// </summary>
-        public IReadOnlyList<string> SubtitleStyles { get; }
+        private IReadOnlyList<string> _subtitleStyles = [];
+
+        /// <summary>
+        /// 来源类型下拉。
+        /// </summary>
+        public IReadOnlyList<string> SourceKinds
+        {
+            get => _sourceKinds;
+            private set => SetProperty(ref _sourceKinds, value);
+        }
+
+        /// <summary>
+        /// 副标题样式下拉。
+        /// </summary>
+        public IReadOnlyList<string> SubtitleStyles
+        {
+            get => _subtitleStyles;
+            private set => SetProperty(ref _subtitleStyles, value);
+        }
 
         /// <summary>
         /// 打开新增弹窗。
@@ -214,6 +236,16 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public bool IsMes => _selectedChart?.SourceKind == ChartSourceKind.Mes;
 
         /// <summary>
+        /// 当前客户插件登记的 MES 来源名称。没有来源时为空。
+        /// </summary>
+        public string MesSourceName { get; }
+
+        /// <summary>
+        /// 是否显示 MES 来源名称。
+        /// </summary>
+        public bool HasMesSource => MesSourceName.Length > 0;
+
+        /// <summary>
         /// 当前是折线图。
         /// </summary>
         public bool IsLine => _kind == DrawKind.Line;
@@ -244,6 +276,43 @@ namespace MMSP.App.TemplateMatch.ViewModels
         {
             get => _dataPaneLength;
             private set => SetProperty(ref _dataPaneLength, value);
+        }
+
+        /// <summary>
+        /// 语言切换后重写下拉文字，并按原来的位置保住当前选项。
+        /// </summary>
+        private void OnLanguageChanged()
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+            {
+                dispatcher.BeginInvoke(new Action(OnLanguageChanged));
+                return;
+            }
+
+            var sourceIndex = ChoiceIndex(SourceKinds, EditorSourceKind);
+            var styleIndex = ChoiceIndex(SubtitleStyles, EditorSubtitleStyle);
+            SourceKinds = [Text("Chart_SourceUph"), Text("Chart_SourceMes")];
+            SubtitleStyles = [Text("Chart_StyleDefault"), Text("Chart_StyleUp"), Text("Chart_StyleDown")];
+            if (sourceIndex >= 0 && sourceIndex < SourceKinds.Count)
+                EditorSourceKind = SourceKinds[sourceIndex];
+            if (styleIndex >= 0 && styleIndex < SubtitleStyles.Count)
+                EditorSubtitleStyle = SubtitleStyles[styleIndex];
+            CollapseText = IsDataOpen ? Text("Chart_Collapse") : Text("Chart_Expand");
+        }
+
+        /// <summary>
+        /// 在下拉里找当前文字的位置。没有时返回 -1。
+        /// </summary>
+        private static int ChoiceIndex(IReadOnlyList<string> choices, string value)
+        {
+            for (var index = 0; index < choices.Count; index++)
+            {
+                if (choices[index] == value)
+                    return index;
+            }
+
+            return -1;
         }
 
         /// <summary>

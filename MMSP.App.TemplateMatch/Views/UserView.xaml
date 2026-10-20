@@ -5,10 +5,10 @@
              xmlns:prism="http://prismlibrary.com/"
              xmlns:svc="clr-namespace:MMSP.App.WpfBase.Services;assembly=MMSP.App.WpfBase"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             Background="White"
+             Background="{DynamicResource CardBackground}"
              FontFamily="Segoe UI, Microsoft YaHei"
              FontSize="14"
-             Foreground="{StaticResource HighestBlack}">
+             Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVis" />
 
@@ -20,7 +20,7 @@
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderBrush" Value="#CCCCCC" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -49,8 +49,8 @@
         <Style x:Key="UserUnderlineBox" TargetType="TextBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
-            <Setter Property="CaretBrush" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -78,8 +78,8 @@
         <Style x:Key="UserPasswordBox" TargetType="PasswordBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
-            <Setter Property="CaretBrush" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -107,7 +107,7 @@
         <Style x:Key="UserRoleItem" TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="8,6" />
             <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -124,7 +124,7 @@
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="ItemBox" Property="Background" Value="{StaticResource ThemeBrushColorAssist}" />
-                                <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                                <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -135,7 +135,7 @@
         <Style x:Key="UserRoleCombo" TargetType="ComboBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -175,7 +175,7 @@
                                                            Text="&#x25BE;"
                                                            HorizontalAlignment="Right"
                                                            VerticalAlignment="Center"
-                                                           Foreground="#666666"
+                                                           Foreground="{DynamicResource FieldLabelBrush}"
                                                            FontSize="12" />
                                             </Grid>
                                         </Border>
@@ -194,7 +194,7 @@
                                    PopupAnimation="Slide"
                                    IsOpen="{TemplateBinding IsDropDownOpen}">
                                 <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
-                                        Background="White"
+                                        Background="{DynamicResource CardBackground}"
                                         BorderBrush="#E0E0E0"
                                         BorderThickness="1"
                                         SnapsToDevicePixels="True">
@@ -244,7 +244,7 @@
 
         <Style x:Key="UserGridHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="#F5F5F5" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Height" Value="36" />
@@ -274,7 +274,7 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Padding" Value="16,0" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DataGridCell">
@@ -289,7 +289,7 @@
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="{StaticResource ThemeBrushColorAssist}" />
-                    <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                    <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -305,7 +305,7 @@
 
         <Style x:Key="UserGridRowStyle" TargetType="DataGridRow">
             <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
             <EventSetter Event="MouseDoubleClick" Handler="OnUserRowDoubleClick" />
             <Style.Triggers>
@@ -317,7 +317,7 @@
                 </DataTrigger>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="{StaticResource ThemeBrushColorAssist}" />
-                    <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                    <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -330,7 +330,7 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Background="White"
+                Background="{DynamicResource CardBackground}"
                 BorderBrush="#E0E0E0"
                 BorderThickness="0,0,0,1"
                 Padding="16,0">
@@ -338,29 +338,29 @@
                 <Button Style="{StaticResource UserToolButtonStyle}"
                         Command="{Binding AddCommand}"
                         AutomationProperties.AutomationId="UserAddButton"
-                        AutomationProperties.Name="{StaticResource User_Add}">
+                        AutomationProperties.Name="{DynamicResource User_Add}">
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconPhosphorIcons Kind="Plus" Width="16" Height="16" VerticalAlignment="Center" />
-                        <TextBlock Text="{StaticResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
                 <Button Style="{StaticResource UserToolButtonStyle}"
                         Command="{Binding EditCommand}"
                         AutomationProperties.AutomationId="UserEditButton"
-                        AutomationProperties.Name="{StaticResource User_Edit}">
+                        AutomationProperties.Name="{DynamicResource User_Edit}">
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconPhosphorIcons Kind="PencilSimple" Width="16" Height="16" VerticalAlignment="Center" />
-                        <TextBlock Text="{StaticResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
                 <Button Style="{StaticResource UserToolButtonStyle}"
                         Margin="0"
                         Command="{Binding DeleteCommand}"
                         AutomationProperties.AutomationId="UserDeleteButton"
-                        AutomationProperties.Name="{StaticResource User_Delete}">
+                        AutomationProperties.Name="{DynamicResource User_Delete}">
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconPhosphorIcons Kind="Trash" Width="16" Height="16" VerticalAlignment="Center" />
-                        <TextBlock Text="{StaticResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </StackPanel>
@@ -380,14 +380,14 @@
                   GridLinesVisibility="Horizontal"
                   HorizontalGridLinesBrush="#EEEEEE"
                   BorderThickness="0"
-                  Background="White"
-                  RowBackground="White"
+                  Background="{DynamicResource CardBackground}"
+                  RowBackground="{DynamicResource CardBackground}"
                   AlternatingRowBackground="#FAFAFA"
                   AlternationCount="2"
                   RowHeight="40"
                   ColumnHeaderHeight="36"
                   FontSize="14"
-                  Foreground="{StaticResource HighestBlack}"
+                  Foreground="{DynamicResource HighestBlack}"
                   SelectionMode="Extended"
                   SelectionUnit="FullRow"
                   RowStyle="{StaticResource UserGridRowStyle}"
@@ -401,11 +401,11 @@
                                         CellStyle="{StaticResource UserCheckCellStyle}"
                                         ElementStyle="{StaticResource UserCheckBoxStyle}"
                                         EditingElementStyle="{StaticResource UserCheckBoxStyle}" />
-                <DataGridTextColumn Header="{StaticResource User_LoginName}" Width="180" Binding="{Binding LoginName}" IsReadOnly="True" />
-                <DataGridTextColumn Header="{StaticResource User_UserName}" Width="220" Binding="{Binding UserName}" IsReadOnly="True" />
-                <DataGridTextColumn Header="{StaticResource User_Role}" Width="160" Binding="{Binding RoleName}" IsReadOnly="True" />
-                <DataGridTextColumn Header="{StaticResource User_Enabled}" Width="120" Binding="{Binding EnabledText}" IsReadOnly="True" />
-                <DataGridTextColumn Header="{StaticResource User_CreateTime}" Width="*" Binding="{Binding CreateTimeText}" IsReadOnly="True" />
+                <DataGridTextColumn Header="{DynamicResource User_LoginName}" Width="180" Binding="{Binding LoginName}" IsReadOnly="True" />
+                <DataGridTextColumn Header="{DynamicResource User_UserName}" Width="220" Binding="{Binding UserName}" IsReadOnly="True" />
+                <DataGridTextColumn Header="{DynamicResource User_Role}" Width="160" Binding="{Binding RoleName}" IsReadOnly="True" />
+                <DataGridTextColumn Header="{DynamicResource User_Enabled}" Width="120" Binding="{Binding EnabledText}" IsReadOnly="True" />
+                <DataGridTextColumn Header="{DynamicResource User_CreateTime}" Width="*" Binding="{Binding CreateTimeText}" IsReadOnly="True" />
             </DataGrid.Columns>
         </DataGrid>
 
@@ -416,7 +416,7 @@
             <Border Width="480"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Background="White"
+                    Background="{DynamicResource CardBackground}"
                     SnapsToDevicePixels="True">
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="40" ShadowDepth="10" Opacity="0.28" Color="Black" />
@@ -437,25 +437,25 @@
                     </Border>
 
                     <StackPanel Grid.Row="1" Margin="24,18,24,8">
-                        <TextBlock Text="{StaticResource User_LoginName}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+                        <TextBlock Text="{DynamicResource User_LoginName}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
                         <TextBox x:Name="EditorLoginBox"
                                  Style="{StaticResource UserUnderlineBox}"
                                  Text="{Binding EditorLoginName, UpdateSourceTrigger=PropertyChanged}"
                                  AutomationProperties.AutomationId="UserEditorLogin" />
 
-                        <TextBlock Text="{StaticResource User_UserName}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                        <TextBlock Text="{DynamicResource User_UserName}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                         <TextBox Style="{StaticResource UserUnderlineBox}"
                                  Text="{Binding EditorUserName, UpdateSourceTrigger=PropertyChanged}"
                                  AutomationProperties.AutomationId="UserEditorUserName" />
 
-                        <TextBlock Text="{StaticResource User_Password}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                        <TextBlock Text="{DynamicResource User_Password}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                         <PasswordBox x:Name="EditorPasswordBox"
                                      Style="{StaticResource UserPasswordBox}"
                                      svc:PasswordService.BindPassword="True"
                                      svc:PasswordService.BoundPassword="{Binding EditorPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.AutomationId="UserEditorPassword" />
 
-                        <TextBlock Text="{StaticResource User_Role}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                        <TextBlock Text="{DynamicResource User_Role}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                         <ComboBox Style="{StaticResource UserRoleCombo}"
                                   ItemsSource="{Binding Roles}"
                                   SelectedItem="{Binding EditorRole}"
@@ -481,7 +481,7 @@
 
                         <DockPanel Margin="0,14,0,0" Height="32" LastChildFill="False">
                             <TextBlock DockPanel.Dock="Left"
-                                       Text="{StaticResource User_Enabled}"
+                                       Text="{DynamicResource User_Enabled}"
                                        VerticalAlignment="Center" />
                             <ToggleButton DockPanel.Dock="Right"
                                           Style="{StaticResource UserSwitchStyle}"
@@ -494,20 +494,20 @@
                         <Button Style="{StaticResource UserToolButtonStyle}"
                                 Command="{Binding ConfirmCommand}"
                                 AutomationProperties.AutomationId="UserEditorSave"
-                                AutomationProperties.Name="{StaticResource User_Save}">
+                                AutomationProperties.Name="{DynamicResource User_Save}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="FloppyDisk" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource User_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource User_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource UserToolButtonStyle}"
                                 Margin="0"
                                 Command="{Binding CancelCommand}"
                                 AutomationProperties.AutomationId="UserEditorCancel"
-                                AutomationProperties.Name="{StaticResource User_Cancel}">
+                                AutomationProperties.Name="{DynamicResource User_Cancel}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="X" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </StackPanel>

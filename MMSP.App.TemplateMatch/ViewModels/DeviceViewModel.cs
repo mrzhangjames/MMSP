@@ -77,6 +77,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             DataTypes = ["Int16", "Int32", "Float", "String"];
             AccessModes = [Text("Device_AccessReadWrite"), Text("Device_AccessRead")];
             ScanTransports = [Text("Device_Tcp"), Text("Device_Serial")];
+            AppAppearance.LanguageChanged += OnLanguageChanged;
             EditorDataType = DataTypes[0];
             EditorAccess = AccessModes[0];
             EditorTransport = ScanTransports[0];
@@ -140,12 +141,84 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// <summary>
         /// 读写下拉项。
         /// </summary>
-        public IReadOnlyList<string> AccessModes { get; }
+        private IReadOnlyList<string> _accessModes = [];
 
         /// <summary>
         /// 扫码传输下拉项。TCP 和串口。
         /// </summary>
-        public IReadOnlyList<string> ScanTransports { get; }
+        private IReadOnlyList<string> _scanTransports = [];
+
+        /// <summary>
+        /// 读写下拉项。
+        /// </summary>
+        public IReadOnlyList<string> AccessModes
+        {
+            get => _accessModes;
+            private set => SetProperty(ref _accessModes, value);
+        }
+
+        /// <summary>
+        /// 扫码传输下拉项。TCP 和串口。
+        /// </summary>
+        public IReadOnlyList<string> ScanTransports
+        {
+            get => _scanTransports;
+            private set => SetProperty(ref _scanTransports, value);
+        }
+
+        /// <summary>
+        /// 语言切换后重写读写、传输和启用文字，并保住当前选项。
+        /// </summary>
+        private void OnLanguageChanged()
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+            {
+                dispatcher.BeginInvoke(new Action(OnLanguageChanged));
+                return;
+            }
+
+            var accessIndex = ChoiceIndex(AccessModes, EditorAccess);
+            var transportIndex = ChoiceIndex(ScanTransports, EditorTransport);
+            var previousAccess = AccessModes;
+            var readWrite = Text("Device_AccessReadWrite");
+            var readOnly = Text("Device_AccessRead");
+            var enabledOn = Text("Device_On");
+            var enabledOff = Text("Device_Off");
+            foreach (var point in Points)
+            {
+                var index = ChoiceIndex(previousAccess, point.AccessText);
+                point.UseEnabledLabels(enabledOn, enabledOff, point.IsEnabled);
+                if (index == 0)
+                    point.AccessText = readWrite;
+                else if (index == 1)
+                    point.AccessText = readOnly;
+            }
+
+            foreach (var card in Scanners)
+                card.UseEnabledLabels(enabledOn, enabledOff, card.IsEnabled);
+
+            AccessModes = [readWrite, readOnly];
+            ScanTransports = [Text("Device_Tcp"), Text("Device_Serial")];
+            if (accessIndex >= 0 && accessIndex < AccessModes.Count)
+                EditorAccess = AccessModes[accessIndex];
+            if (transportIndex >= 0 && transportIndex < ScanTransports.Count)
+                EditorTransport = ScanTransports[transportIndex];
+        }
+
+        /// <summary>
+        /// 在下拉里找当前文字的位置。没有时返回 -1。
+        /// </summary>
+        private static int ChoiceIndex(IReadOnlyList<string> choices, string value)
+        {
+            for (var index = 0; index < choices.Count; index++)
+            {
+                if (choices[index] == value)
+                    return index;
+            }
+
+            return -1;
+        }
 
         /// <summary>
         /// 切到 PLC。

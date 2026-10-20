@@ -161,7 +161,7 @@
                             <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
                                     MaxHeight="200"
                                     Margin="0,2,0,8"
-                                    Background="White"
+                                    Background="{DynamicResource CardBackground}"
                                     BorderBrush="#E0E0E0"
                                     BorderThickness="1"
                                     SnapsToDevicePixels="True">
@@ -249,7 +249,7 @@
                         <Border x:Name="Box"
                                 Width="16"
                                 Height="16"
-                                Background="White"
+                                Background="{DynamicResource CardBackground}"
                                 BorderBrush="#C8C8C8"
                                 BorderThickness="1"
                                 VerticalAlignment="Center">

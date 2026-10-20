@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MMSP.Core.Model\MMSP.Core.Model.csproj" />
+    <ProjectReference Include="..\MMSP.Common.Helper\MMSP.Common.Helper.csproj" />
+    <ProjectReference Include="..\MMSP.Service.Database\MMSP.Service.Database.csproj" />
+    <ProjectReference Include="..\MMSP.Service.Device\MMSP.Service.Device.csproj" />
+  </ItemGroup>
+
+</Project>

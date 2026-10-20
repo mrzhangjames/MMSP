@@ -26,19 +26,19 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0"
-                    Content="{StaticResource User_Cancel}"
+                    Content="{DynamicResource User_Cancel}"
                     Style="{StaticResource MahApps.Styles.Button.Dialogs}"
                     IsCancel="True"
                     AutomationProperties.AutomationId="FlowEditorCancel" />
             <Button Grid.Column="2"
-                    Content="{StaticResource User_Save}"
+                    Content="{DynamicResource User_Save}"
                     Style="{StaticResource MahApps.Styles.Button.Dialogs.Accent}"
                     IsDefault="True"
                     Click="Accept"
                     AutomationProperties.AutomationId="FlowEditorSave" />
         </Grid>
         <StackPanel Margin="20,8,20,8">
-            <TextBlock Text="{StaticResource Flow_Name}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+            <TextBlock Text="{DynamicResource Flow_Name}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
             <TextBox x:Name="NameBox"
                      MaxLength="32"
                      mah:TextBoxHelper.UseFloatingWatermark="False"

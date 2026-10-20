@@ -1,10 +1,10 @@
 ﻿<UserControl x:Class="MMSP.Plugin.Tool.Views.MultiScanToolView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="White"
+             Background="{DynamicResource CardBackground}"
              FontFamily="Segoe UI, Microsoft YaHei"
              FontSize="14"
-             Foreground="#333333">
+             Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -29,7 +29,7 @@
                            AllowsTransparency="True"
                            StaysOpen="False"
                            IsOpen="{Binding IsChecked, ElementName=Guns, Mode=TwoWay}">
-                        <Border Background="White"
+                        <Border Background="{DynamicResource CardBackground}"
                                 BorderBrush="#E0E0E0"
                                 BorderThickness="1"
                                 Margin="0,2,0,8"

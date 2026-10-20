@@ -5,10 +5,10 @@
              xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             Background="White"
+             Background="{DynamicResource CardBackground}"
              FontFamily="Segoe UI, Microsoft YaHei"
              FontSize="14"
-             Foreground="{StaticResource HighestBlack}">
+             Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVis" />
 
@@ -20,7 +20,7 @@
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderBrush" Value="#CCCCCC" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -77,8 +77,8 @@
         <Style x:Key="ChartUnderlineBox" TargetType="TextBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
-            <Setter Property="CaretBrush" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -106,7 +106,7 @@
         <Style x:Key="ChartComboItem" TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="8,6" />
             <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -133,7 +133,7 @@
         <Style x:Key="ChartCombo" TargetType="ComboBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -172,7 +172,7 @@
                                                            Text="&#x25BE;"
                                                            HorizontalAlignment="Right"
                                                            VerticalAlignment="Center"
-                                                           Foreground="#666666"
+                                                           Foreground="{DynamicResource FieldLabelBrush}"
                                                            FontSize="12" />
                                             </Grid>
                                         </Border>
@@ -191,7 +191,7 @@
                                    PopupAnimation="Slide"
                                    IsOpen="{TemplateBinding IsDropDownOpen}">
                                 <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
-                                        Background="White"
+                                        Background="{DynamicResource CardBackground}"
                                         BorderBrush="#E0E0E0"
                                         BorderThickness="1"
                                         SnapsToDevicePixels="True">
@@ -217,7 +217,7 @@
                         <Border x:Name="Card"
                                 MinHeight="120"
                                 Margin="0,0,0,12"
-                                Background="White"
+                                Background="{DynamicResource CardBackground}"
                                 BorderBrush="#E4E4E4"
                                 BorderThickness="1"
                                 CornerRadius="8"
@@ -248,7 +248,7 @@
 
         <Style x:Key="ChartGridHeader" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="#F5F5F5" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Height" Value="32" />
@@ -307,7 +307,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Border Grid.Row="0"
-                    Background="White"
+                    Background="{DynamicResource CardBackground}"
                     BorderBrush="#E0E0E0"
                     BorderThickness="0,0,0,1"
                     Padding="12,0">
@@ -315,29 +315,29 @@
                     <Button Style="{StaticResource ChartToolButton}"
                             Command="{Binding AddCommand}"
                             AutomationProperties.AutomationId="ChartAddButton"
-                            AutomationProperties.Name="{StaticResource User_Add}">
+                            AutomationProperties.Name="{DynamicResource User_Add}">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconPhosphorIcons Kind="Plus" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="{StaticResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource ChartToolButton}"
                             Command="{Binding EditCommand}"
                             AutomationProperties.AutomationId="ChartEditButton"
-                            AutomationProperties.Name="{StaticResource User_Edit}">
+                            AutomationProperties.Name="{DynamicResource User_Edit}">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconPhosphorIcons Kind="PencilSimple" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="{StaticResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource ChartToolButton}"
                             Margin="0"
                             Command="{Binding DeleteCommand}"
                             AutomationProperties.AutomationId="ChartDeleteButton"
-                            AutomationProperties.Name="{StaticResource User_Delete}">
+                            AutomationProperties.Name="{DynamicResource User_Delete}">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconPhosphorIcons Kind="Trash" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="{StaticResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -403,7 +403,7 @@
                                     AutomationProperties.AutomationId="ChartLineButton">
                                 <StackPanel Orientation="Horizontal">
                                     <iconPacks:PackIconPhosphorIcons Kind="ChartLine" Width="16" Height="16" VerticalAlignment="Center" />
-                                    <TextBlock Text="{StaticResource Chart_Line}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource Chart_Line}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Style="{StaticResource ChartColumnButton}"
@@ -412,7 +412,7 @@
                                     AutomationProperties.AutomationId="ChartColumnButton">
                                 <StackPanel Orientation="Horizontal">
                                     <iconPacks:PackIconPhosphorIcons Kind="ChartBar" Width="16" Height="16" VerticalAlignment="Center" />
-                                    <TextBlock Text="{StaticResource Chart_Column}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource Chart_Column}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Style="{StaticResource ChartPieButton}"
@@ -421,7 +421,7 @@
                                     AutomationProperties.AutomationId="ChartPieButton">
                                 <StackPanel Orientation="Horizontal">
                                     <iconPacks:PackIconPhosphorIcons Kind="ChartPie" Width="16" Height="16" VerticalAlignment="Center" />
-                                    <TextBlock Text="{StaticResource Chart_Pie}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource Chart_Pie}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -464,7 +464,7 @@
                 <Border Grid.Row="0" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="16,0">
                     <DockPanel LastChildFill="False">
                         <Border Width="3" Height="16" Background="#FCC800" VerticalAlignment="Center" />
-                        <TextBlock Text="{StaticResource Chart_Data}"
+                        <TextBlock Text="{DynamicResource Chart_Data}"
                                    Margin="8,0,0,0"
                                    FontSize="16"
                                    FontWeight="Bold"
@@ -503,10 +503,10 @@
                                 AutomationProperties.AutomationId="ChartQueryButton">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="MagnifyingGlass" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource Chart_Query}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Chart_Query}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Border Height="32" BorderBrush="#CCCCCC" BorderThickness="1" Background="White">
+                        <Border Height="32" BorderBrush="#CCCCCC" BorderThickness="1" Background="{DynamicResource CardBackground}">
                             <Grid Margin="10,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -533,7 +533,7 @@
                                            VerticalAlignment="Center"
                                            Foreground="#B0B0B0"
                                            IsHitTestVisible="False"
-                                           Text="{StaticResource Chart_SearchHint}">
+                                           Text="{DynamicResource Chart_SearchHint}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Visibility" Value="Collapsed" />
@@ -563,8 +563,8 @@
                               GridLinesVisibility="Horizontal"
                               HorizontalGridLinesBrush="#EEEEEE"
                               BorderThickness="0"
-                              Background="White"
-                              RowBackground="White"
+                              Background="{DynamicResource CardBackground}"
+                              RowBackground="{DynamicResource CardBackground}"
                               AlternatingRowBackground="#FAFAFA"
                               AlternationCount="2"
                               RowHeight="32"
@@ -577,19 +577,26 @@
                               ColumnHeaderStyle="{StaticResource ChartGridHeader}"
                               AutomationProperties.AutomationId="ChartDataGrid">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="{StaticResource Chart_Time}" Width="140" Binding="{Binding TimeText}" />
-                            <DataGridTextColumn Header="{StaticResource Chart_HourOutput}" Width="*" Binding="{Binding HourOutputText}" />
-                            <DataGridTextColumn Header="{StaticResource Chart_TotalOutput}" Width="*" Binding="{Binding TotalOutputText}" />
-                            <DataGridTextColumn Header="{StaticResource Chart_GoodCount}" Width="*" Binding="{Binding GoodCountText}" />
-                            <DataGridTextColumn Header="{StaticResource Chart_DefectCount}" Width="*" Binding="{Binding DefectCountText}" />
-                            <DataGridTextColumn Header="{StaticResource Chart_Yield}" Width="*" Binding="{Binding YieldText}" />
+                            <DataGridTextColumn Header="{DynamicResource Chart_Time}" Width="140" Binding="{Binding TimeText}" />
+                            <DataGridTextColumn Header="{DynamicResource Chart_HourOutput}" Width="*" Binding="{Binding HourOutputText}" />
+                            <DataGridTextColumn Header="{DynamicResource Chart_TotalOutput}" Width="*" Binding="{Binding TotalOutputText}" />
+                            <DataGridTextColumn Header="{DynamicResource Chart_GoodCount}" Width="*" Binding="{Binding GoodCountText}" />
+                            <DataGridTextColumn Header="{DynamicResource Chart_DefectCount}" Width="*" Binding="{Binding DefectCountText}" />
+                            <DataGridTextColumn Header="{DynamicResource Chart_Yield}" Width="*" Binding="{Binding YieldText}" />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Text="{StaticResource Chart_MesEmpty}"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Foreground="#888888"
-                               Visibility="{Binding IsMes, Converter={StaticResource BoolVis}}" />
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding IsMes, Converter={StaticResource BoolVis}}">
+                        <TextBlock Text="{Binding MesSourceName}"
+                                   HorizontalAlignment="Center"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,8"
+                                   Visibility="{Binding HasMesSource, Converter={StaticResource BoolVis}}" />
+                        <TextBlock Text="{DynamicResource Chart_MesEmpty}"
+                                   HorizontalAlignment="Center"
+                                   Foreground="#888888" />
+                    </StackPanel>
                 </Grid>
             </Grid>
         </Grid>
@@ -601,7 +608,7 @@
             <Border Width="480"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Background="White"
+                    Background="{DynamicResource CardBackground}"
                     SnapsToDevicePixels="True">
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="40" ShadowDepth="10" Opacity="0.28" Color="Black" />
@@ -620,13 +627,13 @@
                                    AutomationProperties.AutomationId="ChartEditorTitle" />
                     </Border>
                     <StackPanel Grid.Row="1" Margin="24,18,24,8">
-                        <TextBlock Text="{StaticResource Chart_Name}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+                        <TextBlock Text="{DynamicResource Chart_Name}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
                         <Grid>
                             <TextBox Style="{StaticResource ChartUnderlineBox}"
                                      MaxLength="16"
                                      Text="{Binding EditorName, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.AutomationId="ChartEditorName" />
-                            <TextBlock Text="{StaticResource Chart_NameHint}"
+                            <TextBlock Text="{DynamicResource Chart_NameHint}"
                                        Margin="0,0,0,2"
                                        VerticalAlignment="Center"
                                        Foreground="#B0B0B0"
@@ -644,19 +651,19 @@
                             </TextBlock>
                         </Grid>
 
-                        <TextBlock Text="{StaticResource Chart_SourceKind}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                        <TextBlock Text="{DynamicResource Chart_SourceKind}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                         <ComboBox Style="{StaticResource ChartCombo}"
                                   ItemsSource="{Binding SourceKinds}"
                                   SelectedItem="{Binding EditorSourceKind}"
                                   AutomationProperties.AutomationId="ChartEditorSourceKind" />
 
-                        <TextBlock Text="{StaticResource Chart_Source}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                        <TextBlock Text="{DynamicResource Chart_Source}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                         <Grid>
                             <TextBox Style="{StaticResource ChartUnderlineBox}"
                                      MaxLength="64"
                                      Text="{Binding EditorSource, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.AutomationId="ChartEditorSource" />
-                            <TextBlock Text="{StaticResource Chart_SourceHint}"
+                            <TextBlock Text="{DynamicResource Chart_SourceHint}"
                                        Margin="0,0,0,2"
                                        VerticalAlignment="Center"
                                        Foreground="#B0B0B0"
@@ -674,13 +681,13 @@
                             </TextBlock>
                         </Grid>
 
-                        <TextBlock Text="{StaticResource Chart_Display}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                        <TextBlock Text="{DynamicResource Chart_Display}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                         <Grid>
                             <TextBox Style="{StaticResource ChartUnderlineBox}"
                                      MaxLength="12"
                                      Text="{Binding EditorDisplay, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.AutomationId="ChartEditorDisplay" />
-                            <TextBlock Text="{StaticResource Chart_DisplayHint}"
+                            <TextBlock Text="{DynamicResource Chart_DisplayHint}"
                                        Margin="0,0,0,2"
                                        VerticalAlignment="Center"
                                        Foreground="#B0B0B0"
@@ -698,13 +705,13 @@
                             </TextBlock>
                         </Grid>
 
-                        <TextBlock Text="{StaticResource Chart_Subtitle}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                        <TextBlock Text="{DynamicResource Chart_Subtitle}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                         <Grid>
                             <TextBox Style="{StaticResource ChartUnderlineBox}"
                                      MaxLength="24"
                                      Text="{Binding EditorSubtitle, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.AutomationId="ChartEditorSubtitle" />
-                            <TextBlock Text="{StaticResource Chart_SubtitleHint}"
+                            <TextBlock Text="{DynamicResource Chart_SubtitleHint}"
                                        Margin="0,0,0,2"
                                        VerticalAlignment="Center"
                                        Foreground="#B0B0B0"
@@ -722,7 +729,7 @@
                             </TextBlock>
                         </Grid>
 
-                        <TextBlock Text="{StaticResource Chart_SubtitleStyle}" FontSize="12" Foreground="#666666" Margin="0,14,0,4" />
+                        <TextBlock Text="{DynamicResource Chart_SubtitleStyle}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                         <ComboBox Style="{StaticResource ChartCombo}"
                                   ItemsSource="{Binding SubtitleStyles}"
                                   SelectedItem="{Binding EditorSubtitleStyle}"
@@ -752,7 +759,7 @@
                                 AutomationProperties.AutomationId="ChartEditorSave">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="FloppyDisk" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource User_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource User_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource ChartToolButton}"
@@ -761,7 +768,7 @@
                                 AutomationProperties.AutomationId="ChartEditorCancel">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="X" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </StackPanel>

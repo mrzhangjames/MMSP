@@ -9,9 +9,11 @@ using MMSP.Common.Helper;
 using MMSP.Common.Helper.Logger;
 using System.ComponentModel;
 using System.Reflection;
+using MMSP.Core.License;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using MMSP.Service.Database;
+using MMSP.Service.Flow;
 
 namespace MMSP.App.Main.ViewModels
 {
@@ -24,6 +26,11 @@ namespace MMSP.App.Main.ViewModels
         /// 底栏时间格式。
         /// </summary>
         private const string TimeFormat = "yyyy-MM-dd HH:mm:ss";
+
+        /// <summary>
+        /// 底栏到期日格式。
+        /// </summary>
+        private const string ExpiryDateFormat = "yyyy-MM-dd";
 
         /// <summary>
         /// 内容区区域名，与 MainView 的 RegionName 相同。
@@ -46,9 +53,34 @@ namespace MMSP.App.Main.ViewModels
         private ShellRunItem? _selectedRun;
 
         /// <summary>
+        /// 流程执行服务。启动和停止按钮调用它。
+        /// </summary>
+        private readonly IFlowRunService _flowRun;
+
+        /// <summary>
+        /// 正在按服务状态回写运行按钮，避免再次启动或停止。
+        /// </summary>
+        private bool _applyingRun;
+
+        /// <summary>
+        /// 底栏运行状态。在跑是启动，停稳是停止。
+        /// </summary>
+        private string _runStatusText = "";
+
+        /// <summary>
         /// 底栏时间文字。
         /// </summary>
         private string _currentTimeText = "";
+
+        /// <summary>
+        /// 底栏许可证状态。
+        /// </summary>
+        private string _licenseStatusText = "";
+
+        /// <summary>
+        /// 当前许可证。导入后通过事件更新底栏。
+        /// </summary>
+        private readonly LicenseStatusStore _licenses;
 
         /// <summary>
         /// 界面上是否已登录。
@@ -96,14 +128,22 @@ namespace MMSP.App.Main.ViewModels
         public MainViewModel(
             IRegionManager region,
             IContainerExtension container,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator,
+            IFlowRunService flowRun,
+            LicenseStatusStore licenses)
             : base(region, container, eventAggregator)
         {
+            _flowRun = flowRun;
+            _licenses = licenses;
+            _licenses.Changed += OnLicenseChanged;
+            _flowRun.RunningChanged += OnFlowRunningChanged;
             Menus = new ObservableCollection<ShellMenuItem>();
             LoadMenus();
             RunCommands = new ObservableCollection<ShellRunItem>();
             CreateRunCommands();
+            RunStatusText = RunTitle(RunState.Stop);
             VersionText = AppVersionHelper.GetVersionText();
+            RefreshLicenseStatus();
             LoginName = ReadText("Footer_NotLoggedIn", "未登录");
             SessionCommand = new DelegateCommand(OnSession);
             ConfirmLoginCommand = new DelegateCommand(ConfirmLogin);
@@ -112,6 +152,7 @@ namespace MMSP.App.Main.ViewModels
             _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _clockTimer.Tick += OnClockTick;
             _clockTimer.Start();
+            AppAppearance.LanguageChanged += OnLanguageChanged;
         }
 
         /// <summary>
@@ -125,22 +166,46 @@ namespace MMSP.App.Main.ViewModels
         public ObservableCollection<ShellRunItem> RunCommands { get; }
 
         /// <summary>
-        /// 当前运行按钮。切换后底栏显示对应状态。
+        /// 当前点中的运行按钮。底栏文字不跟这个选中项走。
         /// </summary>
         public ShellRunItem? SelectedRun
         {
             get => _selectedRun;
             set
             {
-                if (SetProperty(ref _selectedRun, value))
-                    RaisePropertyChanged(nameof(RunStatusText));
+                if (_applyingRun)
+                {
+                    SetProperty(ref _selectedRun, value);
+                    return;
+                }
+
+                if (value is null || ReferenceEquals(_selectedRun, value))
+                {
+                    RaisePropertyChanged(nameof(SelectedRun));
+                    return;
+                }
+
+                if (value.State == RunState.Start && !_flowRun.TryStart())
+                {
+                    RaisePropertyChanged(nameof(SelectedRun));
+                    return;
+                }
+
+                if (value.State == RunState.Stop)
+                    _flowRun.Stop();
+
+                SetProperty(ref _selectedRun, value);
             }
         }
 
         /// <summary>
-        /// 底栏运行状态。未选择时为空。
+        /// 底栏运行状态。在跑显示启动，停稳显示停止。
         /// </summary>
-        public string RunStatusText => SelectedRun?.Title ?? "";
+        public string RunStatusText
+        {
+            get => _runStatusText;
+            private set => SetProperty(ref _runStatusText, value);
+        }
 
         /// <summary>
         /// 当前选中的菜单。不允许空选，避免内容标题被清掉。
@@ -173,6 +238,15 @@ namespace MMSP.App.Main.ViewModels
         /// 底栏版本，构造后不再变化。
         /// </summary>
         public string VersionText { get; }
+
+        /// <summary>
+        /// 底栏许可证状态，放在版本号后面。
+        /// </summary>
+        public string LicenseStatusText
+        {
+            get => _licenseStatusText;
+            private set => SetProperty(ref _licenseStatusText, value);
+        }
 
         /// <summary>
         /// 底栏登录名。未登录显示「未登录」，登录后显示窗里填写的名字。
@@ -333,7 +407,49 @@ namespace MMSP.App.Main.ViewModels
             if (string.IsNullOrEmpty(title))
                 title = string.IsNullOrEmpty(row.Name) ? row.Code.ToString() : row.Name;
 
-            return new ShellMenuItem(title, selected, unselected, $"{row.Code}View");
+            return new ShellMenuItem(title, row.PageName ?? "", selected, unselected, $"{row.Code}View");
+        }
+
+        /// <summary>
+        /// 语言切换后重读导航、运行按钮和未登录文字。不重新打开当前页。
+        /// </summary>
+        private void OnLanguageChanged()
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                ApplyLanguageText();
+                return;
+            }
+
+            dispatcher.BeginInvoke(new Action(ApplyLanguageText));
+        }
+
+        /// <summary>
+        /// 用当前语言资源替换主壳上已经生成的文字。
+        /// </summary>
+        private void ApplyLanguageText()
+        {
+            foreach (var menu in Menus)
+            {
+                if (string.IsNullOrEmpty(menu.TitleKey))
+                    continue;
+
+                var title = Application.Current?.TryFindResource(menu.TitleKey) as string;
+                if (!string.IsNullOrEmpty(title))
+                    menu.UseTitle(title);
+            }
+
+            foreach (var command in RunCommands)
+                command.UseTitle(RunTitle(command.State));
+
+            RunStatusText = RunTitle(_flowRun.IsRunning ? RunState.Start : RunState.Stop);
+            if (!IsLoggedIn)
+                LoginName = ReadText("Footer_NotLoggedIn", "未登录");
+
+            RefreshLicenseStatus();
+            RaisePropertyChanged(nameof(SessionToolTip));
+            RaisePropertyChanged(nameof(ContentTitle));
         }
 
         /// <summary>
@@ -393,12 +509,65 @@ namespace MMSP.App.Main.ViewModels
         /// </summary>
         private static ShellRunItem CreateRun(RunState state, PackIconPhosphorIconsKind icon)
         {
+            return new ShellRunItem(state, RunTitle(state), icon);
+        }
+
+        /// <summary>
+        /// 运行状态的显示文字。优先用语言资源，否则用枚举说明。
+        /// </summary>
+        private static string RunTitle(RunState state)
+        {
             var key = "Run_" + state;
             var title = Application.Current?.TryFindResource(key) as string;
             if (string.IsNullOrEmpty(title))
                 title = ReadRunText(state);
 
-            return new ShellRunItem(state, title, icon);
+            return title;
+        }
+
+        /// <summary>
+        /// 服务状态变化后改底栏。过期通知以服务当前值为准。
+        /// </summary>
+        private void OnFlowRunningChanged(bool running)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                ShowRunning(running);
+                return;
+            }
+
+            dispatcher.BeginInvoke(new Action(() => ShowRunning(running)));
+        }
+
+        /// <summary>
+        /// 把底栏改成启动或停止。停稳时把停止按钮点亮。
+        /// </summary>
+        private void ShowRunning(bool running)
+        {
+            if (running != _flowRun.IsRunning)
+                running = _flowRun.IsRunning;
+
+            RunStatusText = RunTitle(running ? RunState.Start : RunState.Stop);
+            if (!running)
+                SelectRun(RunState.Stop);
+        }
+
+        /// <summary>
+        /// 按状态点亮运行按钮，不再次调用启动或停止。
+        /// </summary>
+        private void SelectRun(RunState state)
+        {
+            var item = RunCommands.FirstOrDefault(command => command.State == state);
+            _applyingRun = true;
+            try
+            {
+                SelectedRun = item;
+            }
+            finally
+            {
+                _applyingRun = false;
+            }
         }
 
         /// <summary>
@@ -417,6 +586,48 @@ namespace MMSP.App.Main.ViewModels
         private void OnClockTick(object? sender, EventArgs e)
         {
             CurrentTimeText = DateTime.Now.ToString(TimeFormat);
+            RefreshLicenseStatus();
+        }
+
+        /// <summary>
+        /// 导入许可证后改底栏。事件可能不在界面线程。
+        /// </summary>
+        private void OnLicenseChanged(object? sender, EventArgs e)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                RefreshLicenseStatus();
+                return;
+            }
+
+            dispatcher.BeginInvoke(new Action(RefreshLicenseStatus));
+        }
+
+        /// <summary>
+        /// 按当前许可证和语言生成底栏文字。
+        /// </summary>
+        private void RefreshLicenseStatus()
+        {
+            var evaluation = _licenses.Current;
+            var state = LicenseFooter.StateOf(evaluation, DateTimeOffset.UtcNow);
+            LicenseStatusText = state switch
+            {
+                LicenseFooterState.Authorized => ReadText("Footer_LicenseAuthorized", "已授权"),
+                LicenseFooterState.Expired => ReadText("Footer_LicenseExpired", "授权到期"),
+                LicenseFooterState.Expiring => string.Format(
+                    ReadText("Footer_LicenseExpiring", "{0}到期"),
+                    FormatExpiry(evaluation.NotAfterUtc)),
+                _ => ReadText("Footer_LicenseUnauthorized", "未授权")
+            };
+        }
+
+        /// <summary>
+        /// 到期日显示到本地日期。没有值时是空串。
+        /// </summary>
+        private static string FormatExpiry(DateTimeOffset? value)
+        {
+            return value is { } time ? time.ToLocalTime().ToString(ExpiryDateFormat) : "";
         }
 
         /// <summary>

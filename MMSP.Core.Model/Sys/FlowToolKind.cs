@@ -3,7 +3,7 @@
 namespace MMSP.Core.Model.Sys
 {
     /// <summary>
-    /// 流程步骤的工具种类。数值与客户库 tool_kind 列一致。
+    /// 流程步骤的工具种类。数值与客户库 tool_kind 列一致。0 到 8 是通用工具，100 到 200 是立讯工具。
     /// </summary>
     public enum FlowToolKind
     {
@@ -59,6 +59,12 @@ namespace MMSP.Core.Model.Sys
         /// 脚本。
         /// </summary>
         [Description("脚本")]
-        Script = 8
+        Script = 8,
+
+        /// <summary>
+        /// 立讯报警日志。立讯工具从 100 排到 200。
+        /// </summary>
+        [Description("LUX报警")]
+        Lux_AlarmLogTool = 100
     }
 }

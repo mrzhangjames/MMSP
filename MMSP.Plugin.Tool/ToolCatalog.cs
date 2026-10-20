@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using System.Windows.Controls;
 using MMSP.Core.Model.Base;
 using MMSP.Core.Model.Sys;
@@ -65,6 +66,7 @@ namespace MMSP.Plugin.Tool
                 FlowToolKind.JsonParse => Join(Read<JsonParseToolEntity>(cfg).Source, Read<JsonParseToolEntity>(cfg).JsonPath, Read<JsonParseToolEntity>(cfg).Target),
                 FlowToolKind.Condition => Read<ConditionToolEntity>(cfg).Expression.Trim(),
                 FlowToolKind.Script => Short(Read<ScriptToolEntity>(cfg).Script),
+                FlowToolKind.Lux_AlarmLogTool => AlarmText(Read<LuxAlarmLogToolEntity>(cfg)),
                 _ => ""
             };
         }
@@ -161,8 +163,18 @@ namespace MMSP.Plugin.Tool
                 FlowToolKind.JsonParse => Read<JsonParseToolEntity>(cfg).Name,
                 FlowToolKind.Condition => Read<ConditionToolEntity>(cfg).Name,
                 FlowToolKind.Script => Read<ScriptToolEntity>(cfg).Name,
+                FlowToolKind.Lux_AlarmLogTool => Read<LuxAlarmLogToolEntity>(cfg).Name,
                 _ => ""
             };
+        }
+
+        /// <summary>
+        /// 报警日志说明。只数地址不为空的行。
+        /// </summary>
+        private static string AlarmText(LuxAlarmLogToolEntity tool)
+        {
+            var count = tool.Rows?.Count(row => row is not null && !string.IsNullOrWhiteSpace(row.Address)) ?? 0;
+            return count.ToString(CultureInfo.InvariantCulture) + " 条";
         }
 
         /// <summary>

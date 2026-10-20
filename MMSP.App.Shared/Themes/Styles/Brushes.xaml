@@ -51,6 +51,8 @@
     <SolidColorBrush x:Key="CardBodyBrush">#FAFAF8</SolidColorBrush>
     <SolidColorBrush x:Key="HeaderDividerBrush">#EEEEEE</SolidColorBrush>
     <SolidColorBrush x:Key="StatusConnectedBrush">#49C46A</SolidColorBrush>
+    <SolidColorBrush x:Key="CardBackground">#FFFFFF</SolidColorBrush>
+    <SolidColorBrush x:Key="FieldLabelBrush">#666666</SolidColorBrush>
 
     <sys:Double x:Key="NavBarHeight">120</sys:Double>
     <sys:Double x:Key="NavButtonWidth">112</sys:Double>

@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Media;
 
-namespace MMSP.App.TemplateMatch.Views
+namespace MMSP.App.WpfBase.Services
 {
     /// <summary>
     /// 用 Code 39 画出扫码结果。只负责显示，不连接扫码枪。

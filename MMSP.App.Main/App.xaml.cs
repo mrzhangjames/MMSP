@@ -1,11 +1,16 @@
 ﻿using MMSP.App.Main.ViewModels;
 using MMSP.App.Main.Views;
 using MMSP.App.TemplateMatch;
+using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper.Logger;
+using MMSP.Core.License;
+using MMSP.Core.Model.Base;
+using MMSP.Core.Model.Sys;
+using MMSP.Plugin.Lux;
 using MMSP.Service.Database;
 using MMSP.Service.Device.Plc;
-using System.Configuration;
-using System.Data;
+using MMSP.Service.Flow;
+using System.IO;
 using System.Windows;
 
 namespace MMSP.App.Main
@@ -15,6 +20,16 @@ namespace MMSP.App.Main
     /// </summary>
     public partial class App : PrismApplication
     {
+        /// <summary>
+        /// 主程序 Config 目录里的许可证文件。
+        /// </summary>
+        private readonly LicenseDirectoryStore _licenseFiles = new(Path.Combine(PathCore.Folder_App, PathCore.Folder_Config));
+
+        /// <summary>
+        /// 配置页读取的当前许可证。
+        /// </summary>
+        private readonly LicenseStatusStore _licenseStatus = new();
+
         protected override void RegisterTypes(IContainerRegistry services)
         {
             //Register：每一次解析都会创建一个实例
@@ -30,14 +45,76 @@ namespace MMSP.App.Main
             //services.RegisterSingleton<INavigationMenuService, NavigationMenuService>();
 
             //主窗体（window）
+            services.RegisterInstance(_licenseFiles);
+            services.RegisterInstance(_licenseStatus);
+            services.RegisterSingleton<IFlowRunService, FlowRunService>();
             services.RegisterForNavigation<MainView, MainViewModel>();
         }
 
+        /// <summary>
+        /// 先读安装身份。配置无效或没有对应客户插件时直接退出。
+        /// </summary>
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            try
+            {
+                AppProfile.Use(AppProfileLoader.Load());
+                LoadLicense();
+                base.OnStartup(e);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.SysError("应用程序配置无效", ex);
+                MessageBox.Show(ex.Message, "MMSP", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown(1);
+            }
+        }
+
+        /// <summary>
+        /// 壳模块始终加载。客户插件按安装身份选择，对不上就失败。
+        /// </summary>
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
-            //TODO: 根据当前客户动态加载
             moduleCatalog.AddModule<TemplateMatchModule>();
+            var profile = AppProfile.Current;
+            if (profile.Customer == Customer.Lux && profile.DeviceType == DeviceType.PAD_001)
+                moduleCatalog.AddModule<LuxModule>();
+            else
+                throw new InvalidOperationException($"没有对应的客户插件：Customer={profile.Customer}，DeviceType={profile.DeviceType}。");
+
             base.ConfigureModuleCatalog(moduleCatalog);
+        }
+
+        /// <summary>
+        /// 读取本机许可证供配置页显示。没有许可证或校验失败也继续启动。
+        /// </summary>
+        private void LoadLicense()
+        {
+            var fingerprint = MachineFingerprintReader.TryRead(out var value) ? value : "";
+            LicenseEvaluation evaluation;
+            try
+            {
+                evaluation = LicenseRuntime.Check(_licenseFiles, fingerprint, DateTimeOffset.UtcNow);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                LogHelper.SysError("读取许可证失败", ex);
+                evaluation = LicenseEvaluation.Only(LicenseFailureCode.FileUnreadable);
+            }
+
+            if (evaluation.IsValid)
+            {
+                try
+                {
+                    LicenseRuntime.Remember(_licenseFiles, DateTimeOffset.UtcNow);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    LogHelper.SysError("写入许可证水位失败", ex);
+                }
+            }
+
+            _licenseStatus.Replace(evaluation);
         }
 
         protected override Window? CreateShell()
@@ -48,7 +125,20 @@ namespace MMSP.App.Main
         protected override void OnInitialized()
         {
             SqlSugarContext.Open();
+            var config = AppConfigStore.Load();
+            AppAppearance.Apply(config);
             LogHelper.Use(Container.Resolve<IEventAggregator>());
+            var profile = AppProfile.Current;
+            LogHelper.SysInfo($"当前客户 {profile.Customer}，设备类型 {profile.DeviceType}");
+            LogHelper.SysInfo("许可证 " + _licenseStatus.Current.ToLogText());
+            try
+            {
+                LogRetentionCleaner.Apply(config.DbLogDays, config.FileLogDays);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.SysError("清理过期日志失败", ex);
+            }
             if (HslLicense.Apply())
                 LogHelper.SysInfo("HSL 授权成功");
             else
@@ -78,6 +168,7 @@ namespace MMSP.App.Main
                 }
 
                 App.Current.MainWindow = view;
+                AppAppearance.ApplyTitle(config.WindowTitle);
                 view.Show();
             }
             base.OnInitialized();

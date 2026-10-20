@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using MahApps.Metro.Controls;
+using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
@@ -14,19 +15,89 @@ namespace MMSP.App.TemplateMatch.Views
     /// </summary>
     public partial class ToolPropertyWindow : MetroWindow
     {
+        /// <summary>
+        /// 正在编辑的工具种类。
+        /// </summary>
         private readonly FlowToolKind _kind;
+
+        /// <summary>
+        /// 工具名称为空时用的标题。
+        /// </summary>
         private readonly string _fallbackTitle;
 
         /// <summary>
-        /// 打开一种工具的配置。fallbackTitle 是种类名称，工具名称为空时用它。
+        /// 当前窗口能否保存。当前客户没有这个工具时为 false。
         /// </summary>
-        public ToolPropertyWindow(FlowToolKind kind, string cfg, string fallbackTitle)
+        private readonly bool _editable;
+
+        /// <summary>
+        /// 打开一种工具的配置。fallbackTitle 是种类名称，工具名称为空时用它。
+        /// 客户工具从已登记的插件取界面。当前客户没有这个工具时只提示，不能保存。
+        /// </summary>
+        public ToolPropertyWindow(FlowToolKind kind, string cfg, string fallbackTitle, CustomerPluginCatalog? catalog)
         {
             _kind = kind;
             _fallbackTitle = fallbackTitle;
             InitializeComponent();
-            var scanners = kind is FlowToolKind.SingleScan or FlowToolKind.MultiScan ? ReadScanners() : [];
-            Body.Content = ToolCatalog.Create(kind, cfg, scanners);
+            if (catalog?.Create(kind, cfg) is UserControl customer)
+            {
+                if (kind == FlowToolKind.Lux_AlarmLogTool)
+                    UseAlarmSize();
+
+                Body.Content = customer;
+                _editable = true;
+                return;
+            }
+
+            if (IsGeneral(kind))
+            {
+                var scanners = kind is FlowToolKind.SingleScan or FlowToolKind.MultiScan ? ReadScanners() : [];
+                Body.Content = ToolCatalog.Create(kind, cfg, scanners);
+                _editable = true;
+                return;
+            }
+
+            _editable = false;
+            SaveButton.IsEnabled = false;
+            Body.Content = new TextBlock
+            {
+                Text = UnavailableText(),
+                Margin = new Thickness(20, 16, 20, 16),
+                TextWrapping = TextWrapping.Wrap
+            };
+        }
+
+        /// <summary>
+        /// 通用工具是枚举里的 0 到 8。
+        /// </summary>
+        private static bool IsGeneral(FlowToolKind kind)
+        {
+            return (int)kind <= (int)FlowToolKind.Script;
+        }
+
+        /// <summary>
+        /// 立讯报警表格需要可调整的大窗口。
+        /// </summary>
+        private void UseAlarmSize()
+        {
+            Width = 760;
+            MinWidth = 640;
+            Height = 520;
+            MinHeight = 360;
+            MaxHeight = 800;
+            SizeToContent = SizeToContent.Manual;
+            ResizeMode = ResizeMode.CanResize;
+        }
+
+        /// <summary>
+        /// 当前客户没有这个工具时的提示。
+        /// </summary>
+        private static string UnavailableText()
+        {
+            if (Application.Current?.TryFindResource("Flow_ToolUnavailable") is string value && value.Length > 0)
+                return value;
+
+            return "当前客户未加载此工具";
         }
 
         /// <summary>
@@ -39,6 +110,12 @@ namespace MMSP.App.TemplateMatch.Views
         /// </summary>
         private void Accept(object sender, RoutedEventArgs e)
         {
+            if (!_editable)
+                return;
+
+            if (Body.Content is ICustomerToolView customer)
+                customer.CommitEdit();
+
             if (Body.Content is not UserControl view)
                 return;
 

@@ -7,12 +7,35 @@
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             Background="White"
+             Background="{DynamicResource CardBackground}"
              FontFamily="Segoe UI, Microsoft YaHei"
              FontSize="14"
-             Foreground="{StaticResource HighestBlack}">
+             Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVis" />
+        <ItemsPanelTemplate x:Key="FlowToolPanel">
+            <UniformGrid Columns="2" />
+        </ItemsPanelTemplate>
+        <DataTemplate x:Key="FlowToolCard">
+            <Border MinHeight="56"
+                    Margin="3"
+                    Background="{DynamicResource CardBackground}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <StackPanel VerticalAlignment="Center">
+                    <iconPacks:PackIconPhosphorIcons Kind="{Binding Icon}" Width="16" Height="16" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding Name}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Stretch"
+                               TextAlignment="Center"
+                               TextTrimming="CharacterEllipsis"
+                               TextWrapping="NoWrap"
+                               Margin="6,4,6,0" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
 
         <Style x:Key="FlowToolButton" TargetType="Button">
             <Setter Property="Height" Value="32" />
@@ -22,8 +45,9 @@
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderBrush" Value="#CCCCCC" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Template">
@@ -92,10 +116,10 @@
         </Style>
 
         <Style x:Key="FlowUnderlineBox" TargetType="TextBox">
-            <Setter Property="Height" Value="32" />
+            <Setter Property="Height" Value="30" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
-            <Setter Property="CaretBrush" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -108,7 +132,7 @@
                                 BorderBrush="#E0E0E0"
                                 BorderThickness="0,0,0,2"
                                 SnapsToDevicePixels="True">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,4,0,4" Focusable="False" />
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,4,0,2" Focusable="False" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsKeyboardFocusWithin" Value="True">
@@ -128,7 +152,7 @@
                                 BorderBrush="{StaticResource ThemeBrushColorAssist}"
                                 BorderThickness="0,0,0,2"
                                 SnapsToDevicePixels="True">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,4,0,4" Focusable="False" />
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,4,0,2" Focusable="False" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -138,7 +162,7 @@
         <Style x:Key="FlowComboItem" TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="8,6" />
             <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -160,9 +184,9 @@
         </Style>
 
         <Style x:Key="FlowCombo" TargetType="ComboBox">
-            <Setter Property="Height" Value="32" />
+            <Setter Property="Height" Value="30" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -187,7 +211,7 @@
                                                     <ColumnDefinition Width="24" />
                                                 </Grid.ColumnDefinitions>
                                                 <ContentPresenter Grid.Column="0"
-                                                                  Margin="0,4,0,4"
+                                                                  Margin="0,4,0,2"
                                                                   HorizontalAlignment="Left"
                                                                   VerticalAlignment="Center"
                                                                   IsHitTestVisible="False"
@@ -196,7 +220,7 @@
                                                            Text="&#x25BE;"
                                                            HorizontalAlignment="Right"
                                                            VerticalAlignment="Center"
-                                                           Foreground="#666666"
+                                                           Foreground="{DynamicResource FieldLabelBrush}"
                                                            FontSize="12" />
                                             </Grid>
                                         </Border>
@@ -214,7 +238,7 @@
                                    Focusable="False"
                                    IsOpen="{TemplateBinding IsDropDownOpen}">
                                 <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
-                                        Background="White"
+                                        Background="{DynamicResource CardBackground}"
                                         BorderBrush="#E0E0E0"
                                         BorderThickness="1">
                                     <ScrollViewer MaxHeight="160">
@@ -235,9 +259,9 @@
             <Setter Property="Margin" Value="0,0,8,0" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Foreground" Value="{StaticResource MediumNormalGray}" />
+            <Setter Property="Foreground" Value="{DynamicResource MediumNormalGray}" />
             <Setter Property="FontSize" Value="14" />
-            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -260,7 +284,7 @@
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="#FFF6D2" />
-                    <Setter Property="Foreground" Value="{StaticResource HighestBlack}" />
+                    <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                     <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
                     <Setter Property="BorderThickness" Value="0,0,0,3" />
                 </Trigger>
@@ -272,7 +296,7 @@
     <TabControl ItemContainerStyle="{StaticResource FlowTab}"
                 TabStripPlacement="Top"
                 SelectedIndex="{Binding PageIndex}"
-                Background="White"
+                Background="{DynamicResource CardBackground}"
                 BorderThickness="0"
                 Padding="0">
         <TabControl.Template>
@@ -283,8 +307,8 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Border Grid.Row="0"
-                            Background="White"
-                            BorderBrush="{StaticResource HeaderDividerBrush}"
+                            Background="{DynamicResource CardBackground}"
+                            BorderBrush="{DynamicResource HeaderDividerBrush}"
                             BorderThickness="0,0,0,1"
                             Padding="16,0,8,0">
                         <TabPanel IsItemsHost="True"
@@ -298,11 +322,11 @@
             </ControlTemplate>
         </TabControl.Template>
         <TabItem AutomationProperties.AutomationId="FlowDataTab"
-                 AutomationProperties.Name="{StaticResource Flow_Data}">
+                 AutomationProperties.Name="{DynamicResource Flow_Data}">
             <TabItem.Header>
                 <StackPanel Orientation="Horizontal">
                     <iconPacks:PackIconPhosphorIcons Kind="FlowArrow" Width="16" Height="16" VerticalAlignment="Center" />
-                    <TextBlock Text="{StaticResource Flow_Data}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Flow_Data}" Margin="6,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
             </TabItem.Header>
         <Grid>
@@ -317,52 +341,52 @@
                     <RowDefinition Height="48" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Padding="10,0" Background="White">
+                <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Padding="10,0" Background="{DynamicResource CardBackground}">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding AddCommand}" AutomationProperties.AutomationId="FlowAdd" AutomationProperties.Name="{StaticResource Flow_Add}">
+                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding AddCommand}" AutomationProperties.AutomationId="FlowAdd" AutomationProperties.Name="{DynamicResource Flow_Add}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="Plus" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource Flow_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Flow_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding DeleteCommand}" AutomationProperties.AutomationId="FlowDelete" AutomationProperties.Name="{StaticResource Flow_Delete}">
+                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding DeleteCommand}" AutomationProperties.AutomationId="FlowDelete" AutomationProperties.Name="{DynamicResource Flow_Delete}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="Trash" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource Flow_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Flow_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding RunCommand}" AutomationProperties.AutomationId="FlowRun" AutomationProperties.Name="{StaticResource Flow_Run}">
+                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding RunCommand}" AutomationProperties.AutomationId="FlowRun" AutomationProperties.Name="{DynamicResource Flow_Run}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="Play" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource Flow_Run}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Flow_Run}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding CopyCommand}" AutomationProperties.AutomationId="FlowCopy" AutomationProperties.Name="{StaticResource Flow_Copy}">
+                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding CopyCommand}" AutomationProperties.AutomationId="FlowCopy" AutomationProperties.Name="{DynamicResource Flow_Copy}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="Copy" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource Flow_Copy}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Flow_Copy}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding ExportCommand}" AutomationProperties.AutomationId="FlowExport" AutomationProperties.Name="{StaticResource Flow_Export}">
+                        <Button Style="{StaticResource FlowToolButton}" Command="{Binding ExportCommand}" AutomationProperties.AutomationId="FlowExport" AutomationProperties.Name="{DynamicResource Flow_Export}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="UploadSimple" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource Flow_Export}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Flow_Export}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button Style="{StaticResource FlowToolButton}" Margin="0" Command="{Binding ImportCommand}" AutomationProperties.AutomationId="FlowImport" AutomationProperties.Name="{StaticResource Flow_Import}">
+                        <Button Style="{StaticResource FlowToolButton}" Margin="0" Command="{Binding ImportCommand}" AutomationProperties.AutomationId="FlowImport" AutomationProperties.Name="{DynamicResource Flow_Import}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="DownloadSimple" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="{StaticResource Flow_Import}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Flow_Import}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
                 </Border>
-                <Border Grid.Row="1" Background="{StaticResource CardBodyBrush}" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,1,0">
+                <Border Grid.Row="1" Background="{DynamicResource CardBodyBrush}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="0,0,1,0">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <ItemsControl ItemsSource="{Binding Flows}" Margin="12,12,12,4">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Margin="0,0,0,12"
+                                    <Border Margin="0,0,0,8"
                                             CornerRadius="8"
                                             BorderThickness="1"
                                             ClipToBounds="True"
@@ -371,45 +395,45 @@
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Setter Property="Background" Value="White" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                        <Setter Property="Background" Value="{StaticResource NavSelectedBackground}" />
-                                                        <Setter Property="BorderBrush" Value="{StaticResource NavSelectedBackground}" />
+                                                        <Setter Property="Background" Value="{DynamicResource NavSelectedBackground}" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBackground}" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
                                         <Grid>
-                                            <StackPanel Margin="14,12,14,10">
+                                            <StackPanel Margin="12,8,12,8">
                                                 <Button Style="{StaticResource FlowFlatButton}"
                                                         HorizontalContentAlignment="Left"
                                                         Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         AutomationProperties.AutomationId="FlowCard">
                                                     <StackPanel>
-                                                        <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold" />
-                                                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                                            <TextBlock Text="{StaticResource Flow_StepCount}" FontSize="13" Foreground="#666666" VerticalAlignment="Center" />
-                                                            <TextBlock Text="{Binding StepCount}" FontSize="15" FontWeight="Bold" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Bold" />
+                                                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                            <TextBlock Text="{DynamicResource Flow_StepCount}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" VerticalAlignment="Center" />
+                                                            <TextBlock Text="{Binding StepCount}" FontSize="14" FontWeight="SemiBold" Margin="6,0,0,0" VerticalAlignment="Center" />
                                                         </StackPanel>
                                                     </StackPanel>
                                                 </Button>
-                                                <Grid Height="22" Margin="0,6,0,0">
+                                                <Grid Height="20" Margin="0,4,0,0">
                                                     <Button Style="{StaticResource FlowFlatButton}"
                                                             Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             CommandParameter="{Binding}" />
-                                                    <TextBlock Text="{StaticResource Flow_Enabled}" VerticalAlignment="Center" IsHitTestVisible="False" />
+                                                    <TextBlock Text="{DynamicResource Flow_Enabled}" FontSize="13" VerticalAlignment="Center" IsHitTestVisible="False" />
                                                     <ToggleButton HorizontalAlignment="Right"
                                                                   VerticalAlignment="Center"
                                                                   Style="{StaticResource FlowSwitch}"
                                                                   IsChecked="{Binding IsEnabled}" />
                                                 </Grid>
-                                                <Grid Height="22" Margin="0,6,0,0">
+                                                <Grid Height="20" Margin="0,4,0,0">
                                                     <Button Style="{StaticResource FlowFlatButton}"
                                                             Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             CommandParameter="{Binding}" />
-                                                    <TextBlock Text="{StaticResource Flow_Log}" VerticalAlignment="Center" IsHitTestVisible="False" />
+                                                    <TextBlock Text="{DynamicResource Flow_Log}" FontSize="13" VerticalAlignment="Center" IsHitTestVisible="False" />
                                                     <ToggleButton HorizontalAlignment="Right"
                                                                   VerticalAlignment="Center"
                                                                   Style="{StaticResource FlowSwitch}"
@@ -437,51 +461,46 @@
                 </Border>
             </Grid>
 
-            <DockPanel Grid.Column="1" Background="White" LastChildFill="True">
-                    <Border DockPanel.Dock="Right" Width="1" Background="{StaticResource CardBorderBrush}" />
-                    <Border DockPanel.Dock="Top" Height="48" BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="12,0">
+            <DockPanel Grid.Column="1" Background="{DynamicResource CardBackground}" LastChildFill="True">
+                    <Border DockPanel.Dock="Right" Width="1" Background="{DynamicResource CardBorderBrush}" />
+                    <Border DockPanel.Dock="Top" Height="48" BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="12,0">
                         <DockPanel LastChildFill="False">
                             <Border DockPanel.Dock="Left" Width="3" Height="14" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" VerticalAlignment="Center" />
-                            <TextBlock DockPanel.Dock="Left" Text="{StaticResource Flow_Tools}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="{StaticResource Flow_Loaded}" FontSize="13" Foreground="{StaticResource MediumNormalGray}" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding ToolCount}" FontSize="13" Foreground="{StaticResource MediumNormalGray}" Margin="4,0,0,0" VerticalAlignment="Center" />
-                            </StackPanel>
+                            <TextBlock DockPanel.Dock="Left" Text="{DynamicResource Flow_Tools}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
                         </DockPanel>
                     </Border>
-                    <ItemsControl ItemsSource="{Binding Tools}"
-                                  Margin="8,8,8,8"
-                                  dd:DragDrop.IsDragSource="True">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Columns="2" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border MinHeight="88"
-                                            Margin="4"
-                                            Background="White"
-                                            BorderBrush="{StaticResource CardBorderBrush}"
-                                            BorderThickness="1"
-                                            CornerRadius="8">
-                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                            <iconPacks:PackIconPhosphorIcons Kind="{Binding Icon}" Width="24" Height="24" HorizontalAlignment="Center" />
-                                            <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" Margin="4,6,4,0" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{StaticResource Flow_ToolReady}" FontSize="12" Foreground="{StaticResource MediumNormalGray}" HorizontalAlignment="Center" Margin="0,2,0,0" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="8,4,8,8">
+                            <TextBlock Text="{DynamicResource Flow_ToolGeneral}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource MediumNormalGray}"
+                                       Margin="4,6,4,2" />
+                            <ItemsControl ItemsSource="{Binding GeneralTools}"
+                                          ItemsPanel="{StaticResource FlowToolPanel}"
+                                          ItemTemplate="{StaticResource FlowToolCard}"
+                                          dd:DragDrop.IsDragSource="True" />
+                            <TextBlock Text="{Binding CustomerToolGroup}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource MediumNormalGray}"
+                                       Margin="4,8,4,2"
+                                       Visibility="{Binding HasCustomerTools, Converter={StaticResource BoolVis}}" />
+                            <ItemsControl ItemsSource="{Binding CustomerTools}"
+                                          ItemsPanel="{StaticResource FlowToolPanel}"
+                                          ItemTemplate="{StaticResource FlowToolCard}"
+                                          dd:DragDrop.IsDragSource="True"
+                                          Visibility="{Binding HasCustomerTools, Converter={StaticResource BoolVis}}" />
+                        </StackPanel>
+                    </ScrollViewer>
             </DockPanel>
 
-            <DockPanel Grid.Column="2" Background="{StaticResource CardBodyBrush}" LastChildFill="True">
-                <Border DockPanel.Dock="Top" Height="48" Background="White" BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="12,0">
+            <DockPanel Grid.Column="2" Background="{DynamicResource CardBodyBrush}" LastChildFill="True">
+                <Border DockPanel.Dock="Top" Height="48" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="12,0">
                     <DockPanel LastChildFill="False">
                         <Border DockPanel.Dock="Left" Width="3" Height="14" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" VerticalAlignment="Center" />
-                        <TextBlock DockPanel.Dock="Left" Text="{StaticResource Flow_Column}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
-                        <TextBlock DockPanel.Dock="Right" Text="{StaticResource Flow_Order}" FontSize="13" Foreground="{StaticResource MediumNormalGray}" VerticalAlignment="Center" />
+                        <TextBlock DockPanel.Dock="Left" Text="{DynamicResource Flow_Column}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
+                        <TextBlock DockPanel.Dock="Right" Text="{DynamicResource Flow_Order}" FontSize="12" Foreground="{DynamicResource MediumNormalGray}" VerticalAlignment="Center" />
                     </DockPanel>
                 </Border>
                 <ScrollViewer x:Name="StepScroll"
@@ -490,7 +509,7 @@
                               Background="Transparent">
                     <ItemsControl ItemsSource="{Binding SelectedFlow.Steps}"
                                   Background="Transparent"
-                                  Padding="16,14,20,12"
+                                  Padding="12,10,12,8"
                                   HorizontalAlignment="Stretch"
                                   MinHeight="{Binding ViewportHeight, ElementName=StepScroll}"
                                   dd:DragDrop.IsDragSource="True"
@@ -500,26 +519,26 @@
                             <DataTemplate>
                                 <Grid PreviewMouseLeftButtonDown="OnStepPreviewMouseDown">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="28" />
-                                        <ColumnDefinition Width="16" />
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="10" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Column="0">
-                                        <Border Width="2" HorizontalAlignment="Center" Background="{StaticResource CardBorderBrush}" Margin="0,28,0,0" Visibility="{Binding ShowStem, Converter={StaticResource BoolVis}}" />
-                                        <Border Width="28" Height="28" VerticalAlignment="Top" CornerRadius="14" Background="{StaticResource ThemeBrushColorAssist}">
-                                            <TextBlock Text="{Binding Number}" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Border Width="2" HorizontalAlignment="Center" Background="{DynamicResource CardBorderBrush}" Margin="0,22,0,0" Visibility="{Binding ShowStem, Converter={StaticResource BoolVis}}" />
+                                        <Border Width="22" Height="22" VerticalAlignment="Top" CornerRadius="11" Background="{StaticResource ThemeBrushColorAssist}">
+                                            <TextBlock Text="{Binding Number}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                     </Grid>
                                     <Border Grid.Column="2"
                                             Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                         <Border.Style>
                                             <Style TargetType="Border">
-                                                <Setter Property="Margin" Value="0,0,0,10" />
-                                                <Setter Property="Padding" Value="12,10" />
+                                                <Setter Property="Margin" Value="0,0,0,8" />
+                                                <Setter Property="Padding" Value="10,6" />
                                                 <Setter Property="Background" Value="White" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
                                                 <Setter Property="BorderThickness" Value="1" />
-                                                <Setter Property="CornerRadius" Value="8" />
+                                                <Setter Property="CornerRadius" Value="4" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding ShowStem}" Value="False">
                                                         <Setter Property="Margin" Value="0" />
@@ -537,25 +556,29 @@
                                         </Border.InputBindings>
                                         <Border.ContextMenu>
                                             <ContextMenu Style="{StaticResource MahApps.Styles.ContextMenu}">
-                                                <MenuItem Header="{StaticResource Flow_Property}"
+                                                <MenuItem Header="{DynamicResource Flow_Property}"
                                                           Style="{StaticResource MahApps.Styles.MenuItem}"
                                                           Command="{Binding PlacementTarget.Tag.ShowPropertyCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                <MenuItem Header="{DynamicResource Flow_Delete}"
+                                                          Style="{StaticResource MahApps.Styles.MenuItem}"
+                                                          Command="{Binding PlacementTarget.Tag.DeleteStepCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                           CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                             </ContextMenu>
                                         </Border.ContextMenu>
                                         <StackPanel Orientation="Horizontal">
-                                            <Border MinWidth="64" Height="24" Padding="6,0" CornerRadius="4" Background="{StaticResource NavSelectedBackground}" VerticalAlignment="Center">
+                                            <Border MinWidth="52" Height="20" Padding="6,0" CornerRadius="2" Background="{DynamicResource NavSelectedBackground}" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Kind}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             </Border>
-                                            <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="Bold" />
-                                                <TextBlock FontSize="12" Foreground="#666666" Margin="0,2,0,0">
+                                            <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" />
+                                                <TextBlock FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,2,0,0">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Text" Value="{Binding Detail}" />
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Detail}" Value="">
-                                                                    <Setter Property="Text" Value="{StaticResource Flow_Unconfigured}" />
+                                                                    <Setter Property="Text" Value="{DynamicResource Flow_Unconfigured}" />
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -573,62 +596,62 @@
         </Grid>
         </TabItem>
         <TabItem AutomationProperties.AutomationId="FlowMesTab"
-                 AutomationProperties.Name="{StaticResource Flow_MesTitle}">
+                 AutomationProperties.Name="{DynamicResource Flow_MesTitle}">
             <TabItem.Header>
                 <StackPanel Orientation="Horizontal">
                     <iconPacks:PackIconPhosphorIcons Kind="ShareNetwork" Width="16" Height="16" VerticalAlignment="Center" />
-                    <TextBlock Text="{StaticResource Flow_MesTitle}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Flow_MesTitle}" Margin="6,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
             </TabItem.Header>
-            <Grid Background="{StaticResource CardBodyBrush}"
+            <Grid Background="{DynamicResource CardBodyBrush}"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch">
                 <Border Margin="12"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Top"
-                        Background="White"
-                        BorderBrush="{StaticResource CardBorderBrush}"
+                        Background="{DynamicResource CardBackground}"
+                        BorderBrush="{DynamicResource CardBorderBrush}"
                         BorderThickness="1"
                         AutomationProperties.AutomationId="FlowMesDialog">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="56" />
+                            <RowDefinition Height="48" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="20,0">
+                        <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="14,0">
                             <DockPanel LastChildFill="True">
                                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                                     <Button Style="{StaticResource FlowToolButton}"
                                             Command="{Binding SaveMesCommand}"
                                             AutomationProperties.AutomationId="FlowMesSave"
-                                            AutomationProperties.Name="{StaticResource Config_Save}">
+                                            AutomationProperties.Name="{DynamicResource Config_Save}">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="FloppyDisk" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource Config_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource Config_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                     <Button Style="{StaticResource FlowToolButton}"
                                             Margin="0"
                                             Command="{Binding CancelMesCommand}"
                                             AutomationProperties.AutomationId="FlowMesCancel"
-                                            AutomationProperties.Name="{StaticResource User_Cancel}">
+                                            AutomationProperties.Name="{DynamicResource User_Cancel}">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconPhosphorIcons Kind="X" Width="16" Height="16" VerticalAlignment="Center" />
-                                            <TextBlock Text="{StaticResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource User_Cancel}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Border Width="3" Height="14" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" />
-                                    <TextBlock Text="{StaticResource Flow_MesTitle}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource Flow_MesTitle}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
                                 </StackPanel>
                             </DockPanel>
                         </Border>
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                            <Grid Margin="28,24,28,28">
+                            <Grid Margin="18,14,18,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="32" />
+                                    <ColumnDefinition Width="16" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
@@ -638,31 +661,31 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
-                                    <TextBlock Text="{StaticResource Flow_Endpoint}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+                                    <TextBlock Text="{DynamicResource Flow_Endpoint}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                     <TextBox Style="{StaticResource FlowEndpointBox}"
                                              Text="{Binding DraftEndpoint, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.AutomationId="FlowMesEndpoint" />
                                 </StackPanel>
-                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,16,0,0">
-                                    <TextBlock Text="{StaticResource Flow_Station}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,12,0,0">
+                                    <TextBlock Text="{DynamicResource Flow_Station}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                     <TextBox Style="{StaticResource FlowUnderlineBox}"
                                              Text="{Binding DraftStation, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.AutomationId="FlowMesStation" />
                                 </StackPanel>
-                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,16,0,0">
-                                    <TextBlock Text="{StaticResource Flow_Timeout}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,12,0,0">
+                                    <TextBlock Text="{DynamicResource Flow_Timeout}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                     <TextBox Style="{StaticResource FlowUnderlineBox}"
                                              Text="{Binding DraftTimeout, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.AutomationId="FlowMesTimeout" />
                                 </StackPanel>
-                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,20,0,0">
-                                    <TextBlock Text="{StaticResource Flow_Retry}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,12,0,0">
+                                    <TextBlock Text="{DynamicResource Flow_Retry}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                     <TextBox Style="{StaticResource FlowUnderlineBox}"
                                              Text="{Binding DraftRetry, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.AutomationId="FlowMesRetry" />
                                 </StackPanel>
-                                <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,20,0,0">
-                                    <TextBlock Text="{StaticResource Flow_Enabled}" FontSize="12" Foreground="#666666" Margin="0,0,0,4" />
+                                <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,12,0,0">
+                                    <TextBlock Text="{DynamicResource Flow_Enabled}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
                                     <ComboBox Style="{StaticResource FlowCombo}"
                                               ItemsSource="{Binding EnabledChoices}"
                                               SelectedItem="{Binding DraftEnabled}"
@@ -674,7 +697,7 @@
                                            Text="{Binding MesError}"
                                            Foreground="{StaticResource HighestRed}"
                                            FontSize="12"
-                                           Margin="0,16,0,0"
+                                           Margin="0,12,0,0"
                                            TextWrapping="Wrap"
                                            AutomationProperties.AutomationId="FlowMesError">
                                     <TextBlock.Style>

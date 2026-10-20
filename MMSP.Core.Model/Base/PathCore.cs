@@ -49,9 +49,9 @@ namespace MMSP.Core.Model.Base
         public static readonly string File_SqliteDB = "ldm.db";
 
         /// <summary>
-        /// 配置文件全名称，包含扩展名
+        /// 应用程序安装身份文件名。源文件在 Lib\Config，编译后位于程序目录的 Config。
         /// </summary>
-        public static readonly string File_Config = "Config.cfg";
+        public static readonly string File_Config = "app.cfg";
 
         /// <summary>
         /// 系统配置库文件名。
@@ -109,7 +109,7 @@ namespace MMSP.Core.Model.Base
         public static string ConnectionString_SysConfig => $"Data Source={SystemDbFilePath}";
 
         /// <summary>
-        /// 配置全路径
+        /// 应用程序安装身份全路径：程序目录\Config\app.cfg。
         /// </summary>
         public static readonly string ConfigPath = Path.Combine(Folder_App, Folder_Config, File_Config);
 

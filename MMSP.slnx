@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/App/">
+    <Project Path="MMSP.App.LicenseIssuer/MMSP.App.LicenseIssuer.csproj" />
     <Project Path="MMSP.App.Main/MMSP.App.Main.csproj" />
     <Project Path="MMSP.App.Shared/MMSP.App.Shared.csproj" />
     <Project Path="MMSP.App.TemplateMatch/MMSP.App.TemplateMatch.csproj" />
@@ -19,5 +20,6 @@
   <Folder Name="/Service/">
     <Project Path="MMSP.Service.Database/MMSP.Service.Database.csproj" />
     <Project Path="MMSP.Service.Device/MMSP.Service.Device.csproj" />
+    <Project Path="MMSP.Service.Flow/MMSP.Service.Flow.csproj" />
   </Folder>
 </Solution>

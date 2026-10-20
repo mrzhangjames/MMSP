@@ -9,6 +9,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\MMSP.Core.Model\MMSP.Core.Model.csproj" />
+		<ProjectReference Include="..\MMSP.Core.License\MMSP.Core.License.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="MahApps.Metro" Version="2.4.11" />
 		<PackageReference Include="Prism.Core" Version="9.0.537" />
 		<PackageReference Include="Prism.DryIoc" Version="9.0.537" />
