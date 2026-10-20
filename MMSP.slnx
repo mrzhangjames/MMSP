@@ -22,4 +22,8 @@
     <Project Path="MMSP.Service.Device/MMSP.Service.Device.csproj" />
     <Project Path="MMSP.Service.Flow/MMSP.Service.Flow.csproj" />
   </Folder>
+  <Folder Name="/Test/">
+    <Project Path="MMSP.Core.License.Tests/MMSP.Core.License.Tests.csproj" />
+    <Project Path="MMSP.Service.Flow.Tests/MMSP.Service.Flow.Tests.csproj" />
+  </Folder>
 </Solution>
