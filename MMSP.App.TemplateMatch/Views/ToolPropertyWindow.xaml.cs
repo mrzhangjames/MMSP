@@ -124,8 +124,7 @@ namespace MMSP.App.TemplateMatch.Views
             {
                 Title = Limit(ToolCatalog.Title(_kind, cfg, _fallbackTitle)),
                 Detail = ToolCatalog.Detail(_kind, cfg),
-                CfgValue = cfg,
-                NumberValue = ToolCatalog.NumberValue(_kind, cfg)
+                CfgValue = cfg
             };
             DialogResult = true;
         }
@@ -184,10 +183,5 @@ namespace MMSP.App.TemplateMatch.Views
         /// 工具配置。
         /// </summary>
         public string CfgValue { get; init; } = "";
-
-        /// <summary>
-        /// 延时毫秒。
-        /// </summary>
-        public int NumberValue { get; init; }
     }
 }

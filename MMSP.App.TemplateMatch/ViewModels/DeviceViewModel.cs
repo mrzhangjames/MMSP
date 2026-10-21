@@ -24,7 +24,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
             Scanner
         }
 
-        private bool _isPlcPage = true;
         private bool _isPlcConfigTab = true;
         private EditorKind _editor = EditorKind.None;
         private Guid? _editingId;
@@ -82,8 +81,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
             EditorAccess = AccessModes[0];
             EditorTransport = ScanTransports[0];
 
-            ShowPlcCommand = new DelegateCommand(() => IsPlcPage = true);
-            ShowScannerCommand = new DelegateCommand(() => IsPlcPage = false);
             ShowPlcConfigCommand = new DelegateCommand(() => IsPlcConfigTab = true);
             ShowPlcTestCommand = new DelegateCommand(() => IsPlcConfigTab = false);
             AddPointCommand = new DelegateCommand(OpenAddPoint);
@@ -221,16 +218,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 切到 PLC。
-        /// </summary>
-        public DelegateCommand ShowPlcCommand { get; }
-
-        /// <summary>
-        /// 切到扫码枪。
-        /// </summary>
-        public DelegateCommand ShowScannerCommand { get; }
-
-        /// <summary>
         /// 切到 PLC 配置。
         /// </summary>
         public DelegateCommand ShowPlcConfigCommand { get; }
@@ -314,26 +301,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// 向当前扫码枪发触发字符串。
         /// </summary>
         public DelegateCommand TriggerCommand { get; }
-
-        /// <summary>
-        /// 当前是 PLC 页。
-        /// </summary>
-        public bool IsPlcPage
-        {
-            get => _isPlcPage;
-            private set
-            {
-                if (!SetProperty(ref _isPlcPage, value))
-                    return;
-
-                RaisePropertyChanged(nameof(IsScannerPage));
-            }
-        }
-
-        /// <summary>
-        /// 当前是扫码枪页。
-        /// </summary>
-        public bool IsScannerPage => !IsPlcPage;
 
         /// <summary>
         /// 当前是 PLC 配置页。

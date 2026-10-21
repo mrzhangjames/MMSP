@@ -4,24 +4,30 @@
              Background="{DynamicResource MahApps.Brushes.ThemeBackground}"
              FontFamily="Segoe UI, Microsoft YaHei"
              FontSize="14">
+    <!--  区域 报警日志。按钮：导入、导出。控件：记录日志 Log、表格 AlarmGrid。列：地址、数据类型、触发值、报警描述。  -->
     <DockPanel>
+        <!--  区域 工具栏。  -->
         <DockPanel DockPanel.Dock="Top" Margin="12,12,12,0">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <!--  按钮 导入。事件 ImportClick。  -->
                 <Button Content="导入"
                         Style="{StaticResource MahApps.Styles.Button}"
                         MinWidth="72"
                         Margin="0,0,8,0"
                         Click="ImportClick" />
+                <!--  按钮 导出。事件 ExportClick。  -->
                 <Button Content="导出"
                         Style="{StaticResource MahApps.Styles.Button}"
                         MinWidth="72"
                         Click="ExportClick" />
             </StackPanel>
+            <!--  控件 记录日志。绑定 Log。  -->
             <CheckBox Content="记录日志"
                       Style="{StaticResource MahApps.Styles.CheckBox}"
                       VerticalAlignment="Center"
                       IsChecked="{Binding Log, UpdateSourceTrigger=PropertyChanged}" />
         </DockPanel>
+        <!--  控件 报警表 AlarmGrid。绑定 Rows。列：地址 Address、数据类型 DataType、触发值 TriggerValue、报警描述 Description。  -->
         <DataGrid x:Name="AlarmGrid"
                   Style="{StaticResource MahApps.Styles.DataGrid}"
                   ItemsSource="{Binding Rows}"

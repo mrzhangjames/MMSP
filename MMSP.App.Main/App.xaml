@@ -6,12 +6,15 @@
     <prism:PrismApplication.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!--  MahApps.Metro resource dictionaries. Make sure that all file names are Case Sensitive!  -->
+                <!--  字典 MahApps 控件样式 Controls。  -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <!--  字典 MahApps 字体 Fonts。  -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-                <!--  Theme setting  -->
+                <!--  字典 MahApps 浅色橄榄主题 Light.Olive。  -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Olive.xaml" />
+                <!--  字典 主壳主题 Generic。画刷和导航样式。  -->
                 <ResourceDictionary Source="pack://application:,,,/MMSP.App.Shared;component/Themes/Generic.xaml" />
+                <!--  字典 简体中文 ZH-CN。  -->
                 <ResourceDictionary Source="pack://application:,,,/MMSP.App.Shared;component/Assets/Languages/ZH-CN.xaml" />
 
             </ResourceDictionary.MergedDictionaries>

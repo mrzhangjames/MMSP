@@ -41,42 +41,6 @@ namespace MMSP.Core.Model.DB
         public string Title { get; set; } = "";
 
         /// <summary>
-        /// 扫码枪名、PLC 地址或变量名。最长 64。
-        /// </summary>
-        [SugarColumn(ColumnName = "target", Length = 64)]
-        public string Target { get; set; } = "";
-
-        /// <summary>
-        /// 数据类型。只有 PLC 读取和 PLC 写入使用。
-        /// </summary>
-        [SugarColumn(ColumnName = "data_type")]
-        public PlcDataType DataType { get; set; }
-
-        /// <summary>
-        /// 读取长度。只有 PLC 读取使用。
-        /// </summary>
-        [SugarColumn(ColumnName = "data_length")]
-        public int DataLength { get; set; }
-
-        /// <summary>
-        /// PLC 写入值或变量赋值。最长 64。
-        /// </summary>
-        [SugarColumn(ColumnName = "write_value", Length = 64)]
-        public string WriteValue { get; set; } = "";
-
-        /// <summary>
-        /// 延时毫秒。
-        /// </summary>
-        [SugarColumn(ColumnName = "number_value")]
-        public int NumberValue { get; set; }
-
-        /// <summary>
-        /// 触发字符串、条件、日志或脚本摘要。最长 256。
-        /// </summary>
-        [SugarColumn(ColumnName = "text_value", Length = 256)]
-        public string TextValue { get; set; } = "";
-
-        /// <summary>
         /// 工具配置。Json 文本，由工具种类解释。
         /// </summary>
         [SugarColumn(ColumnName = "cfg_value", ColumnDataType = "text")]

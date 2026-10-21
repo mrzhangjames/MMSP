@@ -69,7 +69,13 @@
     <sys:String x:Key="User_NeedRole">Choose a role</sys:String>
     <sys:String x:Key="User_LoginExists">Login name already exists</sys:String>
     <sys:String x:Key="User_SaveFailed">Save failed</sys:String>
-    <sys:String x:Key="Login_BadCredential">The user name or password is incorrect.</sys:String>
+    <sys:String x:Key="Login_BadCredential">The login name, password, or role is incorrect.</sys:String>
+    <sys:String x:Key="User_Info">Account</sys:String>
+    <sys:String x:Key="User_LoginTime">Signed in</sys:String>
+    <sys:String x:Key="User_Manage">Users</sys:String>
+    <sys:String x:Key="User_ManageModules">Modules</sys:String>
+    <sys:String x:Key="User_ModuleAllowed">Available for this role.</sys:String>
+    <sys:String x:Key="User_Plugin">Plugins</sys:String>
     <sys:String x:Key="Login_UserDisabled">This user is disabled.</sys:String>
     <sys:String x:Key="Login_Failed">Sign-in failed.</sys:String>
 
@@ -103,7 +109,6 @@
     <sys:String x:Key="Device_TriggerRead">Trigger read</sys:String>
     <sys:String x:Key="Device_Trigger">Trigger</sys:String>
     <sys:String x:Key="Device_TriggerText">Trigger text</sys:String>
-    <sys:String x:Key="Device_ScanResult">Scan result</sys:String>
     <sys:String x:Key="Device_BarcodeArea">Barcode</sys:String>
     <sys:String x:Key="Device_ScannerName">Scanner name</sys:String>
     <sys:String x:Key="Device_AddPoint">New point</sys:String>
@@ -257,14 +262,8 @@
     <sys:String x:Key="Flow_Data">Flow data</sys:String>
     <sys:String x:Key="Flow_Mes">MES</sys:String>
     <sys:String x:Key="Flow_MesTitle">MES configuration</sys:String>
-    <sys:String x:Key="Flow_Endpoint">Endpoint</sys:String>
-    <sys:String x:Key="Flow_Station">Station</sys:String>
-    <sys:String x:Key="Flow_Timeout">Timeout</sys:String>
-    <sys:String x:Key="Flow_Retry">Retries</sys:String>
     <sys:String x:Key="Flow_On">On</sys:String>
     <sys:String x:Key="Flow_Off">Off</sys:String>
-    <sys:String x:Key="Flow_NeedTimeout">Enter a non-negative integer for the timeout</sys:String>
-    <sys:String x:Key="Flow_NeedRetry">Enter a non-negative integer for the retries</sys:String>
     <sys:String x:Key="Flow_Edit">Edit</sys:String>
     <sys:String x:Key="Flow_AddTitle">Add flow</sys:String>
     <sys:String x:Key="Flow_EditTitle">Edit flow</sys:String>

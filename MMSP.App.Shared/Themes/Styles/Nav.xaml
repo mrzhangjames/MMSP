@@ -4,7 +4,7 @@
         <ResourceDictionary Source="pack://application:,,,/MMSP.App.Shared;component/Themes/Styles/Brushes.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!--  导航列表不继承 MahApps ListBox 的选中色  -->
+    <!--  样式 NavListBoxItemStyle：导航菜单项。不继承 MahApps 选中色。选中浅金底，底部金条。  -->
     <Style x:Key="NavListBoxItemStyle" TargetType="ListBoxItem">
         <Setter Property="Width" Value="{StaticResource NavButtonWidth}" />
         <Setter Property="Height" Value="{StaticResource NavButtonHeight}" />
@@ -49,6 +49,7 @@
         </Style.Triggers>
     </Style>
 
+    <!--  样式 NavListBoxStyle：导航菜单列表。横排，项样式 NavListBoxItemStyle。  -->
     <Style x:Key="NavListBoxStyle" TargetType="ListBox">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -73,7 +74,7 @@
         </Setter>
     </Style>
 
-    <!--  导航右侧运行列表。默认白底，选中后黄底  -->
+    <!--  样式 NavRunListBoxItemStyle：运行按钮项。默认白底，选中黄底。  -->
     <Style x:Key="NavRunListBoxItemStyle" TargetType="ListBoxItem">
         <Setter Property="Width" Value="{StaticResource NavButtonWidth}" />
         <Setter Property="Height" Value="{StaticResource NavButtonHeight}" />
@@ -110,6 +111,7 @@
         </Style.Triggers>
     </Style>
 
+    <!--  样式 NavRunListBoxStyle：运行按钮列表。基于 NavListBoxStyle，项样式 NavRunListBoxItemStyle。  -->
     <Style x:Key="NavRunListBoxStyle" TargetType="ListBox" BasedOn="{StaticResource NavListBoxStyle}">
         <Setter Property="ItemContainerStyle" Value="{StaticResource NavRunListBoxItemStyle}" />
     </Style>

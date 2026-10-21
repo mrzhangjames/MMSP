@@ -10,15 +10,20 @@
                  ShowMaxRestoreButton="False"
                  ShowMinButton="False"
                  Loaded="WindowLoaded">
+    <!--  区域 许可证签发。控件：密钥状态 KeyStateText、生效日期 StartPicker、到期日期 EndPicker、永久 PerpetualBox、结果 ResultText。  -->
     <StackPanel Margin="24,16,24,20">
+        <!--  区域 密钥。  -->
         <TextBlock Text="密钥" FontSize="16" FontWeight="Bold" />
+        <!--  控件 密钥状态 KeyStateText。  -->
         <TextBlock x:Name="KeyStateText" Margin="0,8,0,8" TextWrapping="Wrap" />
+        <!--  按钮 生成密钥。事件 GenerateClick。  -->
         <Button x:Name="GenerateButton"
                 MinWidth="120"
                 HorizontalAlignment="Left"
                 Content="生成密钥"
                 Click="GenerateClick" />
 
+        <!--  区域 有效期。  -->
         <TextBlock Text="有效期" FontSize="16" FontWeight="Bold" Margin="0,20,0,8" />
         <Grid>
             <Grid.ColumnDefinitions>
@@ -30,9 +35,11 @@
                 <RowDefinition Height="36" />
             </Grid.RowDefinitions>
             <TextBlock Text="生效日期" VerticalAlignment="Center" />
+            <!--  控件 生效日期 StartPicker。  -->
             <DatePicker x:Name="StartPicker" Grid.Column="1" VerticalAlignment="Center" />
             <TextBlock Grid.Row="1" Text="到期日期" VerticalAlignment="Center" />
             <DockPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" LastChildFill="True">
+                <!--  控件 永久 PerpetualBox。事件 PerpetualChanged。  -->
                 <CheckBox x:Name="PerpetualBox"
                           DockPanel.Dock="Right"
                           Content="永久"
@@ -40,15 +47,18 @@
                           VerticalAlignment="Center"
                           Checked="PerpetualChanged"
                           Unchecked="PerpetualChanged" />
+                <!--  控件 到期日期 EndPicker。  -->
                 <DatePicker x:Name="EndPicker" VerticalAlignment="Center" />
             </DockPanel>
         </Grid>
 
+        <!--  按钮 导出。事件 ExportClick。  -->
         <Button MinWidth="120"
                 HorizontalAlignment="Left"
                 Margin="0,16,0,0"
                 Content="导出"
                 Click="ExportClick" />
+        <!--  控件 导出结果 ResultText。  -->
         <TextBlock x:Name="ResultText" Margin="0,12,0,0" TextWrapping="Wrap" />
     </StackPanel>
 </mah:MetroWindow>

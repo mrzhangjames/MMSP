@@ -5,13 +5,15 @@
              xmlns:prism="http://prismlibrary.com/"
              xmlns:svc="clr-namespace:MMSP.App.WpfBase.Services;assembly=MMSP.App.WpfBase"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             Background="{DynamicResource CardBackground}"
+             Background="{DynamicResource PageBackground}"
              FontFamily="Segoe UI, Microsoft YaHei"
              FontSize="14"
              Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
+        <!--  转换 BoolVis：布尔到可见性。  -->
         <BooleanToVisibilityConverter x:Key="BoolVis" />
 
+        <!--  样式 UserToolButtonStyle：工具按钮。白底灰边，悬停变灰。  -->
         <Style x:Key="UserToolButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="32" />
             <Setter Property="MinWidth" Value="88" />
@@ -46,6 +48,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 UserUnderlineBox：下划线输入框。  -->
         <Style x:Key="UserUnderlineBox" TargetType="TextBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
@@ -75,6 +78,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 UserPasswordBox：下划线密码框。  -->
         <Style x:Key="UserPasswordBox" TargetType="PasswordBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
@@ -104,6 +108,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 UserRoleItem：角色下拉项。悬停浅金，选中金色。  -->
         <Style x:Key="UserRoleItem" TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="8,6" />
             <Setter Property="Background" Value="White" />
@@ -132,6 +137,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 UserRoleCombo：下划线下拉框。条目用 UserRoleItem。  -->
         <Style x:Key="UserRoleCombo" TargetType="ComboBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
@@ -209,6 +215,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 UserSwitchStyle：开关。灰轨，开为金色。  -->
         <Style x:Key="UserSwitchStyle" TargetType="ToggleButton">
             <Setter Property="Width" Value="44" />
             <Setter Property="Height" Value="20" />
@@ -242,6 +249,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 UserGridHeaderStyle：用户表格列头。  -->
         <Style x:Key="UserGridHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="#F5F5F5" />
             <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
@@ -269,6 +277,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 UserGridCellStyle：用户表格单元格。选中为金色。  -->
         <Style x:Key="UserGridCellStyle" TargetType="DataGridCell">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -294,15 +303,18 @@
             </Style.Triggers>
         </Style>
 
+        <!--  样式 UserCheckCellStyle：用户勾选列。基于 UserGridCellStyle。  -->
         <Style x:Key="UserCheckCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource UserGridCellStyle}">
             <Setter Property="Padding" Value="0" />
         </Style>
 
+        <!--  样式 UserCheckBoxStyle：勾选框。居中。  -->
         <Style x:Key="UserCheckBoxStyle" TargetType="CheckBox">
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
+        <!--  样式 UserGridRowStyle：用户表格行。隔行浅灰，勾选或选中为金色。双击打开编辑。  -->
         <Style x:Key="UserGridRowStyle" TargetType="DataGridRow">
             <Setter Property="Background" Value="White" />
             <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
@@ -321,95 +333,569 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!--  样式 SessionButtonStyle：登录和注销。加大高度，方便点击。  -->
+        <Style x:Key="SessionButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="64" />
+            <Setter Property="MinWidth" Value="220" />
+            <Setter Property="Padding" Value="28,0" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#CCCCCC" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Box"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="#E6E6E6" />
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#BDBDBD" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  样式 LoginFieldLabel：登录区字段标题。  -->
+        <Style x:Key="LoginFieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Foreground" Value="#666666" />
+            <Setter Property="Margin" Value="0,18,0,8" />
+        </Style>
+
+        <!--  样式 LoginFieldBox：登录区下划线输入框。  -->
+        <Style x:Key="LoginFieldBox" TargetType="TextBox" BasedOn="{StaticResource UserUnderlineBox}">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="FontSize" Value="20" />
+        </Style>
+
+        <!--  样式 LoginFieldPassword：登录区下划线密码框。  -->
+        <Style x:Key="LoginFieldPassword" TargetType="PasswordBox" BasedOn="{StaticResource UserPasswordBox}">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="FontSize" Value="20" />
+        </Style>
+
+        <!--  样式 LoginRoleListStyle：登录角色列表。不出现滚动条。  -->
+        <Style x:Key="LoginRoleListStyle" TargetType="ListBox">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBox">
+                        <ItemsPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  样式 LoginRoleItemStyle：角色行。选中浅金，左边金色。  -->
+        <Style x:Key="LoginRoleItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Row"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="4,0,0,0"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Row" Property="Background" Value="#FFF6D2" />
+                                <Setter TargetName="Row" Property="BorderBrush" Value="#FCC800" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Row" Property="Background" Value="#FFF6D2" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  样式 PageCardStyle：登录卡和用户信息卡。白底灰边。  -->
+        <Style x:Key="PageCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBackground}" />
+            <Setter Property="BorderBrush" Value="#E4E4E4" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+        </Style>
+
+        <!--  样式 SessionFieldLabel：已登录字段标题。  -->
+        <Style x:Key="SessionFieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="#666666" />
+            <Setter Property="Margin" Value="0,16,0,6" />
+        </Style>
+
+        <!--  样式 SessionFieldValue：已登录字段内容。  -->
+        <Style x:Key="SessionFieldValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
     </UserControl.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="64" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+        <!--  区域 登录。未登录时居中放大。控件：角色（LoginRoleList）、登录名（LoginNameBox）、密码（LoginPassword）、错误（LoginError）。按钮：登录（LoginButton）。  -->
+        <Border Style="{StaticResource PageCardStyle}"
+                Margin="24,8"
+                Visibility="{Binding ShowLogin, Converter={StaticResource BoolVis}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="48" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-        <Border Grid.Row="0"
-                Background="{DynamicResource CardBackground}"
-                BorderBrush="#E0E0E0"
-                BorderThickness="0,0,0,1"
-                Padding="16,0">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Style="{StaticResource UserToolButtonStyle}"
-                        Command="{Binding AddCommand}"
-                        AutomationProperties.AutomationId="UserAddButton"
-                        AutomationProperties.Name="{DynamicResource User_Add}">
-                    <StackPanel Orientation="Horizontal">
-                        <iconPacks:PackIconPhosphorIcons Kind="Plus" Width="16" Height="16" VerticalAlignment="Center" />
-                        <TextBlock Text="{DynamicResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                <Border Grid.Row="0" BorderBrush="#E4E4E4" BorderThickness="0,0,0,1" Padding="16,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="3"
+                                Height="16"
+                                Margin="0,0,10,0"
+                                Background="{StaticResource ThemeBrushColorAssist}" />
+                        <TextBlock Text="{DynamicResource Shell_Login}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource HighestBlack}" />
                     </StackPanel>
-                </Button>
-                <Button Style="{StaticResource UserToolButtonStyle}"
-                        Command="{Binding EditCommand}"
-                        AutomationProperties.AutomationId="UserEditButton"
-                        AutomationProperties.Name="{DynamicResource User_Edit}">
-                    <StackPanel Orientation="Horizontal">
-                        <iconPacks:PackIconPhosphorIcons Kind="PencilSimple" Width="16" Height="16" VerticalAlignment="Center" />
-                        <TextBlock Text="{DynamicResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button Style="{StaticResource UserToolButtonStyle}"
-                        Margin="0"
-                        Command="{Binding DeleteCommand}"
-                        AutomationProperties.AutomationId="UserDeleteButton"
-                        AutomationProperties.Name="{DynamicResource User_Delete}">
-                    <StackPanel Orientation="Horizontal">
-                        <iconPacks:PackIconPhosphorIcons Kind="Trash" Width="16" Height="16" VerticalAlignment="Center" />
-                        <TextBlock Text="{DynamicResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="1" Margin="40,0,40,12" VerticalAlignment="Top">
+                        <TextBlock Text="{DynamicResource User_Role}"
+                                   Style="{StaticResource LoginFieldLabel}"
+                                   Margin="0,8,0,4" />
+                        <ListBox ItemsSource="{Binding LoginRoles}"
+                                 SelectedItem="{Binding SelectedLoginRole}"
+                                 DisplayMemberPath="Text"
+                                 Style="{StaticResource LoginRoleListStyle}"
+                                 ItemContainerStyle="{StaticResource LoginRoleItemStyle}"
+                                 AutomationProperties.AutomationId="LoginRoleList" />
+                        <Border Height="1" Background="#E0E0E0" Margin="0,4,0,0" />
+
+                        <TextBlock Text="{DynamicResource User_LoginName}"
+                                   Style="{StaticResource LoginFieldLabel}"
+                                   Margin="0,8,0,4" />
+                        <TextBox x:Name="LoginNameBox"
+                                 Style="{StaticResource LoginFieldBox}"
+                                 Text="{Binding DraftLoginName, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="LoginName" />
+
+                        <TextBlock Text="{DynamicResource User_Password}"
+                                   Style="{StaticResource LoginFieldLabel}"
+                                   Margin="0,8,0,4" />
+                        <PasswordBox Style="{StaticResource LoginFieldPassword}"
+                                     svc:PasswordService.BindPassword="True"
+                                     svc:PasswordService.BoundPassword="{Binding DraftPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.AutomationId="LoginPassword" />
+
+                        <TextBlock Text="{Binding LoginError}"
+                                   Foreground="{StaticResource HighestRed}"
+                                   FontSize="14"
+                                   Margin="0,8,0,0"
+                                   TextWrapping="Wrap"
+                                   AutomationProperties.AutomationId="LoginError">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LoginError}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!--  按钮 登录（LoginButton）。命令 LoginCommand。样式 SessionButtonStyle。  -->
+                        <Button Style="{StaticResource SessionButtonStyle}"
+                                Margin="0,12,0,0"
+                                Command="{Binding LoginCommand}"
+                                AutomationProperties.AutomationId="LoginButton"
+                                AutomationProperties.Name="{DynamicResource Shell_Login}">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconPhosphorIcons Kind="ArrowRight" Width="20" Height="20" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Shell_Login}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Users}"
-                  SelectedItem="{Binding SelectedUser}"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserReorderColumns="False"
-                  CanUserResizeRows="False"
-                  CanUserSortColumns="False"
-                  IsReadOnly="True"
-                  HeadersVisibility="Column"
-                  GridLinesVisibility="Horizontal"
-                  HorizontalGridLinesBrush="#EEEEEE"
-                  BorderThickness="0"
-                  Background="{DynamicResource CardBackground}"
-                  RowBackground="{DynamicResource CardBackground}"
-                  AlternatingRowBackground="#FAFAFA"
-                  AlternationCount="2"
-                  RowHeight="40"
-                  ColumnHeaderHeight="36"
-                  FontSize="14"
-                  Foreground="{DynamicResource HighestBlack}"
-                  SelectionMode="Extended"
-                  SelectionUnit="FullRow"
-                  RowStyle="{StaticResource UserGridRowStyle}"
-                  CellStyle="{StaticResource UserGridCellStyle}"
-                  ColumnHeaderStyle="{StaticResource UserGridHeaderStyle}">
-            <DataGrid.Columns>
-                <DataGridCheckBoxColumn Header=""
-                                        Width="46"
-                                        IsReadOnly="False"
-                                        Binding="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}"
-                                        CellStyle="{StaticResource UserCheckCellStyle}"
-                                        ElementStyle="{StaticResource UserCheckBoxStyle}"
-                                        EditingElementStyle="{StaticResource UserCheckBoxStyle}" />
-                <DataGridTextColumn Header="{DynamicResource User_LoginName}" Width="180" Binding="{Binding LoginName}" IsReadOnly="True" />
-                <DataGridTextColumn Header="{DynamicResource User_UserName}" Width="220" Binding="{Binding UserName}" IsReadOnly="True" />
-                <DataGridTextColumn Header="{DynamicResource User_Role}" Width="160" Binding="{Binding RoleName}" IsReadOnly="True" />
-                <DataGridTextColumn Header="{DynamicResource User_Enabled}" Width="120" Binding="{Binding EnabledText}" IsReadOnly="True" />
-                <DataGridTextColumn Header="{DynamicResource User_CreateTime}" Width="*" Binding="{Binding CreateTimeText}" IsReadOnly="True" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <!--  区域 已登录分栏。管理员和工程师靠左，右侧按角色显示。  -->
+        <Grid Visibility="{Binding ShowSide, Converter={StaticResource BoolVis}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <Grid Grid.RowSpan="2"
+            <Border Grid.Column="0" Style="{StaticResource PageCardStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" BorderBrush="#E4E4E4" BorderThickness="0,0,0,1" Padding="16,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="3"
+                                    Height="16"
+                                    Margin="0,0,10,0"
+                                    Background="{StaticResource ThemeBrushColorAssist}" />
+                            <TextBlock Text="{DynamicResource User_Info}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource HighestBlack}" />
+                        </StackPanel>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1"
+                                  Background="Transparent"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="20,0,20,20">
+                            <TextBlock Text="{DynamicResource User_LoginName}" Style="{StaticResource SessionFieldLabel}" />
+                            <TextBlock Text="{Binding SessionLoginName}" Style="{StaticResource SessionFieldValue}" />
+                            <Border Height="1" Background="#E0E0E0" />
+
+                            <TextBlock Text="{DynamicResource User_UserName}" Style="{StaticResource SessionFieldLabel}" />
+                            <TextBlock Text="{Binding SessionUserName}" Style="{StaticResource SessionFieldValue}" />
+                            <Border Height="1" Background="#E0E0E0" />
+
+                            <TextBlock Text="{DynamicResource User_Role}" Style="{StaticResource SessionFieldLabel}" />
+                            <TextBlock Text="{Binding SessionRoleText}" Style="{StaticResource SessionFieldValue}" />
+                            <Border Height="1" Background="#E0E0E0" />
+
+                            <TextBlock Text="{DynamicResource User_LoginTime}" Style="{StaticResource SessionFieldLabel}" />
+                            <TextBlock Text="{Binding SessionLoginTimeText}" Style="{StaticResource SessionFieldValue}" />
+                            <Border Height="1" Background="#E0E0E0" />
+
+                            <!--  按钮 注销（LogoutButtonSide）。命令 LogoutCommand。拉通左栏。  -->
+                            <Button Style="{StaticResource SessionButtonStyle}"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,28,0,0"
+                                    Command="{Binding LogoutCommand}"
+                                    AutomationProperties.AutomationId="LogoutButtonSide"
+                                    AutomationProperties.Name="{DynamicResource Shell_Logout}">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconPhosphorIcons Kind="ArrowRight" Width="20" Height="20" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource Shell_Logout}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!--  区域 用户管理。只有管理员。按钮：新增（UserAddButton）、编辑（UserEditButton）、删除（UserDeleteButton）。  -->
+            <Border Grid.Column="2"
+                    Style="{StaticResource PageCardStyle}"
+                    Visibility="{Binding ShowUserAdmin, Converter={StaticResource BoolVis}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" BorderBrush="#E4E4E4" BorderThickness="0,0,0,1" Padding="16,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="3"
+                                    Height="16"
+                                    Margin="0,0,10,0"
+                                    Background="{StaticResource ThemeBrushColorAssist}" />
+                            <TextBlock Text="{DynamicResource User_Manage}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource HighestBlack}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="1"
+                            Background="{DynamicResource CardBackground}"
+                            BorderBrush="#E0E0E0"
+                            BorderThickness="0,0,0,1"
+                            Padding="16,12">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <!--  按钮 新增（UserAddButton）。命令 AddCommand。  -->
+                            <Button Style="{StaticResource UserToolButtonStyle}"
+                                    Command="{Binding AddCommand}"
+                                    AutomationProperties.AutomationId="UserAddButton"
+                                    AutomationProperties.Name="{DynamicResource User_Add}">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconPhosphorIcons Kind="Plus" Width="16" Height="16" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <!--  按钮 编辑（UserEditButton）。命令 EditCommand。  -->
+                            <Button Style="{StaticResource UserToolButtonStyle}"
+                                    Command="{Binding EditCommand}"
+                                    AutomationProperties.AutomationId="UserEditButton"
+                                    AutomationProperties.Name="{DynamicResource User_Edit}">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconPhosphorIcons Kind="PencilSimple" Width="16" Height="16" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <!--  按钮 删除（UserDeleteButton）。命令 DeleteCommand。  -->
+                            <Button Style="{StaticResource UserToolButtonStyle}"
+                                    Margin="0"
+                                    Command="{Binding DeleteCommand}"
+                                    AutomationProperties.AutomationId="UserDeleteButton"
+                                    AutomationProperties.Name="{DynamicResource User_Delete}">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconPhosphorIcons Kind="Trash" Width="16" Height="16" VerticalAlignment="Center" />
+                                    <TextBlock Text="{DynamicResource User_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!--  控件 用户表。绑定 Users、SelectedUser。列：勾选、登录名、用户名、角色、启用、创建时间。样式 UserGridRowStyle、UserGridCellStyle、UserGridHeaderStyle。  -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding Users}"
+                              SelectedItem="{Binding SelectedUser}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeRows="False"
+                              CanUserSortColumns="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#EEEEEE"
+                              BorderThickness="0"
+                              Background="{DynamicResource CardBackground}"
+                              RowBackground="{DynamicResource CardBackground}"
+                              AlternatingRowBackground="#FAFAFA"
+                              AlternationCount="2"
+                              RowHeight="40"
+                              ColumnHeaderHeight="36"
+                              FontSize="14"
+                              Foreground="{DynamicResource HighestBlack}"
+                              SelectionMode="Extended"
+                              SelectionUnit="FullRow"
+                              RowStyle="{StaticResource UserGridRowStyle}"
+                              CellStyle="{StaticResource UserGridCellStyle}"
+                              ColumnHeaderStyle="{StaticResource UserGridHeaderStyle}">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header=""
+                                                    Width="46"
+                                                    IsReadOnly="False"
+                                                    Binding="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}"
+                                                    CellStyle="{StaticResource UserCheckCellStyle}"
+                                                    ElementStyle="{StaticResource UserCheckBoxStyle}"
+                                                    EditingElementStyle="{StaticResource UserCheckBoxStyle}" />
+                            <DataGridTextColumn Header="{DynamicResource User_LoginName}" Width="180" Binding="{Binding LoginName}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{DynamicResource User_UserName}" Width="220" Binding="{Binding UserName}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{DynamicResource User_Role}" Width="160" Binding="{Binding RoleName}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{DynamicResource User_Enabled}" Width="120" Binding="{Binding EnabledText}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{DynamicResource User_CreateTime}" Width="*" Binding="{Binding CreateTimeText}" IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!--  区域 管理模块。只有工程师。配置和插件只展示，不跳转。  -->
+            <Border Grid.Column="2"
+                    Style="{StaticResource PageCardStyle}"
+                    Visibility="{Binding ShowEngineerModules, Converter={StaticResource BoolVis}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" BorderBrush="#E4E4E4" BorderThickness="0,0,0,1" Padding="16,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="3"
+                                    Height="16"
+                                    Margin="0,0,10,0"
+                                    Background="{StaticResource ThemeBrushColorAssist}" />
+                            <TextBlock Text="{DynamicResource User_ManageModules}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource HighestBlack}" />
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Grid.Row="1" Margin="16">
+                        <Border Background="{DynamicResource CardBodyBrush}"
+                                BorderBrush="#E4E4E4"
+                                BorderThickness="1"
+                                Padding="16"
+                                Margin="0,0,0,12"
+                                AutomationProperties.AutomationId="ConfigModuleCard">
+                            <DockPanel LastChildFill="True">
+                                <Border Width="40"
+                                        Height="40"
+                                        Margin="0,0,14,0"
+                                        Background="#FFF6D2"
+                                        DockPanel.Dock="Left">
+                                    <iconPacks:PackIconPhosphorIcons Kind="Sliders"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     HorizontalAlignment="Center"
+                                                                     VerticalAlignment="Center"
+                                                                     Foreground="{DynamicResource HighestBlack}" />
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Nav_Config}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource HighestBlack}" />
+                                    <TextBlock Text="{DynamicResource User_ModuleAllowed}"
+                                               Margin="0,4,0,0"
+                                               FontSize="13"
+                                               Foreground="#666666" />
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+
+                        <Border Background="{DynamicResource CardBodyBrush}"
+                                BorderBrush="#E4E4E4"
+                                BorderThickness="1"
+                                Padding="16"
+                                AutomationProperties.AutomationId="PluginModuleCard">
+                            <DockPanel LastChildFill="True">
+                                <Border Width="40"
+                                        Height="40"
+                                        Margin="0,0,14,0"
+                                        Background="#FFF6D2"
+                                        DockPanel.Dock="Left">
+                                    <iconPacks:PackIconPhosphorIcons Kind="PuzzlePiece"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     HorizontalAlignment="Center"
+                                                                     VerticalAlignment="Center"
+                                                                     Foreground="{DynamicResource HighestBlack}" />
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource User_Plugin}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource HighestBlack}" />
+                                    <TextBlock Text="{DynamicResource User_ModuleAllowed}"
+                                               Margin="0,4,0,0"
+                                               FontSize="13"
+                                               Foreground="#666666" />
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!--  区域 已登录居中。操作员和供应商没有右侧管理区。按钮：注销（LogoutButton）。  -->
+        <Border Style="{StaticResource PageCardStyle}"
+                Margin="48,24"
+                Visibility="{Binding ShowCenteredSession, Converter={StaticResource BoolVis}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="48" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" BorderBrush="#E4E4E4" BorderThickness="0,0,0,1" Padding="16,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="3"
+                                Height="16"
+                                Margin="0,0,10,0"
+                                Background="{StaticResource ThemeBrushColorAssist}" />
+                        <TextBlock Text="{DynamicResource User_Info}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource HighestBlack}" />
+                    </StackPanel>
+                </Border>
+
+                <ScrollViewer x:Name="CenteredSessionScroll"
+                              Grid.Row="1"
+                              Background="Transparent"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <Grid MinHeight="{Binding ViewportHeight, ElementName=CenteredSessionScroll}">
+                    <StackPanel Margin="56,24,56,28" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource User_LoginName}" Style="{StaticResource LoginFieldLabel}" />
+                        <TextBlock Text="{Binding SessionLoginName}"
+                                   FontSize="22"
+                                   Foreground="{DynamicResource HighestBlack}"
+                                   Margin="0,0,0,8" />
+                        <Border Height="1" Background="#E0E0E0" />
+
+                        <TextBlock Text="{DynamicResource User_UserName}" Style="{StaticResource LoginFieldLabel}" />
+                        <TextBlock Text="{Binding SessionUserName}"
+                                   FontSize="22"
+                                   Foreground="{DynamicResource HighestBlack}"
+                                   Margin="0,0,0,8" />
+                        <Border Height="1" Background="#E0E0E0" />
+
+                        <TextBlock Text="{DynamicResource User_Role}" Style="{StaticResource LoginFieldLabel}" />
+                        <TextBlock Text="{Binding SessionRoleText}"
+                                   FontSize="22"
+                                   Foreground="{DynamicResource HighestBlack}"
+                                   Margin="0,0,0,8" />
+                        <Border Height="1" Background="#E0E0E0" />
+
+                        <TextBlock Text="{DynamicResource User_LoginTime}" Style="{StaticResource LoginFieldLabel}" />
+                        <TextBlock Text="{Binding SessionLoginTimeText}"
+                                   FontSize="22"
+                                   Foreground="{DynamicResource HighestBlack}"
+                                   Margin="0,0,0,8" />
+                        <Border Height="1" Background="#E0E0E0" />
+
+                        <!--  按钮 注销（LogoutButton）。命令 LogoutCommand。样式 SessionButtonStyle。  -->
+                        <Button Style="{StaticResource SessionButtonStyle}"
+                                Margin="0,28,0,0"
+                                Command="{Binding LogoutCommand}"
+                                AutomationProperties.AutomationId="LogoutButton"
+                                AutomationProperties.Name="{DynamicResource Shell_Logout}">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconPhosphorIcons Kind="ArrowRight" Width="20" Height="20" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Shell_Logout}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!--  区域 编辑窗 UserEditor。控件：登录名（UserEditorLogin）、用户名（UserEditorUserName）、密码（UserEditorPassword）、角色（UserEditorRole）、错误（UserEditorError）。按钮：保存（UserEditorSave）、取消（UserEditorCancel）。样式 UserToolButtonStyle、UserUnderlineBox、UserPasswordBox、UserRoleCombo。  -->
+        <Grid Panel.ZIndex="2"
               Background="#73000000"
               Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolVis}}"
               AutomationProperties.AutomationId="UserEditor">
@@ -483,6 +969,7 @@
                             <TextBlock DockPanel.Dock="Left"
                                        Text="{DynamicResource User_Enabled}"
                                        VerticalAlignment="Center" />
+                            <!--  控件 启用（UserEditorEnabled）。绑定 EditorEnabled。样式 UserSwitchStyle。  -->
                             <ToggleButton DockPanel.Dock="Right"
                                           Style="{StaticResource UserSwitchStyle}"
                                           IsChecked="{Binding EditorEnabled}"
@@ -491,6 +978,7 @@
                     </StackPanel>
 
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,16,0">
+                        <!--  按钮 保存（UserEditorSave）。命令 ConfirmCommand。  -->
                         <Button Style="{StaticResource UserToolButtonStyle}"
                                 Command="{Binding ConfirmCommand}"
                                 AutomationProperties.AutomationId="UserEditorSave"
@@ -500,6 +988,7 @@
                                 <TextBlock Text="{DynamicResource User_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
+                        <!--  按钮 取消（UserEditorCancel）。命令 CancelCommand。  -->
                         <Button Style="{StaticResource UserToolButtonStyle}"
                                 Margin="0"
                                 Command="{Binding CancelCommand}"

@@ -242,7 +242,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 entity.Title = result.Title;
                 entity.CfgValue = result.CfgValue;
-                entity.NumberValue = result.NumberValue;
                 db.Updateable(entity).ExecuteCommand();
                 step.Title = result.Title;
                 step.Detail = result.Detail;

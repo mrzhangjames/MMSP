@@ -20,6 +20,7 @@
                  WindowTransitionsEnabled="False"
                  FontFamily="Segoe UI, Microsoft YaHei"
                  FontSize="14">
+    <!--  区域 工具属性。按钮：取消、保存。控件 Body 放各工具表单。  -->
     <DockPanel>
         <Grid DockPanel.Dock="Bottom" Margin="12,0,12,12">
             <Grid.ColumnDefinitions>
@@ -27,10 +28,12 @@
                 <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+            <!--  按钮 取消。  -->
             <Button Grid.Column="0"
                     Content="{DynamicResource User_Cancel}"
                     Style="{StaticResource MahApps.Styles.Button.Dialogs}"
                     IsCancel="True" />
+            <!--  按钮 保存 SaveButton。事件 Accept。  -->
             <Button x:Name="SaveButton"
                     Grid.Column="2"
                     Content="{DynamicResource User_Save}"
@@ -38,6 +41,7 @@
                     IsDefault="True"
                     Click="Accept" />
         </Grid>
+        <!--  控件 Body：当前工具的属性表单。  -->
         <ContentControl x:Name="Body" />
     </DockPanel>
 </mah:MetroWindow>

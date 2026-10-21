@@ -48,6 +48,7 @@ namespace MMSP.App.Main
             services.RegisterInstance(_licenseFiles);
             services.RegisterInstance(_licenseStatus);
             services.RegisterSingleton<IFlowRunService, FlowRunService>();
+            services.RegisterSingleton<UserSession>();
             services.RegisterForNavigation<MainView, MainViewModel>();
         }
 

@@ -81,14 +81,6 @@ namespace MMSP.Plugin.Tool
         }
 
         /// <summary>
-        /// 延时毫秒。其它工具为 0。
-        /// </summary>
-        public static int NumberValue(FlowToolKind kind, string cfg)
-        {
-            return kind == FlowToolKind.Delay ? Read<DelayToolEntity>(cfg).Milliseconds : 0;
-        }
-
-        /// <summary>
         /// 把已有配置装进控件。控件构造时已经建过一份空配置，这里换掉它。扫码页同时带上扫码枪列表。
         /// </summary>
         private static UserControl Load<TTool>(UserControl view, TTool tool, IReadOnlyList<string> scanners)

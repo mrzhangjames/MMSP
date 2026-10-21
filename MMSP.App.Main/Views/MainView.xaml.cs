@@ -38,15 +38,6 @@ namespace MMSP.App.Main.Views
         }
 
         /// <summary>
-        /// 登录窗打开后把焦点放在登录名。按名字查找，不依赖生成字段。
-        /// </summary>
-        private void OnLoginOverlayVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (e.NewValue is true && FindName("LoginNameBox") is IInputElement box)
-                box.Focus();
-        }
-
-        /// <summary>
         /// 关闭前用 Metro 对话框确认。取消则留下窗口。
         /// </summary>
         protected override async void OnClosing(CancelEventArgs e)

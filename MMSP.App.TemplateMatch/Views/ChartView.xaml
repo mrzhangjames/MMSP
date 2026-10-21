@@ -10,8 +10,10 @@
              FontSize="14"
              Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
+        <!--  转换 BoolVis：布尔到可见性。  -->
         <BooleanToVisibilityConverter x:Key="BoolVis" />
 
+        <!--  样式 ChartToolButton：工具按钮。白底灰边，悬停变灰。  -->
         <Style x:Key="ChartToolButton" TargetType="Button">
             <Setter Property="Height" Value="32" />
             <Setter Property="MinWidth" Value="88" />
@@ -46,6 +48,7 @@
             </Style.Triggers>
         </Style>
 
+        <!--  样式 ChartLineButton：折线按钮。选中浅金底、金边。基于 ChartToolButton。  -->
         <Style x:Key="ChartLineButton" TargetType="Button" BasedOn="{StaticResource ChartToolButton}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsLine}" Value="True">
@@ -55,6 +58,7 @@
             </Style.Triggers>
         </Style>
 
+        <!--  样式 ChartColumnButton：柱状按钮。选中浅金底、金边。基于 ChartToolButton。  -->
         <Style x:Key="ChartColumnButton" TargetType="Button" BasedOn="{StaticResource ChartToolButton}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsColumn}" Value="True">
@@ -64,6 +68,7 @@
             </Style.Triggers>
         </Style>
 
+        <!--  样式 ChartPieButton：饼图按钮。外边距为 0，选中浅金底、金边。基于 ChartToolButton。  -->
         <Style x:Key="ChartPieButton" TargetType="Button" BasedOn="{StaticResource ChartToolButton}">
             <Setter Property="Margin" Value="0" />
             <Style.Triggers>
@@ -74,6 +79,7 @@
             </Style.Triggers>
         </Style>
 
+        <!--  样式 ChartUnderlineBox：下划线输入框。  -->
         <Style x:Key="ChartUnderlineBox" TargetType="TextBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
@@ -103,6 +109,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 ChartComboItem：下拉项。悬停浅金，选中金色。  -->
         <Style x:Key="ChartComboItem" TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="8,6" />
             <Setter Property="Background" Value="White" />
@@ -130,6 +137,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 ChartCombo：下划线下拉框。条目用 ChartComboItem。  -->
         <Style x:Key="ChartCombo" TargetType="ComboBox">
             <Setter Property="Height" Value="32" />
             <Setter Property="FontSize" Value="15" />
@@ -206,6 +214,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 ChartCardItem：图表卡片。悬停浅金边，选中浅金底并露出金条。  -->
         <Style x:Key="ChartCardItem" TargetType="ListBoxItem">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -246,6 +255,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 ChartGridHeader：图表数据列头。  -->
         <Style x:Key="ChartGridHeader" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="#F5F5F5" />
             <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
@@ -270,6 +280,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 ChartGridCell：图表数据单元格。  -->
         <Style x:Key="ChartGridCell" TargetType="DataGridCell">
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -285,6 +296,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 ChartGridRow：图表数据行。隔行浅灰。  -->
         <Style x:Key="ChartGridRow" TargetType="DataGridRow">
             <Setter Property="Background" Value="White" />
             <Style.Triggers>
@@ -301,6 +313,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
+        <!--  区域 图表列表。按钮：新增（ChartAddButton）、编辑（ChartEditButton）、删除（ChartDeleteButton）。样式 ChartToolButton。  -->
         <Grid Grid.Column="0" Background="#FAFAF8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="64" />
@@ -312,6 +325,7 @@
                     BorderThickness="0,0,0,1"
                     Padding="12,0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <!--  按钮 新增（ChartAddButton）。命令 AddCommand。  -->
                     <Button Style="{StaticResource ChartToolButton}"
                             Command="{Binding AddCommand}"
                             AutomationProperties.AutomationId="ChartAddButton"
@@ -321,6 +335,7 @@
                             <TextBlock Text="{DynamicResource User_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
+                    <!--  按钮 编辑（ChartEditButton）。命令 EditCommand。  -->
                     <Button Style="{StaticResource ChartToolButton}"
                             Command="{Binding EditCommand}"
                             AutomationProperties.AutomationId="ChartEditButton"
@@ -330,6 +345,7 @@
                             <TextBlock Text="{DynamicResource User_Edit}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
+                    <!--  按钮 删除（ChartDeleteButton）。命令 DeleteCommand。  -->
                     <Button Style="{StaticResource ChartToolButton}"
                             Margin="0"
                             Command="{Binding DeleteCommand}"
@@ -342,6 +358,7 @@
                     </Button>
                 </StackPanel>
             </Border>
+            <!--  控件 图表卡片列表（ChartCardList）。绑定 Charts、SelectedChart。样式 ChartCardItem。项为名称、显示值、副标题。  -->
             <ListBox Grid.Row="1"
                      ItemsSource="{Binding Charts}"
                      SelectedItem="{Binding SelectedChart}"
@@ -376,12 +393,14 @@
             <Border Grid.RowSpan="2" BorderBrush="#E4E4E4" BorderThickness="0,0,1,0" IsHitTestVisible="False" />
         </Grid>
 
+        <!--  区域 图表与数据。上为图形，下为图表数据。  -->
         <Grid x:Name="ChartRight" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="{Binding DataContext.DataPaneLength, ElementName=ChartRight}" />
             </Grid.RowDefinitions>
 
+            <!--  区域 图形。按钮：折线图（ChartLineButton）、柱状图（ChartColumnButton）、饼图（ChartPieButton）。控件：直角坐标图绑 CartesianSeries、XAxes、YAxes，饼图时隐藏；饼图绑 PieSeries，可见性 IsPie。样式 ChartLineButton、ChartColumnButton、ChartPieButton。  -->
             <Grid Grid.Row="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="56" />
@@ -397,6 +416,7 @@
                                    VerticalAlignment="Center"
                                    TextTrimming="CharacterEllipsis" />
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <!--  按钮 折线图（ChartLineButton）。命令 SetKindCommand。参数 Line。样式 ChartLineButton。  -->
                             <Button Style="{StaticResource ChartLineButton}"
                                     Command="{Binding SetKindCommand}"
                                     CommandParameter="Line"
@@ -406,6 +426,7 @@
                                     <TextBlock Text="{DynamicResource Chart_Line}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
+                            <!--  按钮 柱状图（ChartColumnButton）。命令 SetKindCommand。参数 Column。样式 ChartColumnButton。  -->
                             <Button Style="{StaticResource ChartColumnButton}"
                                     Command="{Binding SetKindCommand}"
                                     CommandParameter="Column"
@@ -415,6 +436,7 @@
                                     <TextBlock Text="{DynamicResource Chart_Column}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
+                            <!--  按钮 饼图（ChartPieButton）。命令 SetKindCommand。参数 Pie。样式 ChartPieButton。  -->
                             <Button Style="{StaticResource ChartPieButton}"
                                     Command="{Binding SetKindCommand}"
                                     CommandParameter="Pie"
@@ -455,6 +477,7 @@
                 </Grid>
             </Grid>
 
+            <!--  区域 图表数据。按钮：折叠（ChartCollapseButton）、查询（ChartQueryButton）。控件：搜索（ChartSearchBox）、数据表（ChartDataGrid）。展开后 UPH 显示数据表，MES 显示空数据。样式 ChartToolButton、ChartGridRow、ChartGridCell、ChartGridHeader。  -->
             <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="56" />
@@ -469,6 +492,7 @@
                                    FontSize="16"
                                    FontWeight="Bold"
                                    VerticalAlignment="Center" />
+                        <!--  按钮 折叠（ChartCollapseButton）。命令 ToggleDataCommand。  -->
                         <Button DockPanel.Dock="Right"
                                 Style="{StaticResource ChartToolButton}"
                                 MinWidth="72"
@@ -496,6 +520,7 @@
                 </Border>
                 <Border Grid.Row="1" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="16,0" Visibility="{Binding IsDataOpen, Converter={StaticResource BoolVis}}">
                     <DockPanel>
+                        <!--  按钮 查询（ChartQueryButton）。命令 QueryCommand。  -->
                         <Button DockPanel.Dock="Right"
                                 Style="{StaticResource ChartToolButton}"
                                 Margin="8,0,0,0"
@@ -517,6 +542,7 @@
                                                                  Height="16"
                                                                  VerticalAlignment="Center"
                                                                  Foreground="#B0B0B0" />
+                                <!--  控件 搜索（ChartSearchBox）。绑定 SearchText。回车命令 QueryCommand。  -->
                                 <TextBox Grid.Column="1"
                                          Margin="8,0,0,0"
                                          BorderThickness="0"
@@ -550,6 +576,7 @@
                     </DockPanel>
                 </Border>
                 <Grid Grid.Row="2" Visibility="{Binding IsDataOpen, Converter={StaticResource BoolVis}}">
+                    <!--  控件 数据表（ChartDataGrid）。绑定 Points。列：时间、小时产量、累计产量、良品数、不良数、良品率。样式 ChartGridRow、ChartGridCell、ChartGridHeader。可见性绑 IsUph。  -->
                     <DataGrid ItemsSource="{Binding Points}"
                               Visibility="{Binding IsUph, Converter={StaticResource BoolVis}}"
                               AutoGenerateColumns="False"
@@ -585,6 +612,7 @@
                             <DataGridTextColumn Header="{DynamicResource Chart_Yield}" Width="*" Binding="{Binding YieldText}" />
                         </DataGrid.Columns>
                     </DataGrid>
+                    <!--  区域 MES 空数据。来源名绑 MesSourceName，提示暂无 MES 数据。可见性绑 IsMes。  -->
                     <StackPanel HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Visibility="{Binding IsMes, Converter={StaticResource BoolVis}}">
@@ -601,6 +629,7 @@
             </Grid>
         </Grid>
 
+        <!--  区域 编辑窗 ChartEditor。标题 ChartEditorTitle。控件：名称（ChartEditorName）、来源类型（ChartEditorSourceKind）、来源（ChartEditorSource）、显示值（ChartEditorDisplay）、副标题（ChartEditorSubtitle）、副标题样式（ChartEditorSubtitleStyle）、错误（ChartEditorError）。按钮：保存（ChartEditorSave）、取消（ChartEditorCancel）。样式 ChartUnderlineBox、ChartCombo、ChartToolButton。  -->
         <Grid Grid.ColumnSpan="2"
               Background="#73000000"
               Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolVis}}"
@@ -754,6 +783,7 @@
                         </TextBlock>
                     </StackPanel>
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,16,0">
+                        <!--  按钮 保存（ChartEditorSave）。命令 ConfirmCommand。  -->
                         <Button Style="{StaticResource ChartToolButton}"
                                 Command="{Binding ConfirmCommand}"
                                 AutomationProperties.AutomationId="ChartEditorSave">
@@ -762,6 +792,7 @@
                                 <TextBlock Text="{DynamicResource User_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
+                        <!--  按钮 取消（ChartEditorCancel）。命令 CancelCommand。  -->
                         <Button Style="{StaticResource ChartToolButton}"
                                 Margin="0"
                                 Command="{Binding CancelCommand}"

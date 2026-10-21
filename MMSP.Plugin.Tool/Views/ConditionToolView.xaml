@@ -8,10 +8,12 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!--  字典 工具表单 ToolForm。样式 ToolLabel、ToolBox。  -->
                 <ResourceDictionary Source="pack://application:,,,/MMSP.Plugin.Tool;component/Themes/ToolForm.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
+    <!--  区域 条件。控件：名称 Name、条件 Expression。样式 ToolLabel、ToolBox。  -->
     <StackPanel Margin="16">
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />

@@ -8,10 +8,12 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!--  字典 工具表单 ToolForm。样式 ToolLabel、ToolBox、ToolCombo。  -->
                 <ResourceDictionary Source="pack://application:,,,/MMSP.Plugin.Tool;component/Themes/ToolForm.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
+    <!--  区域 PLC 读取。控件：名称 Name、地址 Address、数据类型 DataType、长度 Length。样式 ToolLabel、ToolBox、ToolCombo。  -->
     <StackPanel Margin="16">
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />

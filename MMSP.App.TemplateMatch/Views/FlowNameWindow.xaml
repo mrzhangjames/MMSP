@@ -18,18 +18,22 @@
                  WindowTransitionsEnabled="False"
                  FontFamily="Segoe UI, Microsoft YaHei"
                  FontSize="14">
+    <!--  区域 流程名称。按钮：取消（FlowEditorCancel）、保存（FlowEditorSave）。控件：名称 FlowEditorName、错误 FlowEditorError。  -->
     <DockPanel>
+        <!--  区域 底部按钮。  -->
         <Grid DockPanel.Dock="Bottom" Margin="12,0,12,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+            <!--  按钮 取消（FlowEditorCancel）。  -->
             <Button Grid.Column="0"
                     Content="{DynamicResource User_Cancel}"
                     Style="{StaticResource MahApps.Styles.Button.Dialogs}"
                     IsCancel="True"
                     AutomationProperties.AutomationId="FlowEditorCancel" />
+            <!--  按钮 保存（FlowEditorSave）。事件 Accept。  -->
             <Button Grid.Column="2"
                     Content="{DynamicResource User_Save}"
                     Style="{StaticResource MahApps.Styles.Button.Dialogs.Accent}"
@@ -39,10 +43,12 @@
         </Grid>
         <StackPanel Margin="20,8,20,8">
             <TextBlock Text="{DynamicResource Flow_Name}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
+            <!--  控件 名称 FlowEditorName。最多 32 字。  -->
             <TextBox x:Name="NameBox"
                      MaxLength="32"
                      mah:TextBoxHelper.UseFloatingWatermark="False"
                      AutomationProperties.AutomationId="FlowEditorName" />
+            <!--  控件 错误 FlowEditorError。默认隐藏。  -->
             <TextBlock x:Name="ErrorText"
                        Foreground="{StaticResource HighestRed}"
                        FontSize="12"

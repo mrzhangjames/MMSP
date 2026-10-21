@@ -8,10 +8,12 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!--  字典 工具表单 ToolForm。样式 ToolLabel、ToolBox、ToolDrop、ToolCheck。  -->
                 <ResourceDictionary Source="pack://application:,,,/MMSP.Plugin.Tool;component/Themes/ToolForm.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
+    <!--  区域 多次扫码。控件：名称 Name、扫码枪 Guns、触发字符串 Trigger、条码数量 Count。样式 ToolLabel、ToolBox、ToolDrop、ToolCheck。  -->
     <StackPanel Margin="16">
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
@@ -21,6 +23,7 @@
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="扫码枪" Style="{StaticResource ToolLabel}" />
                 <Grid>
+                    <!--  控件 扫码枪 Guns。样式 ToolDrop。绑定 Scanner。  -->
                     <ToggleButton x:Name="Guns"
                                   Style="{StaticResource ToolDrop}"
                                   Content="{Binding Scanner}" />
@@ -38,6 +41,7 @@
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.16" Color="Black" />
                             </Border.Effect>
+                            <!--  控件 扫码枪多选。绑定 Choices。样式 ToolCheck。  -->
                             <ItemsControl ItemsSource="{Binding Choices}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>

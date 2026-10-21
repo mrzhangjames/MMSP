@@ -4,7 +4,7 @@ using SqlSugar;
 namespace MMSP.Core.Model.DB
 {
     /// <summary>
-    /// 流程页的 MES 连接。写在客户库，只使用一行。这不是报文表。
+    /// 流程页的 MES 配置。一行对应一种按客户和设备选出的配置类。
     /// </summary>
     [SugarTable("biz_flow_mes")]
     public class FlowMesEntity : BaseDBEntity
@@ -16,33 +16,15 @@ namespace MMSP.Core.Model.DB
         public Guid Id { get; set; }
 
         /// <summary>
-        /// 接口地址。最长 256。
+        /// 配置类全名。同一种配置只保留一行。
         /// </summary>
-        [SugarColumn(ColumnName = "endpoint", Length = 256)]
-        public string Endpoint { get; set; } = "";
+        [SugarColumn(ColumnName = "config_type", Length = 256)]
+        public string ConfigType { get; set; } = "";
 
         /// <summary>
-        /// 工位。最长 32。
+        /// 配置类公共属性的 JSON。
         /// </summary>
-        [SugarColumn(ColumnName = "station", Length = 32)]
-        public string Station { get; set; } = "";
-
-        /// <summary>
-        /// 超时，毫秒。
-        /// </summary>
-        [SugarColumn(ColumnName = "timeout_ms")]
-        public int TimeoutMs { get; set; }
-
-        /// <summary>
-        /// 重试次数。
-        /// </summary>
-        [SugarColumn(ColumnName = "retry_count")]
-        public int RetryCount { get; set; }
-
-        /// <summary>
-        /// 是否启用。
-        /// </summary>
-        [SugarColumn(ColumnName = "is_enabled")]
-        public bool IsEnabled { get; set; }
+        [SugarColumn(ColumnName = "cfg_value", ColumnDataType = "text")]
+        public string CfgValue { get; set; } = "";
     }
 }

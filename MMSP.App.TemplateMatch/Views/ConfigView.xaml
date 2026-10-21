@@ -9,8 +9,10 @@
              FontSize="14"
              Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
+        <!--  转换 BoolVis：布尔到可见性。  -->
         <BooleanToVisibilityConverter x:Key="BoolVis" />
 
+        <!--  样式 ConfigPanel：配置卡片。卡片底、描边、圆角 8，下边距 16。  -->
         <Style x:Key="ConfigPanel" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBackground}" />
             <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
@@ -20,6 +22,7 @@
             <Setter Property="SnapsToDevicePixels" Value="True" />
         </Style>
 
+        <!--  样式 ConfigFlatButton：扁平按钮。透明无边框，内容铺满。  -->
         <Style x:Key="ConfigFlatButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -39,6 +42,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 ConfigToolButton：工具按钮。卡片底灰边，悬停变灰。  -->
         <Style x:Key="ConfigToolButton" TargetType="Button">
             <Setter Property="Height" Value="32" />
             <Setter Property="MinWidth" Value="88" />
@@ -72,6 +76,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 ConfigUnderlineBox：下划线输入框。  -->
         <Style x:Key="ConfigUnderlineBox" TargetType="TextBox">
             <Setter Property="Height" Value="36" />
             <Setter Property="FontSize" Value="15" />
@@ -106,6 +111,7 @@
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <!--  区域 配置页。左列界面主题、语言切换、常规，右列许可证、程序版本。  -->
         <Grid Margin="16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -114,6 +120,7 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
+                <!--  区域 界面主题。按钮：浅色（ConfigThemeLight）、深色（ConfigThemeDark）。样式 ConfigPanel、ConfigFlatButton。  -->
                 <Border Style="{StaticResource ConfigPanel}">
                     <StackPanel>
                         <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Height="52" Padding="16,0">
@@ -141,6 +148,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
+                                <!--  按钮 浅色（ConfigThemeLight）。命令 SelectLightCommand。  -->
                                 <Button Style="{StaticResource ConfigFlatButton}"
                                         Command="{Binding SelectLightCommand}"
                                         AutomationProperties.AutomationId="ConfigThemeLight"
@@ -183,6 +191,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
+                                <!--  按钮 深色（ConfigThemeDark）。命令 SelectDarkCommand。  -->
                                 <Button Style="{StaticResource ConfigFlatButton}"
                                         Command="{Binding SelectDarkCommand}"
                                         AutomationProperties.AutomationId="ConfigThemeDark"
@@ -216,6 +225,7 @@
                     </StackPanel>
                 </Border>
 
+                <!--  区域 语言切换。按钮：简体中文（ConfigLangZh）、English（ConfigLangEn）。样式 ConfigPanel、ConfigFlatButton。  -->
                 <Border Style="{StaticResource ConfigPanel}">
                     <StackPanel>
                         <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Height="52" Padding="16,0">
@@ -244,6 +254,7 @@
                                     </Style>
                                 </Border.Style>
                                 <Grid>
+                                    <!--  按钮 简体中文（ConfigLangZh）。命令 SelectChineseCommand。  -->
                                     <Button Style="{StaticResource ConfigFlatButton}"
                                             Command="{Binding SelectChineseCommand}"
                                             AutomationProperties.AutomationId="ConfigLangZh"
@@ -281,6 +292,7 @@
                                     </Style>
                                 </Border.Style>
                                 <Grid>
+                                    <!--  按钮 English（ConfigLangEn）。命令 SelectEnglishCommand。  -->
                                     <Button Style="{StaticResource ConfigFlatButton}"
                                             Command="{Binding SelectEnglishCommand}"
                                             AutomationProperties.AutomationId="ConfigLangEn"
@@ -308,12 +320,14 @@
                     </StackPanel>
                 </Border>
 
+                <!--  区域 常规。按钮：保存（ConfigSave）、打开日志目录（ConfigOpenLog）。控件：窗口标题（ConfigWindowTitle）、日志目录、保存错误（ConfigSaveError）。样式 ConfigPanel、ConfigToolButton、ConfigUnderlineBox。  -->
                 <Border Style="{StaticResource ConfigPanel}">
                     <StackPanel>
                         <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Height="52" Padding="16,0">
                             <DockPanel LastChildFill="False">
                                 <Border DockPanel.Dock="Left" Width="3" Height="16" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" VerticalAlignment="Center" />
                                 <TextBlock DockPanel.Dock="Left" Text="{DynamicResource Config_General}" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+                                <!--  按钮 保存（ConfigSave）。命令 SaveCommand。  -->
                                 <Button DockPanel.Dock="Right"
                                         Style="{StaticResource ConfigToolButton}"
                                         Command="{Binding SaveCommand}"
@@ -336,6 +350,7 @@
                                     <TextBlock Text="{DynamicResource Config_LogFolder}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
                                     <TextBlock Text="{DynamicResource Config_LogPath}" FontSize="15" FontWeight="SemiBold" />
                                 </StackPanel>
+                                <!--  按钮 打开日志目录（ConfigOpenLog）。命令 OpenLogCommand。  -->
                                 <Button HorizontalAlignment="Right"
                                         VerticalAlignment="Bottom"
                                         Style="{StaticResource ConfigToolButton}"
@@ -348,6 +363,7 @@
                                     </StackPanel>
                                 </Button>
                             </Grid>
+                            <!--  区域 保留策略。控件：数据库日志保留天数（ConfigDbLogDays）、日志文件保留天数（ConfigFileLogDays）。样式 ConfigUnderlineBox。  -->
                             <TextBlock Text="{DynamicResource Config_Retention}"
                                        FontSize="14"
                                        FontWeight="Bold"
@@ -432,12 +448,14 @@
             </StackPanel>
 
             <StackPanel Grid.Column="2">
+                <!--  区域 许可证。按钮：导入（ConfigImport）。控件：状态、客户编码、绑定、生效时间、到期时间、授权模块、导入结果。样式 ConfigPanel、ConfigToolButton。  -->
                 <Border Style="{StaticResource ConfigPanel}">
                     <StackPanel>
                         <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Height="52" Padding="16,0">
                             <DockPanel LastChildFill="False">
                                 <Border DockPanel.Dock="Left" Width="3" Height="16" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" VerticalAlignment="Center" />
                                 <TextBlock DockPanel.Dock="Left" Text="{DynamicResource Config_License}" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+                                <!--  按钮 导入（ConfigImport）。命令 ImportCommand。  -->
                                 <Button DockPanel.Dock="Right"
                                         Style="{StaticResource ConfigToolButton}"
                                         Command="{Binding ImportCommand}"
@@ -549,6 +567,7 @@
                     </StackPanel>
                 </Border>
 
+                <!--  区域 程序版本。控件：产品名称、程序版本、文件版本。样式 ConfigPanel。  -->
                 <Border Style="{StaticResource ConfigPanel}">
                     <StackPanel>
                         <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Height="52" Padding="16,0">

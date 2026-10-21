@@ -12,7 +12,7 @@ using MMSP.Service.Device.Scan;
 namespace MMSP.App.TemplateMatch.ViewModels
 {
     /// <summary>
-    /// 设备页的客户库读写、轮询和真实通讯。
+    /// 设备页的客户库读写和真实通讯。点位列表不自动读写 PLC。
     /// </summary>
     public partial class DeviceViewModel
     {
@@ -57,7 +57,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private string _dataFormat = "ABCD";
 
         /// <summary>
-        /// 已保存的轮询周期。小于等于 0 时不轮询。
+        /// 已保存的轮询周期。只入库和显示，点位列表不按它读取。
         /// </summary>
         private int _pollMs = 200;
 
@@ -87,17 +87,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private int _session;
 
         /// <summary>
-        /// 上一轮已经记过的轮询失败。相同文字不再重复记。
-        /// </summary>
-        private string? _lastPollError;
-
-        /// <summary>
-        /// 轮询循环的取消源。离开页面时只取消，不等待循环结束。
-        /// </summary>
-        private CancellationTokenSource? _pollCancel;
-
-        /// <summary>
-        /// 这一次停留期间的取消源。手动读写和轮询共用。
+        /// 这一次停留期间的取消源。右键读写用它。
         /// </summary>
         private CancellationTokenSource _life = new();
 
@@ -137,25 +127,22 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private readonly Dictionary<Guid, string> _scanSignatures = new();
 
         /// <summary>
-        /// 进入页面时从客户库加载，并开始轮询。
+        /// 进入页面时从客户库加载。不连接 PLC，也不读写点位。
         /// </summary>
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
             BumpSession();
             CancelLife();
             _life = new CancellationTokenSource();
-            _lastPollError = null;
             LoadDevice();
-            StartPoll();
         }
 
         /// <summary>
-        /// 离开页面时停掉轮询，并释放 PLC 和扫码枪。
+        /// 离开页面时释放 PLC 和扫码枪。
         /// </summary>
         public override void OnNavigatedFrom(NavigationContext navigationContext)
         {
             BumpSession();
-            StopPoll();
             CancelLife();
             CloseDevices();
             CloseEditor();
@@ -420,9 +407,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     if (connectionChanged)
                         ClosePlcLocked();
                 }
-
-                if (pollChanged)
-                    StartPoll();
             }
             catch (Exception ex)
             {
@@ -1106,282 +1090,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 按当前周期启动轮询。周期小于等于 0 或页面还没进入时不启动。
-        /// </summary>
-        private void StartPoll()
-        {
-            StopPoll();
-            if (_pollMs <= 0 || Session == 0)
-                return;
-
-            var session = Session;
-            var interval = _pollMs;
-            var cancel = new CancellationTokenSource();
-            _pollCancel = cancel;
-            var token = cancel.Token;
-            Task.Run(() =>
-            {
-                try
-                {
-                    PollLoop(session, interval, token);
-                }
-                catch (Exception ex)
-                {
-                    var message = ex.Message;
-                    Post(() =>
-                    {
-                        if (session != Session)
-                            return;
-
-                        ReportPollFailure(message);
-                    });
-                }
-                finally
-                {
-                    cancel.Dispose();
-                }
-            });
-        }
-
-        /// <summary>
-        /// 取消当前轮询。不等待它结束，避免停在界面线程上。
-        /// </summary>
-        private void StopPoll()
-        {
-            var cancel = _pollCancel;
-            _pollCancel = null;
-            if (cancel is null)
-                return;
-
-            try
-            {
-                cancel.Cancel();
-            }
-            catch (ObjectDisposedException)
-            {
-            }
-        }
-
-        /// <summary>
-        /// 按周期读取启用的点位。
-        /// </summary>
-        private void PollLoop(int session, int interval, CancellationToken token)
-        {
-            while (!token.IsCancellationRequested && session == Session)
-            {
-                try
-                {
-                    PollOnce(session, token);
-                }
-                catch (Exception ex)
-                {
-                    var message = ex.Message;
-                    Post(() =>
-                    {
-                        if (session != Session)
-                            return;
-
-                        ReportPollFailure(message);
-                    });
-                }
-
-                if (token.IsCancellationRequested || session != Session)
-                    break;
-
-                if (token.WaitHandle.WaitOne(Math.Max(interval, 1)))
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// 抄一份点位后连接并读取。连接失败就结束这一轮。
-        /// </summary>
-        private void PollOnce(int session, CancellationToken token)
-        {
-            var points = CopyPoints(session, token);
-            if (points is null || token.IsCancellationRequested || session != Session)
-                return;
-
-            var enabled = new List<PointSnapshot>();
-            foreach (var point in points)
-            {
-                if (point.IsEnabled)
-                    enabled.Add(point);
-            }
-
-            if (enabled.Count == 0)
-                return;
-
-            var connected = ConnectPlc(session, token);
-            if (token.IsCancellationRequested || session != Session)
-                return;
-
-            if (!connected.IsSuccess)
-            {
-                var message = string.IsNullOrWhiteSpace(connected.Message) ? "连接失败" : connected.Message;
-                Post(() =>
-                {
-                    if (session != Session)
-                        return;
-
-                    ReportPollFailure(message);
-                });
-                return;
-            }
-
-            var failed = false;
-            foreach (var point in enabled)
-            {
-                if (token.IsCancellationRequested || session != Session)
-                    return;
-
-                if (!Enum.TryParse(point.DataType, out PlcDataType dataType) || !Enum.IsDefined(dataType))
-                    continue;
-
-                if (!int.TryParse(point.LengthText, out var length) || length <= 0)
-                    continue;
-
-                PlcIoResult result;
-                lock (_plcLock)
-                {
-                    if (token.IsCancellationRequested || session != Session || _plc is null)
-                        return;
-
-                    try
-                    {
-                        result = _plc.Read(point.Address, dataType, length);
-                    }
-                    catch (Exception ex)
-                    {
-                        result = PlcIoResult.Fail(ex.Message);
-                    }
-                }
-
-                if (!result.IsSuccess)
-                {
-                    failed = true;
-                    var message = point.Name + " " + result.Message;
-                    Post(() =>
-                    {
-                        if (session != Session)
-                            return;
-
-                        ReportPollFailure(message);
-                    });
-                    continue;
-                }
-
-                var value = result.Value;
-                var id = point.Id;
-                var address = point.Address;
-                var typeName = point.DataType;
-                Post(() =>
-                {
-                    if (session != Session)
-                        return;
-
-                    ApplyPollValue(id, address, typeName, value);
-                });
-            }
-
-            if (!failed)
-            {
-                Post(() =>
-                {
-                    if (session != Session)
-                        return;
-
-                    _lastPollError = null;
-                });
-            }
-        }
-
-        /// <summary>
-        /// 在界面线程抄点位。后台只等待这份副本，不直接读列表。
-        /// </summary>
-        private List<PointSnapshot>? CopyPoints(int session, CancellationToken token)
-        {
-            var source = new TaskCompletionSource<List<PointSnapshot>?>(TaskCreationOptions.RunContinuationsAsynchronously);
-            Post(() =>
-            {
-                try
-                {
-                    if (session != Session)
-                    {
-                        source.TrySetResult(null);
-                        return;
-                    }
-
-                    var copy = new List<PointSnapshot>(Points.Count);
-                    foreach (var item in Points)
-                    {
-                        copy.Add(new PointSnapshot
-                        {
-                            Id = item.Id,
-                            Name = item.Name,
-                            Address = item.Address,
-                            DataType = item.DataType,
-                            LengthText = item.LengthText,
-                            IsEnabled = item.IsEnabled
-                        });
-                    }
-
-                    source.TrySetResult(copy);
-                }
-                catch (Exception ex)
-                {
-                    source.TrySetException(ex);
-                }
-            });
-
-            try
-            {
-                source.Task.Wait(token);
-            }
-            catch (OperationCanceledException)
-            {
-                return null;
-            }
-            catch (AggregateException)
-            {
-                return null;
-            }
-
-            return source.Task.IsCompletedSuccessfully ? source.Task.Result : null;
-        }
-
-        /// <summary>
-        /// 轮询读到新值时，静默写回这一行。选中行同时刷新当前值。
-        /// </summary>
-        private void ApplyPollValue(Guid id, string address, string typeName, string value)
-        {
-            var row = Points.FirstOrDefault(item => item.Id == id);
-            if (row is null || row.CurrentValue == value)
-                return;
-
-            var detail = address + " · " + typeName + " · " + DateTime.Now.ToString("HH:mm:ss.fff");
-            row.CurrentValue = value;
-            row.ValueDetail = detail;
-            if (SelectedPoint == row)
-            {
-                CurrentValue = value;
-                CurrentDetail = detail;
-            }
-        }
-
-        /// <summary>
-        /// 同一条轮询失败只记一次。
-        /// </summary>
-        private void ReportPollFailure(string message)
-        {
-            if (message == _lastPollError)
-                return;
-
-            _lastPollError = message;
-            NotePlc(DeviceLogKind.Timeout, message, true);
-        }
-
-        /// <summary>
         /// 释放 PLC 和全部扫码枪。
         /// </summary>
         private void CloseDevices()
@@ -1458,42 +1166,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
             }
 
             dispatcher.BeginInvoke(action);
-        }
-
-        /// <summary>
-        /// 轮询用的点位副本。
-        /// </summary>
-        private sealed class PointSnapshot
-        {
-            /// <summary>
-            /// 点位主键。
-            /// </summary>
-            public Guid Id { get; init; }
-
-            /// <summary>
-            /// 点位名称。
-            /// </summary>
-            public string Name { get; init; } = "";
-
-            /// <summary>
-            /// 地址。
-            /// </summary>
-            public string Address { get; init; } = "";
-
-            /// <summary>
-            /// 数据类型文字。
-            /// </summary>
-            public string DataType { get; init; } = "";
-
-            /// <summary>
-            /// 长度文字。
-            /// </summary>
-            public string LengthText { get; init; } = "";
-
-            /// <summary>
-            /// 是否启用。
-            /// </summary>
-            public bool IsEnabled { get; init; }
         }
     }
 }

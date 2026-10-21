@@ -1,71 +1,78 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
-    <!--  主界面颜色主题  -->
+    <!--  画刷 主界面颜色主题。  -->
 
+    <!--  画刷 ThemeBrushColorMajor：主色。  -->
     <SolidColorBrush x:Key="ThemeBrushColorMajor">#767676</SolidColorBrush>
+    <!--  画刷 ThemeBrushColorAssist：辅助色，金色。  -->
     <SolidColorBrush x:Key="ThemeBrushColorAssist">#FCC800</SolidColorBrush>
+    <!--  颜色 ThemeColorMajor：主色。  -->
     <Color x:Key="ThemeColorMajor">#767676</Color>
+    <!--  颜色 ThemeColorAssist：辅助色，金色。  -->
     <Color x:Key="ThemeColorAssist">#FCC800</Color>
 
-    <!--
-     用于特别需要强调和突出的文字、按钮和icon
-     如选项卡文字选中状态、列表标题标签、icon文字、可交互文字等
- -->
+    <!--  画刷 HighestRed：强调文字、按钮和图标。  -->
     <SolidColorBrush x:Key="HighestRed">#CE3D3A</SolidColorBrush>
 
-    <!--
-     用于重要及文字信息、内容标题信息
-     如列表标题名称、大板块标题、正文内容等重要的文字内容
- -->
+    <!--  画刷 HighestBlack：标题和正文。  -->
     <SolidColorBrush x:Key="HighestBlack">#333333</SolidColorBrush>
 
-    <!--
-     小面积使用、用于重要链接文字颜色
-     如动态界面用户昵称、其他内容等
- -->
+    <!--  画刷 HighestBlue：链接和用户昵称。  -->
     <SolidColorBrush x:Key="HighestBlue">#477AAC</SolidColorBrush>
 
-    <!--
-     用于普通级别段落、用户名、icon等
-     如DataGrid正文内容
- -->
+    <!--  画刷 MediumDarkGray：正文、用户名、图标。键名末尾带空格，引用处必须一致。  -->
     <SolidColorBrush x:Key="MediumDarkGray ">#666666</SolidColorBrush>
 
-    <!--
-     用于辅助、次要的文字信息
-     如次级标题
- -->
+    <!--  画刷 MediumNormalGray：次级标题。  -->
     <SolidColorBrush x:Key="MediumNormalGray">#888888</SolidColorBrush>
 
-    <!--  用于辅助、更次要的文字信息、排序  -->
+    <!--  画刷 MediumLightGray：更次要的文字和排序。  -->
     <SolidColorBrush x:Key="MediumLightGray">#999999</SolidColorBrush>
 
-    <!--  用于输入框提示文本  -->
+    <!--  画刷 LowerGray：输入框提示文本。  -->
     <SolidColorBrush x:Key="LowerGray">#B2B2B2</SolidColorBrush>
 
-    <!--  主壳导航和内容区  -->
+    <!--  画刷 NavSelectedBackground：导航选中底。  -->
     <SolidColorBrush x:Key="NavSelectedBackground">#FFF6D2</SolidColorBrush>
+    <!--  画刷 PageBackground：内容区底。  -->
     <SolidColorBrush x:Key="PageBackground">#F0F1EF</SolidColorBrush>
+    <!--  画刷 CardBorderBrush：卡片边。  -->
     <SolidColorBrush x:Key="CardBorderBrush">#E4E4E4</SolidColorBrush>
+    <!--  画刷 CardBodyBrush：卡片内底。  -->
     <SolidColorBrush x:Key="CardBodyBrush">#FAFAF8</SolidColorBrush>
+    <!--  画刷 HeaderDividerBrush：标题分割线。  -->
     <SolidColorBrush x:Key="HeaderDividerBrush">#EEEEEE</SolidColorBrush>
+    <!--  画刷 StatusConnectedBrush：设备已连接。  -->
     <SolidColorBrush x:Key="StatusConnectedBrush">#49C46A</SolidColorBrush>
+    <!--  画刷 CardBackground：卡片白底。  -->
     <SolidColorBrush x:Key="CardBackground">#FFFFFF</SolidColorBrush>
+    <!--  画刷 FieldLabelBrush：字段标题。  -->
     <SolidColorBrush x:Key="FieldLabelBrush">#666666</SolidColorBrush>
 
+    <!--  尺寸 NavBarHeight：导航栏高。  -->
     <sys:Double x:Key="NavBarHeight">120</sys:Double>
+    <!--  尺寸 NavButtonWidth：导航按钮宽。  -->
     <sys:Double x:Key="NavButtonWidth">112</sys:Double>
+    <!--  尺寸 NavButtonHeight：导航按钮高。  -->
     <sys:Double x:Key="NavButtonHeight">87</sys:Double>
-    <!--  六个菜单，每项宽 112、右间距 12  -->
+    <!--  尺寸 NavMenuAreaWidth：六个菜单，每项宽 112、右间距 12。  -->
     <sys:Double x:Key="NavMenuAreaWidth">744</sys:Double>
-    <!--  启动、停止、恢复，每项左间距 12、宽 112  -->
+    <!--  尺寸 NavRunAreaWidth：启动、停止、恢复，每项左间距 12、宽 112。  -->
     <sys:Double x:Key="NavRunAreaWidth">372</sys:Double>
-    <!--  登录、退出，每项左间距 12、宽 112  -->
-    <sys:Double x:Key="NavAuthAreaWidth">248</sys:Double>
+    <!--  尺寸 NavExitButtonWidth：退出按钮宽。比导航按钮小，靠右。  -->
+    <sys:Double x:Key="NavExitButtonWidth">56</sys:Double>
+    <!--  尺寸 NavExitButtonHeight：退出按钮高。  -->
+    <sys:Double x:Key="NavExitButtonHeight">56</sys:Double>
+    <!--  尺寸 NavExitIconSize：退出图标。比导航图标小。  -->
+    <sys:Double x:Key="NavExitIconSize">24</sys:Double>
+    <!--  尺寸 NavIconSize：导航图标。  -->
     <sys:Double x:Key="NavIconSize">34</sys:Double>
+    <!--  尺寸 NavLabelFontSize：导航文字。  -->
     <sys:Double x:Key="NavLabelFontSize">16</sys:Double>
+    <!--  尺寸 NavSelectedBarHeight：选中底条。  -->
     <sys:Double x:Key="NavSelectedBarHeight">7</sys:Double>
+    <!--  尺寸 NavCornerRadius：导航圆角。  -->
     <CornerRadius x:Key="NavCornerRadius">8</CornerRadius>
 
 </ResourceDictionary>

@@ -97,10 +97,10 @@ namespace MMSP.Core.Model.Sys
         Config = 4,
 
         /// <summary>
-        /// 用户
+        /// 用户。登录和注销都在这一页，四个角色都能打开。右侧管理内容另按角色显示。
         /// </summary>
         [Description("用户")]
-        [MenuRole(UserRole.Admin)]
+        [MenuRole(UserRole.Operator)]
         [MenuIcons("UserFill", "User")]
         User = 5
     }

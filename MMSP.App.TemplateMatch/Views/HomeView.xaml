@@ -4,6 +4,7 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True">
     <UserControl.Resources>
+        <!--  模板 LogRowTemplate：一条日志。控件为时间和内容。  -->
         <DataTemplate x:Key="LogRowTemplate">
             <Border BorderBrush="{DynamicResource HeaderDividerBrush}"
                     BorderThickness="0,0,0,1"
@@ -27,6 +28,7 @@
                 </Grid>
             </Border>
         </DataTemplate>
+        <!--  样式 LogListStyle：日志列表。项模板 LogRowTemplate。  -->
         <Style x:Key="LogListStyle" TargetType="ListBox">
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Background" Value="Transparent" />
@@ -62,6 +64,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
+        <!--  区域 运行日志。控件 RunLogs。样式 LogListStyle，模板 LogRowTemplate。  -->
         <Border Grid.Column="0"
                 Background="{DynamicResource CardBackground}"
                 BorderBrush="{DynamicResource CardBorderBrush}"
@@ -85,6 +88,7 @@
             </Grid>
         </Border>
 
+        <!--  区域 报警日志。控件 AlarmLogs。样式 LogListStyle，模板 LogRowTemplate。  -->
         <Border Grid.Column="2"
                 Background="{DynamicResource CardBackground}"
                 BorderBrush="{DynamicResource CardBorderBrush}"

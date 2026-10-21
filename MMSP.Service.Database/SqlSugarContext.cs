@@ -36,7 +36,7 @@ namespace MMSP.Service.Database
         public static SqlSugarScope SystemDb => _systemDb ?? throw new InvalidOperationException("系统配置库尚未打开。");
 
         /// <summary>
-        /// 客户数据库。运行日志、图表、UPH、PLC 连接、PLC 点位、扫码枪、流程和 MES 连接建在这里。
+        /// 客户数据库。运行日志、图表、UPH、PLC 连接、PLC 点位、扫码枪、流程和 MES 配置建在这里。
         /// </summary>
         public static SqlSugarScope CustomerDb => _customerDb ?? throw new InvalidOperationException("客户数据库尚未打开。");
 
@@ -74,12 +74,15 @@ namespace MMSP.Service.Database
         }
 
         /// <summary>
-        /// 建客户表。运行日志、图表、UPH、PLC 连接、PLC 点位、扫码枪、流程和 MES 连接放在客户库。
+        /// 建客户表。运行日志、图表、UPH、PLC 连接、PLC 点位、扫码枪、流程和 MES 配置放在客户库。
         /// </summary>
         private static void InitCustomerTables(SqlSugarScope db)
         {
             if (db.DbMaintenance.IsAnyTable("biz_logs", false))
                 EnsureBizTypeColumn(db);
+            if (db.DbMaintenance.IsAnyTable("biz_flow_mes", false))
+                DropLegacyFlowMes(db);
+            TrimLegacyFlowSteps(db);
 
             db.CodeFirst.InitTables(
                 typeof(RunLogEntity),
@@ -93,8 +96,97 @@ namespace MMSP.Service.Database
                 typeof(FlowMesEntity));
             db.Ado.ExecuteCommand("CREATE INDEX IF NOT EXISTS idx_biz_logs_log_time ON biz_logs (log_time);");
             db.Ado.ExecuteCommand("CREATE UNIQUE INDEX IF NOT EXISTS idx_biz_uph_hour_time ON biz_uph (hour_time);");
+            db.Ado.ExecuteCommand("CREATE UNIQUE INDEX IF NOT EXISTS idx_biz_flow_mes_config_type ON biz_flow_mes (config_type);");
             if (db.DbMaintenance.IsAnyTable("biz_flow_steps", false))
                 EnsureCfgValueColumn(db);
+        }
+
+        /// <summary>
+        /// 旧表按接口地址等五列保存，对不上配置类。没有 config_type 时丢掉重建，不迁移旧值。
+        /// </summary>
+        private static void DropLegacyFlowMes(SqlSugarScope db)
+        {
+            var count = db.Ado.GetInt("SELECT COUNT(1) FROM pragma_table_info('biz_flow_mes') WHERE name = 'config_type'");
+            if (count > 0)
+                return;
+
+            db.Ado.ExecuteCommand("DROP TABLE biz_flow_mes");
+        }
+
+        /// <summary>
+        /// 旧流程步上已被工具配置取代的列。
+        /// </summary>
+        private static readonly string[] LegacyFlowStepColumns =
+        [
+            "target",
+            "data_type",
+            "data_length",
+            "write_value",
+            "number_value",
+            "text_value"
+        ];
+
+        /// <summary>
+        /// 删掉流程步表里不再使用的列，并保留主键、流程、顺序、工具、标题和配置。
+        /// CodeFirst 不会删除已有列，所以有旧列时先改名，再建新表，再拷回。
+        /// </summary>
+        internal static void TrimLegacyFlowSteps(SqlSugarScope db)
+        {
+            if (db.DbMaintenance.IsAnyTable("biz_flow_steps_legacy", false))
+            {
+                if (!db.DbMaintenance.IsAnyTable("biz_flow_steps", false))
+                    db.CodeFirst.InitTables(typeof(FlowStepEntity));
+                CopyLegacyFlowSteps(db);
+                return;
+            }
+
+            if (!db.DbMaintenance.IsAnyTable("biz_flow_steps", false) || !HasLegacyFlowStepColumn(db))
+                return;
+
+            EnsureCfgValueColumn(db);
+            db.Ado.ExecuteCommand("ALTER TABLE biz_flow_steps RENAME TO biz_flow_steps_legacy");
+            db.CodeFirst.InitTables(typeof(FlowStepEntity));
+            CopyLegacyFlowSteps(db);
+        }
+
+        /// <summary>
+        /// 旧表是否还带着已经不用的列。
+        /// </summary>
+        private static bool HasLegacyFlowStepColumn(SqlSugarScope db)
+        {
+            var names = string.Join(", ", LegacyFlowStepColumns.Select(name => "'" + name + "'"));
+            var count = db.Ado.GetInt(
+                "SELECT COUNT(1) FROM pragma_table_info('biz_flow_steps') WHERE name IN (" + names + ")");
+            return count > 0;
+        }
+
+        /// <summary>
+        /// 把旧表里仍使用的列拷进新表，然后丢掉旧表。新表已有数据时不再拷，避免重复主键。
+        /// </summary>
+        private static void CopyLegacyFlowSteps(SqlSugarScope db)
+        {
+            db.Ado.BeginTran();
+            try
+            {
+                var copied = db.Ado.GetInt("SELECT COUNT(1) FROM biz_flow_steps");
+                if (copied == 0)
+                {
+                    db.Ado.ExecuteCommand(
+                        """
+                        INSERT INTO biz_flow_steps ("Id", flow_id, sort_index, tool_kind, title, cfg_value)
+                        SELECT "Id", flow_id, sort_index, tool_kind, title, IFNULL(cfg_value, '')
+                        FROM biz_flow_steps_legacy
+                        """);
+                }
+
+                db.Ado.ExecuteCommand("DROP TABLE biz_flow_steps_legacy");
+                db.Ado.CommitTran();
+            }
+            catch
+            {
+                db.Ado.RollbackTran();
+                throw;
+            }
         }
 
         /// <summary>

@@ -11,8 +11,10 @@
              FontSize="14"
              Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
+        <!--  转换 BoolVis：布尔到可见性。  -->
         <BooleanToVisibilityConverter x:Key="BoolVis" />
 
+        <!--  样式 DeviceToolButtonStyle：工具按钮。白底灰边，悬停变灰。  -->
         <Style x:Key="DeviceToolButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="32" />
             <Setter Property="MinWidth" Value="88" />
@@ -46,6 +48,46 @@
             </Setter>
         </Style>
 
+        <!--  样式 DevicePageTab：PLC 与扫码枪页签。顶栏靠左，选中浅金底，底部 3 像素金线。  -->
+        <Style x:Key="DevicePageTab" TargetType="TabItem">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource MediumNormalGray}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource NavSelectedBackground}" />
+                    <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
+                    <Setter Property="BorderThickness" Value="0,0,0,3" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--  样式 DeviceTabButtonStyle：页签按钮。选中色由各按钮自己加。  -->
         <Style x:Key="DeviceTabButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="32" />
             <Setter Property="Padding" Value="14,0" />
@@ -54,7 +96,7 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Foreground" Value="{DynamicResource MediumNormalGray}" />
             <Setter Property="FontSize" Value="14" />
-            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Template">
@@ -73,6 +115,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 DeviceUnderlineBox：下划线输入框。  -->
         <Style x:Key="DeviceUnderlineBox" TargetType="TextBox">
             <Setter Property="Height" Value="30" />
             <Setter Property="FontSize" Value="15" />
@@ -90,7 +133,7 @@
                                 BorderBrush="#E0E0E0"
                                 BorderThickness="0,0,0,2"
                                 SnapsToDevicePixels="True">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,4,0,2" Focusable="False" />
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,0,0,1" VerticalAlignment="Center" Focusable="False" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsKeyboardFocusWithin" Value="True">
@@ -102,6 +145,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 DeviceComboItem：下拉项。悬停浅金，选中金色。  -->
         <Style x:Key="DeviceComboItem" TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="8,6" />
             <Setter Property="Background" Value="White" />
@@ -128,6 +172,13 @@
             </Setter>
         </Style>
 
+        <!--  样式 DeviceFieldBox：配置和测试里的输入框。比编辑窗更矮，避免把文字裁掉。  -->
+        <Style x:Key="DeviceFieldBox" TargetType="TextBox" BasedOn="{StaticResource DeviceUnderlineBox}">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+
+        <!--  样式 DeviceCombo：下划线下拉框。条目用 DeviceComboItem。  -->
         <Style x:Key="DeviceCombo" TargetType="ComboBox">
             <Setter Property="Height" Value="30" />
             <Setter Property="FontSize" Value="15" />
@@ -143,20 +194,30 @@
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
                             <ToggleButton Focusable="False"
+                                          Style="{x:Null}"
+                                          MinHeight="0"
+                                          MinWidth="0"
+                                          Padding="0"
                                           ClickMode="Press"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch"
                                           IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                           Background="Transparent"
                                           BorderThickness="0">
                                 <ToggleButton.Template>
                                     <ControlTemplate TargetType="ToggleButton">
-                                        <Border x:Name="Line" BorderBrush="#E0E0E0" BorderThickness="0,0,0,2" Background="Transparent">
+                                        <Border x:Name="Line"
+                                                Background="Transparent"
+                                                BorderBrush="#E0E0E0"
+                                                BorderThickness="0,0,0,2"
+                                                SnapsToDevicePixels="True">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="24" />
                                                 </Grid.ColumnDefinitions>
                                                 <ContentPresenter Grid.Column="0"
-                                                                  Margin="0,4,0,2"
+                                                                  Margin="0,0,0,1"
                                                                   HorizontalAlignment="Left"
                                                                   VerticalAlignment="Center"
                                                                   IsHitTestVisible="False"
@@ -183,9 +244,11 @@
                                    Focusable="False"
                                    IsOpen="{TemplateBinding IsDropDownOpen}">
                                 <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Margin="0,1,1,1"
                                         Background="{DynamicResource CardBackground}"
                                         BorderBrush="#E0E0E0"
-                                        BorderThickness="1">
+                                        BorderThickness="1"
+                                        SnapsToDevicePixels="True">
                                     <ScrollViewer MaxHeight="160">
                                         <ItemsPresenter />
                                     </ScrollViewer>
@@ -197,6 +260,13 @@
             </Setter>
         </Style>
 
+        <!--  样式 DeviceFieldCombo：配置和测试里的下拉框。高度与 DeviceFieldBox 一致。  -->
+        <Style x:Key="DeviceFieldCombo" TargetType="ComboBox" BasedOn="{StaticResource DeviceCombo}">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+
+        <!--  样式 DeviceGridHeaderStyle：点位表格列头。  -->
         <Style x:Key="DeviceGridHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="#F5F5F5" />
             <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
@@ -222,6 +292,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 DeviceGridCellStyle：点位表格单元格。选中为金色。  -->
         <Style x:Key="DeviceGridCellStyle" TargetType="DataGridCell">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -245,10 +316,12 @@
             </Style.Triggers>
         </Style>
 
+        <!--  样式 DeviceCheckCellStyle：点位勾选列。基于 DeviceGridCellStyle。  -->
         <Style x:Key="DeviceCheckCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource DeviceGridCellStyle}">
             <Setter Property="Padding" Value="0" />
         </Style>
 
+        <!--  样式 DeviceGridRowStyle：点位表格行。隔行浅灰，勾选或选中为金色。  -->
         <Style x:Key="DeviceGridRowStyle" TargetType="DataGridRow">
             <Setter Property="Background" Value="White" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
@@ -266,6 +339,7 @@
             </Style.Triggers>
         </Style>
 
+        <!--  样式 DeviceLogItem：日志行容器。PLC 日志另改为左对齐，长文才能横向滚动。  -->
         <Style x:Key="DeviceLogItem" TargetType="ListBoxItem">
             <Setter Property="Padding" Value="0" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -279,6 +353,7 @@
             </Setter>
         </Style>
 
+        <!--  模板 DeviceLogTemplate：一条日志。控件为时间、方向、内容。  -->
         <DataTemplate x:Key="DeviceLogTemplate">
             <StackPanel Orientation="Horizontal" Margin="0,1">
                 <TextBlock Text="{Binding TimeText}" Foreground="{DynamicResource MediumNormalGray}" Margin="0,0,8,0" />
@@ -307,6 +382,7 @@
             </StackPanel>
         </DataTemplate>
 
+        <!--  样式 PointMenuItem：点位右键菜单项。  -->
         <Style x:Key="PointMenuItem" TargetType="MenuItem">
             <Setter Property="Height" Value="32" />
             <Setter Property="Margin" Value="0,0,0,6" />
@@ -341,58 +417,45 @@
     </UserControl.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="48" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <Border Grid.Row="0" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="16,0,8,0">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                    <Button Command="{Binding ShowPlcCommand}"
-                            AutomationProperties.AutomationId="DevicePlcTab"
-                            AutomationProperties.Name="{DynamicResource Device_Plc}">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource DeviceTabButtonStyle}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsPlcPage}" Value="True">
-                                        <Setter Property="Background" Value="#FFF6D2" />
-                                        <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
-                                        <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
-                                        <Setter Property="BorderThickness" Value="0,0,0,3" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <iconPacks:PackIconPhosphorIcons Kind="Monitor" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="{DynamicResource Device_Plc}" Margin="6,0,0,0" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding ShowScannerCommand}"
-                            AutomationProperties.AutomationId="DeviceScannerTab"
-                            AutomationProperties.Name="{DynamicResource Device_Scanner}">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource DeviceTabButtonStyle}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsScannerPage}" Value="True">
-                                        <Setter Property="Background" Value="#FFF6D2" />
-                                        <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
-                                        <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
-                                        <Setter Property="BorderThickness" Value="0,0,0,3" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <iconPacks:PackIconPhosphorIcons Kind="Barcode" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="{DynamicResource Device_Scanner}" Margin="6,0,0,0" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-            </StackPanel>
-        </Border>
-
-        <Grid Grid.Row="1" Margin="12">
-            <Grid Visibility="{Binding IsPlcPage, Converter={StaticResource BoolVis}}">
+        <!--  区域 页签。页签 PLC（DevicePlcTab）、扫码枪（DeviceScannerTab）靠左，版式与流程页 FlowTab 相同。样式 DevicePageTab。  -->
+        <TabControl ItemContainerStyle="{StaticResource DevicePageTab}"
+                    TabStripPlacement="Top"
+                    Background="{DynamicResource CardBackground}"
+                    BorderThickness="0"
+                    Padding="0">
+            <TabControl.Template>
+                <ControlTemplate TargetType="TabControl">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="48" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource CardBackground}"
+                                BorderBrush="{DynamicResource HeaderDividerBrush}"
+                                BorderThickness="0,0,0,1"
+                                Padding="16,0,8,0">
+                            <TabPanel IsItemsHost="True"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Bottom" />
+                        </Border>
+                        <ContentPresenter x:Name="PART_SelectedContentHost"
+                                          Grid.Row="1"
+                                          ContentSource="SelectedContent" />
+                    </Grid>
+                </ControlTemplate>
+            </TabControl.Template>
+            <!--  页签 PLC（DevicePlcTab）。  -->
+            <TabItem AutomationProperties.AutomationId="DevicePlcTab"
+                     AutomationProperties.Name="{DynamicResource Device_Plc}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconPhosphorIcons Kind="Monitor" Width="16" Height="16" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource Device_Plc}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
+            <!--  区域 PLC 页。左列连接与日志，右列点位。  -->
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="480" />
                     <ColumnDefinition Width="12" />
@@ -400,11 +463,12 @@
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="5*" />
+                        <RowDefinition Height="5*" MinHeight="260" />
                         <RowDefinition Height="12" />
                         <RowDefinition Height="3*" />
                     </Grid.RowDefinitions>
 
+                    <!--  区域 PLC 连接卡片。页签：配置（DeviceConfigTab）、测试（DeviceTestTab）。  -->
                     <Border Grid.Row="0" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -413,6 +477,7 @@
                             </Grid.RowDefinitions>
                             <Border BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="8,0,8,0">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                    <!--  按钮 配置。命令 ShowPlcConfigCommand。样式 DeviceTabButtonStyle。  -->
                                     <Button Command="{Binding ShowPlcConfigCommand}"
                                             AutomationProperties.AutomationId="DeviceConfigTab"
                                             AutomationProperties.Name="{DynamicResource Device_Config}">
@@ -420,7 +485,7 @@
                                             <Style TargetType="Button" BasedOn="{StaticResource DeviceTabButtonStyle}">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsPlcConfigTab}" Value="True">
-                                                        <Setter Property="Background" Value="#FFF6D2" />
+                                                        <Setter Property="Background" Value="{DynamicResource NavSelectedBackground}" />
                                                         <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                                                         <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
                                                         <Setter Property="BorderThickness" Value="0,0,0,3" />
@@ -430,6 +495,7 @@
                                         </Button.Style>
                                         <TextBlock Text="{DynamicResource Device_Config}" VerticalAlignment="Center" />
                                     </Button>
+                                    <!--  按钮 测试。命令 ShowPlcTestCommand。样式 DeviceTabButtonStyle。  -->
                                     <Button Command="{Binding ShowPlcTestCommand}"
                                             AutomationProperties.AutomationId="DeviceTestTab"
                                             AutomationProperties.Name="{DynamicResource Device_Test}">
@@ -437,7 +503,7 @@
                                             <Style TargetType="Button" BasedOn="{StaticResource DeviceTabButtonStyle}">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsPlcTestTab}" Value="True">
-                                                        <Setter Property="Background" Value="#FFF6D2" />
+                                                        <Setter Property="Background" Value="{DynamicResource NavSelectedBackground}" />
                                                         <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                                                         <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
                                                         <Setter Property="BorderThickness" Value="0,0,0,3" />
@@ -449,110 +515,137 @@
                                     </Button>
                                 </StackPanel>
                             </Border>
-                            <ScrollViewer Grid.Row="1"
-                                          VerticalScrollBarVisibility="Auto"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          Visibility="{Binding IsPlcConfigTab, Converter={StaticResource BoolVis}}">
-                                <UniformGrid Columns="2" Margin="18,14,18,8">
-                                    <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{DynamicResource Device_Ip}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                        <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcIp, UpdateSourceTrigger=LostFocus}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="{DynamicResource Device_ConnType}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                        <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding ConnectionTypes}" SelectedItem="{Binding PlcConnectionType}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{DynamicResource Device_Port}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                        <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcPort, UpdateSourceTrigger=LostFocus}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="{DynamicResource Device_DataFormat}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                        <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding DataFormats}" SelectedItem="{Binding PlcDataFormat}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{DynamicResource Device_Poll}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                        <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcPoll, UpdateSourceTrigger=LostFocus}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="{DynamicResource Device_ReadTimeout}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                        <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcReadTimeout, UpdateSourceTrigger=LostFocus}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{DynamicResource Device_WriteTimeout}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                        <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcWriteTimeout, UpdateSourceTrigger=LostFocus}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="{DynamicResource Device_ReconnectInterval}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                        <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcReconnectInterval, UpdateSourceTrigger=LostFocus}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,0,16,12">
-                                        <TextBlock Text="{DynamicResource Device_ReconnectCount}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                        <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding PlcReconnectCount, UpdateSourceTrigger=LostFocus}" />
-                                    </StackPanel>
-                                </UniformGrid>
-                            </ScrollViewer>
-                            <Grid Grid.Row="1" Visibility="{Binding IsPlcTestTab, Converter={StaticResource BoolVis}}">
+                            <!--  区域 PLC 配置。控件：IP、连接类型、端口、数据格式、轮询、读超时、写超时、重连间隔、重连次数。样式 DeviceFieldBox、DeviceFieldCombo。不滚动。  -->
+                            <Grid Grid.Row="1"
+                                  Margin="16,4,16,4"
+                                  Visibility="{Binding IsPlcConfigTab, Converter={StaticResource BoolVis}}">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" MinHeight="0" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="14" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_Ip}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcIp, UpdateSourceTrigger=LostFocus}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_ConnType}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <ComboBox Style="{StaticResource DeviceFieldCombo}" ItemsSource="{Binding ConnectionTypes}" SelectedItem="{Binding PlcConnectionType}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_Port}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcPort, UpdateSourceTrigger=LostFocus}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_DataFormat}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <ComboBox Style="{StaticResource DeviceFieldCombo}" ItemsSource="{Binding DataFormats}" SelectedItem="{Binding PlcDataFormat}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_Poll}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcPoll, UpdateSourceTrigger=LostFocus}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_ReadTimeout}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcReadTimeout, UpdateSourceTrigger=LostFocus}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_WriteTimeout}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcWriteTimeout, UpdateSourceTrigger=LostFocus}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_ReconnectInterval}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcReconnectInterval, UpdateSourceTrigger=LostFocus}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="4" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_ReconnectCount}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcReconnectCount, UpdateSourceTrigger=LostFocus}" />
+                                </StackPanel>
+                            </Grid>
+                            <!--  区域 PLC 测试。控件：地址、数据类型、长度、写入值。样式 DeviceFieldBox、DeviceFieldCombo。不滚动。  -->
+                            <Grid Grid.Row="1"
+                                  Margin="16,4,16,6"
+                                  Visibility="{Binding IsPlcTestTab, Converter={StaticResource BoolVis}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-                                <ScrollViewer Grid.Row="0"
-                                              VerticalScrollBarVisibility="Auto"
-                                              HorizontalScrollBarVisibility="Disabled">
-                                    <UniformGrid Columns="2" Margin="18,14,18,0">
-                                        <StackPanel Margin="0,0,16,12">
-                                            <TextBlock Text="{DynamicResource Device_Address}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                            <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding TestAddress, UpdateSourceTrigger=PropertyChanged}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,0,0,12">
-                                            <TextBlock Text="{DynamicResource Device_DataType}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                            <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding DataTypes}" SelectedItem="{Binding TestDataType}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,0,16,4">
-                                            <TextBlock Text="{DynamicResource Device_Length}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                            <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding TestLength, UpdateSourceTrigger=PropertyChanged}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,0,0,4">
-                                            <TextBlock Text="{DynamicResource Device_WriteValue}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                            <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding TestWriteValue, UpdateSourceTrigger=PropertyChanged}" />
-                                        </StackPanel>
-                                    </UniformGrid>
-                                </ScrollViewer>
-                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="18,8,18,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="14" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_Address}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding TestAddress, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_DataType}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <ComboBox Style="{StaticResource DeviceFieldCombo}" ItemsSource="{Binding DataTypes}" SelectedItem="{Binding TestDataType}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_Length}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding TestLength, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_WriteValue}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding TestWriteValue, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                                <!--  按钮 读取（DeviceReadButton）、写入（DeviceWriteButton）。样式 DeviceToolButtonStyle。  -->
+                                <StackPanel Grid.Row="2"
+                                            Grid.ColumnSpan="3"
+                                            Orientation="Horizontal"
+                                            HorizontalAlignment="Right"
+                                            Margin="0,2,0,4">
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
+                                            Height="28"
                                             Margin="0,0,8,0"
                                             Command="{Binding ReadCustomCommand}"
                                             AutomationProperties.AutomationId="DeviceReadButton"
                                             AutomationProperties.Name="{DynamicResource Device_Read}">
                                         <StackPanel Orientation="Horizontal">
-                                            <iconPacks:PackIconPhosphorIcons Kind="DownloadSimple" Width="16" Height="16" VerticalAlignment="Center" />
+                                            <iconPacks:PackIconPhosphorIcons Kind="DownloadSimple" Width="14" Height="14" VerticalAlignment="Center" />
                                             <TextBlock Text="{DynamicResource Device_Read}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
+                                            Height="28"
                                             Command="{Binding WriteCustomCommand}"
                                             AutomationProperties.AutomationId="DeviceWriteButton"
                                             AutomationProperties.Name="{DynamicResource Device_Write}">
                                         <StackPanel Orientation="Horizontal">
-                                            <iconPacks:PackIconPhosphorIcons Kind="UploadSimple" Width="16" Height="16" VerticalAlignment="Center" />
+                                            <iconPacks:PackIconPhosphorIcons Kind="UploadSimple" Width="14" Height="14" VerticalAlignment="Center" />
                                             <TextBlock Text="{DynamicResource Device_Write}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
-                                <Border Grid.Row="2" Margin="18,0,18,14" Background="{DynamicResource CardBodyBrush}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Padding="16,12">
+                                <!--  区域 当前值。控件 CurrentValue、CurrentDetail。  -->
+                                <Border Grid.Row="3"
+                                        Grid.ColumnSpan="3"
+                                        Background="{DynamicResource CardBodyBrush}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        Padding="12,6">
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="{DynamicResource Device_CurrentValue}" FontSize="12" Foreground="{DynamicResource MediumNormalGray}" />
-                                        <TextBlock Text="{Binding CurrentValue}" FontSize="28" FontWeight="Bold" Margin="0,4,0,0" />
-                                        <TextBlock Text="{Binding CurrentDetail}" FontSize="12" Foreground="{DynamicResource MediumNormalGray}" Margin="0,4,0,0" />
+                                        <TextBlock Text="{Binding CurrentValue}" FontSize="20" FontWeight="Bold" Margin="0,1,0,0" />
+                                        <TextBlock Text="{Binding CurrentDetail}" FontSize="12" Foreground="{DynamicResource MediumNormalGray}" Margin="0,1,0,0" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Border>
                             </Grid>
                         </Grid>
                     </Border>
 
-                    <Border Grid.Row="2" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
+                    <!--  区域 PLC 日志。控件 PlcLogs，模板 DeviceLogTemplate。横向滚动条 Auto。卡片上边距 10。  -->
+                    <Border Grid.Row="2" Margin="0,10,0,0" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40" />
@@ -567,17 +660,24 @@
                             <ListBox Grid.Row="1"
                                      ItemsSource="{Binding PlcLogs}"
                                      ItemTemplate="{StaticResource DeviceLogTemplate}"
-                                     ItemContainerStyle="{StaticResource DeviceLogItem}"
                                      BorderThickness="0"
                                      Background="{DynamicResource CardBackground}"
                                      Padding="14,8"
                                      FontFamily="Consolas, Microsoft YaHei"
                                      FontSize="13"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+                                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                     ScrollViewer.CanContentScroll="False">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource DeviceLogItem}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
                         </Grid>
                     </Border>
                 </Grid>
 
+                <!--  区域 点位。按钮：新增、编辑、删除、导入、导出。样式 DeviceToolButtonStyle。  -->
                 <Border Grid.Column="2" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -640,6 +740,7 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
+                        <!--  控件 PointGrid：点位表。列：勾选、名称、地址、数据类型、长度、读写、启用。样式 DeviceGridRowStyle、DeviceGridCellStyle、DeviceGridHeaderStyle。  -->
                         <DataGrid x:Name="PointGrid"
                                   Grid.Row="1"
                                   ItemsSource="{Binding Points}"
@@ -667,6 +768,7 @@
                                   ColumnHeaderStyle="{StaticResource DeviceGridHeaderStyle}"
                                   PreviewMouseRightButtonDown="OnPointRightClick"
                                   MouseDoubleClick="OnPointDoubleClick">
+                            <!--  菜单 点位右键。项：读取、写入。样式 PointMenuItem。  -->
                             <DataGrid.ContextMenu>
                                 <ContextMenu Placement="MousePoint"
                                              DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
@@ -735,13 +837,24 @@
                     </Grid>
                 </Border>
             </Grid>
-
-            <Grid Visibility="{Binding IsScannerPage, Converter={StaticResource BoolVis}}">
+            </TabItem>
+            <!--  页签 扫码枪（DeviceScannerTab）。  -->
+            <TabItem AutomationProperties.AutomationId="DeviceScannerTab"
+                     AutomationProperties.Name="{DynamicResource Device_Scanner}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconPhosphorIcons Kind="Barcode" Width="16" Height="16" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource Device_Scanner}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
+            <!--  区域 扫码枪页。左列枪列表，右列触发读取和扫码日志。  -->
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="440" />
                     <ColumnDefinition Width="12" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <!--  区域 扫码枪列表。按钮：新增（DeviceScannerAdd）、编辑（DeviceScannerEdit）、删除（DeviceScannerDelete）。样式 DeviceToolButtonStyle。  -->
                 <Border Grid.Column="0" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -778,6 +891,7 @@
                                 </Button>
                             </StackPanel>
                         </Border>
+                        <!--  控件 扫码枪卡片列表。绑定 Scanners、SelectedScanner。双击打开编辑。  -->
                         <ListBox Grid.Row="1"
                                  ItemsSource="{Binding Scanners}"
                                  SelectedItem="{Binding SelectedScanner}"
@@ -885,6 +999,7 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
+                    <!--  区域 触发读取。只读控件：枪名、IP 或 COM、端口、触发字符串。扫码结果的条码和文字在同一张卡片里。  -->
                     <Border Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -940,6 +1055,7 @@
                                         </Border>
                                     </StackPanel>
                                 </UniformGrid>
+                                <!--  按钮 触发（DeviceTriggerButton）。样式 DeviceToolButtonStyle。命令 TriggerCommand。  -->
                                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
                                     <Button Style="{StaticResource DeviceToolButtonStyle}"
                                             Command="{Binding TriggerCommand}"
@@ -951,32 +1067,22 @@
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
-                                <Border Grid.Row="2" Margin="0,16,0,0" BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,1,0,0" Padding="0,14,0,0">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                            <Border Width="3" Height="14" Margin="0,0,8,0" Background="{StaticResource ThemeBrushColorAssist}" />
-                                            <TextBlock Text="{DynamicResource Device_ScanResult}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                        <Border Grid.Row="1" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Padding="16,12">
-                                            <base:BarcodeBlock Text="{Binding ScanResult}" Height="72" />
-                                        </Border>
-                                        <TextBlock Grid.Row="2"
-                                                   Text="{Binding ScanResult}"
-                                                   FontSize="28"
-                                                   FontWeight="Bold"
-                                                   HorizontalAlignment="Center"
-                                                   Margin="0,12,0,0"
-                                                   AutomationProperties.AutomationId="DeviceScanResult" />
-                                    </Grid>
-                                </Border>
+                                <!--  控件 扫码结果。条码 BarcodeBlock，文字 DeviceScanResult，都绑 ScanResult。  -->
+                                <StackPanel Grid.Row="2" Margin="0,16,0,0">
+                                    <Border Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Padding="16,12">
+                                        <base:BarcodeBlock Text="{Binding ScanResult}" Height="72" />
+                                    </Border>
+                                    <TextBlock Text="{Binding ScanResult}"
+                                               FontSize="28"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,12,0,0"
+                                               AutomationProperties.AutomationId="DeviceScanResult" />
+                                </StackPanel>
                             </Grid>
                         </Grid>
                     </Border>
+                    <!--  区域 扫码日志。控件 ScanLogs，模板 DeviceLogTemplate，行样式 DeviceLogItem。  -->
                     <Border Grid.Row="2" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -1003,10 +1109,11 @@
                     </Border>
                 </Grid>
             </Grid>
-        </Grid>
+            </TabItem>
+        </TabControl>
 
-        <Grid Grid.RowSpan="2"
-              Background="#2E333333"
+        <!--  区域 编辑窗 DeviceEditor。点位或扫码枪字段。按钮：保存（DeviceEditorSave）、取消（DeviceEditorCancel）。样式 DeviceToolButtonStyle。  -->
+        <Grid Background="#2E333333"
               Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolVis}}"
               AutomationProperties.AutomationId="DeviceEditor">
             <Border Width="480"
@@ -1026,6 +1133,7 @@
                         <TextBlock Text="{Binding EditorTitle}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel Grid.Row="1" Margin="24,18,24,8">
+                        <!--  区域 点位编辑。控件：名称、地址、数据类型、长度、读写。样式 DeviceUnderlineBox、DeviceCombo。  -->
                         <StackPanel Visibility="{Binding IsPointEditor, Converter={StaticResource BoolVis}}">
                             <TextBlock Text="{DynamicResource Device_PointName}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorName, UpdateSourceTrigger=PropertyChanged}" />
@@ -1038,6 +1146,7 @@
                             <TextBlock Text="{DynamicResource Device_Access}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding AccessModes}" SelectedItem="{Binding EditorAccess}" />
                         </StackPanel>
+                        <!--  区域 扫码枪编辑。控件：名称、传输、IP 或 COM、端口、触发字符串。样式 DeviceUnderlineBox、DeviceCombo。  -->
                         <StackPanel Visibility="{Binding IsScannerEditor, Converter={StaticResource BoolVis}}">
                             <TextBlock Text="{DynamicResource Device_ScannerName}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorName, UpdateSourceTrigger=PropertyChanged}" />
@@ -1063,6 +1172,7 @@
                             <TextBlock Text="{DynamicResource Device_TriggerText}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorTrigger, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
+                        <!--  控件 启用。绑定 EditorEnabled。  -->
                         <CheckBox Margin="0,16,0,0"
                                   Content="{DynamicResource Device_On}"
                                   IsChecked="{Binding EditorEnabled}"

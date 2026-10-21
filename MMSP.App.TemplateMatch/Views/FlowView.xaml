@@ -12,10 +12,13 @@
              FontSize="14"
              Foreground="{DynamicResource HighestBlack}">
     <UserControl.Resources>
+        <!--  转换 BoolVis：布尔到可见性。  -->
         <BooleanToVisibilityConverter x:Key="BoolVis" />
+        <!--  模板 FlowToolPanel：工具卡片两列面板。  -->
         <ItemsPanelTemplate x:Key="FlowToolPanel">
             <UniformGrid Columns="2" />
         </ItemsPanelTemplate>
+        <!--  模板 FlowToolCard：工具卡片。图标和名称。  -->
         <DataTemplate x:Key="FlowToolCard">
             <Border MinHeight="56"
                     Margin="3"
@@ -37,6 +40,7 @@
             </Border>
         </DataTemplate>
 
+        <!--  样式 FlowToolButton：工具按钮。白底灰边，悬停变灰。  -->
         <Style x:Key="FlowToolButton" TargetType="Button">
             <Setter Property="Height" Value="32" />
             <Setter Property="MinWidth" Value="64" />
@@ -72,6 +76,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 FlowFlatButton：透明按钮。无边框，内容拉满。  -->
         <Style x:Key="FlowFlatButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -91,6 +96,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 FlowSwitch：开关。未选为灰轨，选中为金轨且圆点靠右。  -->
         <Style x:Key="FlowSwitch" TargetType="ToggleButton">
             <Setter Property="Width" Value="44" />
             <Setter Property="Height" Value="20" />
@@ -115,6 +121,7 @@
             </Setter>
         </Style>
 
+        <!--  样式 FlowUnderlineBox：下划线输入框。聚焦时底边变金。  -->
         <Style x:Key="FlowUnderlineBox" TargetType="TextBox">
             <Setter Property="Height" Value="30" />
             <Setter Property="FontSize" Value="15" />
@@ -144,38 +151,45 @@
             </Setter>
         </Style>
 
-        <Style x:Key="FlowEndpointBox" TargetType="TextBox" BasedOn="{StaticResource FlowUnderlineBox}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border Background="Transparent"
-                                BorderBrush="{StaticResource ThemeBrushColorAssist}"
-                                BorderThickness="0,0,0,2"
-                                SnapsToDevicePixels="True">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,4,0,2" Focusable="False" />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="FlowComboItem" TargetType="ComboBoxItem">
-            <Setter Property="Padding" Value="8,6" />
-            <Setter Property="Background" Value="White" />
+        <!--  样式 FlowCheck：MES 布尔勾选框。选中为金色。  -->
+        <Style x:Key="FlowCheck" TargetType="CheckBox">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="FontSize" Value="15" />
             <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="ComboBoxItem">
-                        <Border x:Name="ItemBox" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter VerticalAlignment="Center" />
-                        </Border>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Background="Transparent">
+                            <Border x:Name="Box"
+                                    Width="16"
+                                    Height="16"
+                                    Background="{DynamicResource CardBackground}"
+                                    BorderBrush="#C8C8C8"
+                                    BorderThickness="1"
+                                    VerticalAlignment="Center">
+                                <Path x:Name="Mark"
+                                      Width="10"
+                                      Height="8"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Stretch="None"
+                                      Stroke="{DynamicResource HighestBlack}"
+                                      StrokeThickness="1.6"
+                                      Data="M 1 4 L 4 7 L 9 1"
+                                      Visibility="Collapsed" />
+                            </Border>
+                            <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
+                        </StackPanel>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="ItemBox" Property="Background" Value="#FFF6D2" />
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="ItemBox" Property="Background" Value="{StaticResource ThemeBrushColorAssist}" />
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="{StaticResource ThemeBrushColorAssist}" />
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#E0B400" />
+                                <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -183,76 +197,7 @@
             </Setter>
         </Style>
 
-        <Style x:Key="FlowCombo" TargetType="ComboBox">
-            <Setter Property="Height" Value="30" />
-            <Setter Property="FontSize" Value="15" />
-            <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="ItemContainerStyle" Value="{StaticResource FlowComboItem}" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Grid>
-                            <ToggleButton Focusable="False"
-                                          ClickMode="Press"
-                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                          Background="Transparent"
-                                          BorderThickness="0">
-                                <ToggleButton.Template>
-                                    <ControlTemplate TargetType="ToggleButton">
-                                        <Border x:Name="Line" Background="Transparent" BorderBrush="#E0E0E0" BorderThickness="0,0,0,2">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="24" />
-                                                </Grid.ColumnDefinitions>
-                                                <ContentPresenter Grid.Column="0"
-                                                                  Margin="0,4,0,2"
-                                                                  HorizontalAlignment="Left"
-                                                                  VerticalAlignment="Center"
-                                                                  IsHitTestVisible="False"
-                                                                  Content="{Binding SelectionBoxItem, RelativeSource={RelativeSource AncestorType=ComboBox}}" />
-                                                <TextBlock Grid.Column="1"
-                                                           Text="&#x25BE;"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource FieldLabelBrush}"
-                                                           FontSize="12" />
-                                            </Grid>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsChecked" Value="True">
-                                                <Setter TargetName="Line" Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </ToggleButton.Template>
-                            </ToggleButton>
-                            <Popup x:Name="PART_Popup"
-                                   Placement="Bottom"
-                                   AllowsTransparency="True"
-                                   Focusable="False"
-                                   IsOpen="{TemplateBinding IsDropDownOpen}">
-                                <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
-                                        Background="{DynamicResource CardBackground}"
-                                        BorderBrush="#E0E0E0"
-                                        BorderThickness="1">
-                                    <ScrollViewer MaxHeight="160">
-                                        <ItemsPresenter />
-                                    </ScrollViewer>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!--  与设备页页签相同：顶栏横排，选中浅金底，底部 3 像素金线。  -->
+        <!--  样式 FlowTab：流程页签。顶栏横排，选中浅金底，底部 3 像素金线。  -->
         <Style x:Key="FlowTab" TargetType="TabItem">
             <Setter Property="Height" Value="32" />
             <Setter Property="Padding" Value="14,0" />
@@ -283,7 +228,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#FFF6D2" />
+                    <Setter Property="Background" Value="{DynamicResource NavSelectedBackground}" />
                     <Setter Property="Foreground" Value="{DynamicResource HighestBlack}" />
                     <Setter Property="BorderBrush" Value="{StaticResource ThemeBrushColorAssist}" />
                     <Setter Property="BorderThickness" Value="0,0,0,3" />
@@ -293,6 +238,7 @@
     </UserControl.Resources>
 
     <Grid>
+    <!--  区域 页签。绑定 PageIndex。页签：流程数据（FlowDataTab）、MES配置（FlowMesTab）。样式 FlowTab。  -->
     <TabControl ItemContainerStyle="{StaticResource FlowTab}"
                 TabStripPlacement="Top"
                 SelectedIndex="{Binding PageIndex}"
@@ -321,6 +267,7 @@
                 </Grid>
             </ControlTemplate>
         </TabControl.Template>
+        <!--  页签 流程数据（FlowDataTab）。  -->
         <TabItem AutomationProperties.AutomationId="FlowDataTab"
                  AutomationProperties.Name="{DynamicResource Flow_Data}">
             <TabItem.Header>
@@ -329,6 +276,7 @@
                     <TextBlock Text="{DynamicResource Flow_Data}" Margin="6,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
             </TabItem.Header>
+        <!--  区域 流程数据。左列流程列表，中列工具，右列步骤。  -->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="480" />
@@ -336,6 +284,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <!--  区域 流程列表。按钮：新增（FlowAdd）、删除（FlowDelete）、执行（FlowRun）、复制（FlowCopy）、导出（FlowExport）、导入（FlowImport）。样式 FlowToolButton。  -->
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="48" />
@@ -343,36 +292,42 @@
                 </Grid.RowDefinitions>
                 <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,1,1" Padding="10,0" Background="{DynamicResource CardBackground}">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <!--  按钮 新增（FlowAdd）。命令 AddCommand。  -->
                         <Button Style="{StaticResource FlowToolButton}" Command="{Binding AddCommand}" AutomationProperties.AutomationId="FlowAdd" AutomationProperties.Name="{DynamicResource Flow_Add}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="Plus" Width="16" Height="16" VerticalAlignment="Center" />
                                 <TextBlock Text="{DynamicResource Flow_Add}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
+                        <!--  按钮 删除（FlowDelete）。命令 DeleteCommand。  -->
                         <Button Style="{StaticResource FlowToolButton}" Command="{Binding DeleteCommand}" AutomationProperties.AutomationId="FlowDelete" AutomationProperties.Name="{DynamicResource Flow_Delete}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="Trash" Width="16" Height="16" VerticalAlignment="Center" />
                                 <TextBlock Text="{DynamicResource Flow_Delete}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
+                        <!--  按钮 执行（FlowRun）。命令 RunCommand。  -->
                         <Button Style="{StaticResource FlowToolButton}" Command="{Binding RunCommand}" AutomationProperties.AutomationId="FlowRun" AutomationProperties.Name="{DynamicResource Flow_Run}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="Play" Width="16" Height="16" VerticalAlignment="Center" />
                                 <TextBlock Text="{DynamicResource Flow_Run}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
+                        <!--  按钮 复制（FlowCopy）。命令 CopyCommand。  -->
                         <Button Style="{StaticResource FlowToolButton}" Command="{Binding CopyCommand}" AutomationProperties.AutomationId="FlowCopy" AutomationProperties.Name="{DynamicResource Flow_Copy}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="Copy" Width="16" Height="16" VerticalAlignment="Center" />
                                 <TextBlock Text="{DynamicResource Flow_Copy}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
+                        <!--  按钮 导出（FlowExport）。命令 ExportCommand。  -->
                         <Button Style="{StaticResource FlowToolButton}" Command="{Binding ExportCommand}" AutomationProperties.AutomationId="FlowExport" AutomationProperties.Name="{DynamicResource Flow_Export}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="UploadSimple" Width="16" Height="16" VerticalAlignment="Center" />
                                 <TextBlock Text="{DynamicResource Flow_Export}" Margin="6,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
+                        <!--  按钮 导入（FlowImport）。命令 ImportCommand。  -->
                         <Button Style="{StaticResource FlowToolButton}" Margin="0" Command="{Binding ImportCommand}" AutomationProperties.AutomationId="FlowImport" AutomationProperties.Name="{DynamicResource Flow_Import}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="DownloadSimple" Width="16" Height="16" VerticalAlignment="Center" />
@@ -383,8 +338,10 @@
                 </Border>
                 <Border Grid.Row="1" Background="{DynamicResource CardBodyBrush}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="0,0,1,0">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <!--  控件 流程卡片列表。绑定 Flows。  -->
                         <ItemsControl ItemsSource="{Binding Flows}" Margin="12,12,12,4">
                             <ItemsControl.ItemTemplate>
+                                <!--  模板 流程卡片项：一条流程。名称、流程步数量、启用（IsEnabled）、日志输出（LogOutput）。按钮用 FlowFlatButton，开关用 FlowSwitch。  -->
                                 <DataTemplate>
                                     <Border Margin="0,0,0,8"
                                             CornerRadius="8"
@@ -406,6 +363,7 @@
                                         </Border.Style>
                                         <Grid>
                                             <StackPanel Margin="12,8,12,8">
+                                                <!--  按钮 流程卡片（FlowCard）。命令 SelectCommand。  -->
                                                 <Button Style="{StaticResource FlowFlatButton}"
                                                         HorizontalContentAlignment="Left"
                                                         Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -420,6 +378,7 @@
                                                     </StackPanel>
                                                 </Button>
                                                 <Grid Height="20" Margin="0,4,0,0">
+                                                    <!--  按钮 选择流程。命令 SelectCommand。  -->
                                                     <Button Style="{StaticResource FlowFlatButton}"
                                                             Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             CommandParameter="{Binding}" />
@@ -430,6 +389,7 @@
                                                                   IsChecked="{Binding IsEnabled}" />
                                                 </Grid>
                                                 <Grid Height="20" Margin="0,4,0,0">
+                                                    <!--  按钮 选择流程。命令 SelectCommand。  -->
                                                     <Button Style="{StaticResource FlowFlatButton}"
                                                             Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             CommandParameter="{Binding}" />
@@ -461,6 +421,7 @@
                 </Border>
             </Grid>
 
+            <!--  区域 工具。标题：工具。分组：通用、客户工具（CustomerToolGroup）。模板 FlowToolPanel、FlowToolCard。  -->
             <DockPanel Grid.Column="1" Background="{DynamicResource CardBackground}" LastChildFill="True">
                     <Border DockPanel.Dock="Right" Width="1" Background="{DynamicResource CardBorderBrush}" />
                     <Border DockPanel.Dock="Top" Height="48" BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="12,0">
@@ -476,6 +437,7 @@
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource MediumNormalGray}"
                                        Margin="4,6,4,2" />
+                            <!--  控件 通用工具。绑定 GeneralTools。可拖出。模板 FlowToolPanel、FlowToolCard。  -->
                             <ItemsControl ItemsSource="{Binding GeneralTools}"
                                           ItemsPanel="{StaticResource FlowToolPanel}"
                                           ItemTemplate="{StaticResource FlowToolCard}"
@@ -486,6 +448,7 @@
                                        Foreground="{DynamicResource MediumNormalGray}"
                                        Margin="4,8,4,2"
                                        Visibility="{Binding HasCustomerTools, Converter={StaticResource BoolVis}}" />
+                            <!--  控件 客户工具。绑定 CustomerTools、HasCustomerTools。可拖出。模板 FlowToolPanel、FlowToolCard。  -->
                             <ItemsControl ItemsSource="{Binding CustomerTools}"
                                           ItemsPanel="{StaticResource FlowToolPanel}"
                                           ItemTemplate="{StaticResource FlowToolCard}"
@@ -495,6 +458,7 @@
                     </ScrollViewer>
             </DockPanel>
 
+            <!--  区域 流程步骤。标题：流程。提示：由上向下依次执行。控件：步骤列表。  -->
             <DockPanel Grid.Column="2" Background="{DynamicResource CardBodyBrush}" LastChildFill="True">
                 <Border DockPanel.Dock="Top" Height="48" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource HeaderDividerBrush}" BorderThickness="0,0,0,1" Padding="12,0">
                     <DockPanel LastChildFill="False">
@@ -507,6 +471,7 @@
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
                               Background="Transparent">
+                    <!--  控件 步骤列表。绑定 SelectedFlow.Steps。可拖入工具，步骤也可拖动。  -->
                     <ItemsControl ItemsSource="{Binding SelectedFlow.Steps}"
                                   Background="Transparent"
                                   Padding="12,10,12,8"
@@ -516,6 +481,7 @@
                                   dd:DragDrop.IsDropTarget="True"
                                   dd:DragDrop.DropHandler="{Binding}">
                         <ItemsControl.ItemTemplate>
+                            <!--  模板 步骤项：序号、类型、标题、说明。说明为空时显示未配置。  -->
                             <DataTemplate>
                                 <Grid PreviewMouseLeftButtonDown="OnStepPreviewMouseDown">
                                     <Grid.ColumnDefinitions>
@@ -554,6 +520,7 @@
                                                           Command="{Binding DataContext.SelectStepCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                           CommandParameter="{Binding}" />
                                         </Border.InputBindings>
+                                        <!--  菜单 步骤右键。项：属性（ShowPropertyCommand）、删除（DeleteStepCommand）。样式 MahApps.Styles.ContextMenu、MahApps.Styles.MenuItem。  -->
                                         <Border.ContextMenu>
                                             <ContextMenu Style="{StaticResource MahApps.Styles.ContextMenu}">
                                                 <MenuItem Header="{DynamicResource Flow_Property}"
@@ -595,6 +562,7 @@
             </DockPanel>
         </Grid>
         </TabItem>
+        <!--  页签 MES配置（FlowMesTab）。  -->
         <TabItem AutomationProperties.AutomationId="FlowMesTab"
                  AutomationProperties.Name="{DynamicResource Flow_MesTitle}">
             <TabItem.Header>
@@ -606,6 +574,7 @@
             <Grid Background="{DynamicResource CardBodyBrush}"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch">
+                <!--  区域 MES配置（FlowMesDialog）。按钮：保存（FlowMesSave）、取消（FlowMesCancel）。控件：MesFields 按配置类属性生成，错误 MesError。样式 FlowToolButton、FlowUnderlineBox、FlowCheck。  -->
                 <Border Margin="12"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Top"
@@ -621,6 +590,7 @@
                         <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="14,0">
                             <DockPanel LastChildFill="True">
                                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <!--  按钮 保存（FlowMesSave）。命令 SaveMesCommand。  -->
                                     <Button Style="{StaticResource FlowToolButton}"
                                             Command="{Binding SaveMesCommand}"
                                             AutomationProperties.AutomationId="FlowMesSave"
@@ -630,6 +600,7 @@
                                             <TextBlock Text="{DynamicResource Config_Save}" Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
+                                    <!--  按钮 取消（FlowMesCancel）。命令 CancelMesCommand。  -->
                                     <Button Style="{StaticResource FlowToolButton}"
                                             Margin="0"
                                             Command="{Binding CancelMesCommand}"
@@ -648,56 +619,58 @@
                             </DockPanel>
                         </Border>
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                            <Grid Margin="18,14,18,16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="16" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
-                                    <TextBlock Text="{DynamicResource Flow_Endpoint}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                    <TextBox Style="{StaticResource FlowEndpointBox}"
-                                             Text="{Binding DraftEndpoint, UpdateSourceTrigger=PropertyChanged}"
-                                             AutomationProperties.AutomationId="FlowMesEndpoint" />
-                                </StackPanel>
-                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,12,0,0">
-                                    <TextBlock Text="{DynamicResource Flow_Station}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                    <TextBox Style="{StaticResource FlowUnderlineBox}"
-                                             Text="{Binding DraftStation, UpdateSourceTrigger=PropertyChanged}"
-                                             AutomationProperties.AutomationId="FlowMesStation" />
-                                </StackPanel>
-                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,12,0,0">
-                                    <TextBlock Text="{DynamicResource Flow_Timeout}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                    <TextBox Style="{StaticResource FlowUnderlineBox}"
-                                             Text="{Binding DraftTimeout, UpdateSourceTrigger=PropertyChanged}"
-                                             AutomationProperties.AutomationId="FlowMesTimeout" />
-                                </StackPanel>
-                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,12,0,0">
-                                    <TextBlock Text="{DynamicResource Flow_Retry}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                    <TextBox Style="{StaticResource FlowUnderlineBox}"
-                                             Text="{Binding DraftRetry, UpdateSourceTrigger=PropertyChanged}"
-                                             AutomationProperties.AutomationId="FlowMesRetry" />
-                                </StackPanel>
-                                <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,12,0,0">
-                                    <TextBlock Text="{DynamicResource Flow_Enabled}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2" />
-                                    <ComboBox Style="{StaticResource FlowCombo}"
-                                              ItemsSource="{Binding EnabledChoices}"
-                                              SelectedItem="{Binding DraftEnabled}"
-                                              AutomationProperties.AutomationId="FlowMesEnabled" />
-                                </StackPanel>
-                                <TextBlock Grid.Row="3"
-                                           Grid.Column="0"
-                                           Grid.ColumnSpan="3"
-                                           Text="{Binding MesError}"
+                            <StackPanel Margin="18,14,18,16">
+                                <!--  控件 MES 字段。绑定 MesFields。文本为标题加 FlowUnderlineBox，布尔为 FlowCheck。  -->
+                                <ItemsControl ItemsSource="{Binding MesFields}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,0,0,12"
+                                                        AutomationProperties.AutomationId="{Binding Name}">
+                                                <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,2">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsCheck}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox" BasedOn="{StaticResource FlowUnderlineBox}">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsCheck}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
+                                                <CheckBox Content="{Binding Label}"
+                                                          IsChecked="{Binding Checked, Mode=TwoWay}">
+                                                    <CheckBox.Style>
+                                                        <Style TargetType="CheckBox" BasedOn="{StaticResource FlowCheck}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsCheck}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </CheckBox.Style>
+                                                </CheckBox>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <!--  控件 错误（FlowMesError）。绑定 MesError。为空时折叠。  -->
+                                <TextBlock Text="{Binding MesError}"
                                            Foreground="{StaticResource HighestRed}"
                                            FontSize="12"
-                                           Margin="0,12,0,0"
                                            TextWrapping="Wrap"
                                            AutomationProperties.AutomationId="FlowMesError">
                                     <TextBlock.Style>
@@ -711,7 +684,7 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-                            </Grid>
+                            </StackPanel>
                         </ScrollViewer>
                     </Grid>
                 </Border>

@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using GongSolutions.Wpf.DragDrop;
@@ -9,7 +8,9 @@ using MMSP.App.TemplateMatch.Models;
 using MMSP.App.WpfBase.Core;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper.Logger;
+using MMSP.Core.Model.Base;
 using MMSP.Core.Model.DB;
+using MMSP.Core.Model.Helper;
 using MMSP.Core.Model.Sys;
 using MMSP.Plugin.Tool;
 using MMSP.Service.Database;
@@ -17,28 +18,15 @@ using MMSP.Service.Database;
 namespace MMSP.App.TemplateMatch.ViewModels
 {
     /// <summary>
-    /// 流程页。流程数据页放列表、工具和流程步，MES 配置单独一页。连接读客户库。
+    /// 流程页。流程数据页放列表、工具和流程步，MES 配置单独一页。配置按当前客户和设备选出的类读写。
     /// 拖入工具会写入流程步，流程步可上下拖动并写回顺序。属性窗口会写回工具配置。新增和编辑只改流程名称。删除会连同流程步一起去掉。
     /// </summary>
     public partial class FlowViewModel : BaseViewModel, IDropTarget
     {
-        private const int EndpointLimit = 256;
-        private const int StationLimit = 32;
-
         private bool _loading = true;
         private FlowCard? _selectedFlow;
         private int _pageIndex;
-        private Guid? _mesId;
-        private string _mesEndpoint = "";
-        private string _mesStation = "";
-        private string _mesTimeout = "";
-        private string _mesRetry = "";
-        private string _mesEnabled = "";
-        private string _draftEndpoint = "";
-        private string _draftStation = "";
-        private string _draftTimeout = "";
-        private string _draftRetry = "";
-        private string _draftEnabled = "";
+        private string _savedCfg = "";
         private string _mesError = "";
 
         /// <summary>
@@ -53,10 +41,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             Flows = [];
             GeneralTools = [];
             CustomerTools = [];
-            EnabledChoices = [Text("User_Yes", "是"), Text("User_No", "否")];
-            AppAppearance.LanguageChanged += OnLanguageChanged;
-            _mesEnabled = NoText();
-            _draftEnabled = _mesEnabled;
+            MesFields = [];
             SelectCommand = new DelegateCommand<FlowCard?>(Select);
             SelectStepCommand = new DelegateCommand<FlowStep?>(SelectStep);
             ShowPropertyCommand = new DelegateCommand<FlowStep?>(ShowProperty);
@@ -114,64 +99,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public DelegateCommand<FlowStep?> DeleteStepCommand { get; }
 
         /// <summary>
-        /// 启用下拉项。是、否。
-        /// </summary>
-        private IReadOnlyList<string> _enabledChoices = [];
-
-        /// <summary>
-        /// 启用下拉项。是、否。
-        /// </summary>
-        public IReadOnlyList<string> EnabledChoices
-        {
-            get => _enabledChoices;
-            private set => SetProperty(ref _enabledChoices, value);
-        }
-
-        /// <summary>
-        /// 语言切换后重写“是/否”，并保住当前选中项。
-        /// </summary>
-        private void OnLanguageChanged()
-        {
-            var dispatcher = Application.Current?.Dispatcher;
-            if (dispatcher is not null && !dispatcher.CheckAccess())
-            {
-                dispatcher.BeginInvoke(new Action(OnLanguageChanged));
-                return;
-            }
-
-            var draftIndex = ChoiceIndex(EnabledChoices, DraftEnabled);
-            var savedIndex = ChoiceIndex(EnabledChoices, _mesEnabled);
-            EnabledChoices = [Text("User_Yes", "是"), Text("User_No", "否")];
-            DraftEnabled = ChoiceAt(EnabledChoices, draftIndex);
-            _mesEnabled = ChoiceAt(EnabledChoices, savedIndex);
-        }
-
-        /// <summary>
-        /// 在下拉里找当前文字的位置。没有时返回 -1。
-        /// </summary>
-        private static int ChoiceIndex(IReadOnlyList<string> choices, string value)
-        {
-            for (var index = 0; index < choices.Count; index++)
-            {
-                if (choices[index] == value)
-                    return index;
-            }
-
-            return -1;
-        }
-
-        /// <summary>
-        /// 按下标取下拉文字。下标无效时取第一项。
-        /// </summary>
-        private static string ChoiceAt(IReadOnlyList<string> choices, int index)
-        {
-            if (index >= 0 && index < choices.Count)
-                return choices[index];
-
-            return choices.Count > 0 ? choices[0] : "";
-        }
-
-        /// <summary>
         /// 当前流程。流程数据页右侧标题和步骤跟着它。没有流程时为空。
         /// </summary>
         public FlowCard? SelectedFlow
@@ -197,49 +124,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// MES 配置页里的接口地址。
+        /// MES 配置页的输入项。来自当前配置类的公共属性。
         /// </summary>
-        public string DraftEndpoint
-        {
-            get => _draftEndpoint;
-            set => SetProperty(ref _draftEndpoint, value);
-        }
-
-        /// <summary>
-        /// MES 配置页里的工位。
-        /// </summary>
-        public string DraftStation
-        {
-            get => _draftStation;
-            set => SetProperty(ref _draftStation, value);
-        }
-
-        /// <summary>
-        /// MES 配置页里的超时。
-        /// </summary>
-        public string DraftTimeout
-        {
-            get => _draftTimeout;
-            set => SetProperty(ref _draftTimeout, value);
-        }
-
-        /// <summary>
-        /// MES 配置页里的重试次数。
-        /// </summary>
-        public string DraftRetry
-        {
-            get => _draftRetry;
-            set => SetProperty(ref _draftRetry, value);
-        }
-
-        /// <summary>
-        /// MES 配置页里的启用。是或否。
-        /// </summary>
-        public string DraftEnabled
-        {
-            get => _draftEnabled;
-            set => SetProperty(ref _draftEnabled, value);
-        }
+        public ObservableCollection<MesFieldItem> MesFields { get; }
 
         /// <summary>
         /// MES 配置页里的保存错误。空字符串表示没有错误。
@@ -373,17 +260,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     card.PropertyChanged += OnFlowChanged;
                     Flows.Add(card);
                 }
+            }
 
-                var mes = db.Queryable<FlowMesEntity>().OrderBy(item => item.Id).ToList().FirstOrDefault();
-                if (mes is null)
-                    ApplyMes(null, "", "", "", "", false);
-                else
-                    ApplyMes(mes.Id, mes.Endpoint, mes.Station, TimeoutText(mes.TimeoutMs), RetryText(mes.RetryCount), mes.IsEnabled);
-            }
-            else
-            {
-                ApplyMes(null, "", "", "", "", false);
-            }
+            LoadMes();
 
             _loading = false;
             var selected = Flows.FirstOrDefault(item => item.Id == selectId) ?? Flows.FirstOrDefault();
@@ -473,61 +352,143 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
+        /// 按当前配置类读取已保存的 JSON。没有对上的类时不显示输入项。
+        /// </summary>
+        private void LoadMes()
+        {
+            MesError = "";
+            var model = CurrentModel();
+            if (model is null)
+            {
+                _savedCfg = "";
+                ShowFields(null);
+                return;
+            }
+
+            var typeName = model.GetType().FullName ?? model.GetType().Name;
+            var json = "";
+            if (SqlSugarContext.IsOpen)
+            {
+                try
+                {
+                    var row = SqlSugarContext.CustomerDb.Queryable<FlowMesEntity>().ToList()
+                        .FirstOrDefault(item => item.ConfigType == typeName);
+                    json = row?.CfgValue ?? "";
+                    MesCfgJson.Read(model, json);
+                    json = MesCfgJson.Write(model);
+                }
+                catch (Exception)
+                {
+                    MesCfgJson.Read(model, "");
+                    json = MesCfgJson.Write(model);
+                    MesError = "MES 配置无法读取";
+                }
+            }
+            else
+            {
+                MesCfgJson.Read(model, "");
+                json = MesCfgJson.Write(model);
+            }
+
+            _savedCfg = json;
+            ShowFields(model);
+        }
+
+        /// <summary>
+        /// 当前客户和设备选出的配置实例。没有登记时为空。
+        /// </summary>
+        private MesCfgModel? CurrentModel()
+        {
+            if (!IContainerProviderExtensions.IsRegistered<MesCfgModel>(ContainerExt))
+                return null;
+
+            return ContainerExt.Resolve<MesCfgModel>();
+        }
+
+        /// <summary>
         /// 把已保存的 MES 配置抄进配置页。
         /// </summary>
         private void FillDraft()
         {
-            DraftEndpoint = _mesEndpoint;
-            DraftStation = _mesStation;
-            DraftTimeout = _mesTimeout;
-            DraftRetry = _mesRetry;
-            DraftEnabled = _mesEnabled;
             MesError = "";
+            var model = CurrentModel();
+            if (model is null)
+            {
+                ShowFields(null);
+                return;
+            }
+
+            try
+            {
+                MesCfgJson.Read(model, _savedCfg);
+            }
+            catch (Exception)
+            {
+                MesCfgJson.Read(model, "");
+                MesError = "MES 配置无法读取";
+            }
+
+            ShowFields(model);
         }
 
+        /// <summary>
+        /// 按配置类的公共属性生成输入项。
+        /// </summary>
+        private void ShowFields(MesCfgModel? model)
+        {
+            MesFields.Clear();
+            if (model is null)
+                return;
+
+            foreach (var field in MesCfgJson.Fields(model))
+                MesFields.Add(new MesFieldItem(field.Name, field.Label, field.Text, field.IsCheck));
+        }
+
+        /// <summary>
+        /// 把界面文字写回配置类，并按配置类全名保存一行。
+        /// </summary>
         private void SaveMes()
         {
             MesError = "";
-            if (!TryNonNegative(DraftTimeout, out var timeoutMs))
-            {
-                MesError = Text("Flow_NeedTimeout", "超时请填写非负整数");
-                return;
-            }
-
-            if (!TryNonNegative(DraftRetry, out var retryCount))
-            {
-                MesError = Text("Flow_NeedRetry", "重试次数请填写非负整数");
-                return;
-            }
-
-            if (!SqlSugarContext.IsOpen)
+            var model = CurrentModel();
+            if (model is null || !SqlSugarContext.IsOpen)
             {
                 MesError = Text("User_SaveFailed", "保存失败");
                 return;
             }
 
-            var endpoint = Limit(DraftEndpoint, EndpointLimit);
-            var station = Limit(DraftStation, StationLimit);
-            var enabled = EnabledChoices.Count > 0 && DraftEnabled == EnabledChoices[0];
+            var rejected = MesCfgJson.Apply(model, MesFields.Select(item => new MesCfgField(item.Name, item.Label, item.Value)).ToList());
+            if (rejected is not null)
+            {
+                MesError = rejected + "无法识别";
+                return;
+            }
+
+            var typeName = model.GetType().FullName ?? model.GetType().Name;
+            var json = MesCfgJson.Write(model);
             try
             {
                 var db = SqlSugarContext.CustomerDb;
-                var entity = _mesId is Guid id
-                    ? db.Queryable<FlowMesEntity>().Where(item => item.Id == id).ToList().FirstOrDefault()
-                    : null;
+                var entity = db.Queryable<FlowMesEntity>().ToList()
+                    .FirstOrDefault(item => item.ConfigType == typeName);
                 if (entity is null)
                 {
-                    entity = new FlowMesEntity { Id = Guid.NewGuid() };
-                    CopyMes(entity, endpoint, station, timeoutMs, retryCount, enabled);
+                    entity = new FlowMesEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        ConfigType = typeName,
+                        CfgValue = json
+                    };
                     db.Insertable(entity).ExecuteCommand();
                 }
                 else
                 {
-                    CopyMes(entity, endpoint, station, timeoutMs, retryCount, enabled);
+                    entity.CfgValue = json;
                     db.Updateable(entity).ExecuteCommand();
                 }
 
-                ApplyMes(entity.Id, endpoint, station, TimeoutText(timeoutMs), RetryText(retryCount), enabled);
+                _savedCfg = json;
+                ShowFields(model);
                 LogHelper.FlowInfo("保存 MES 配置");
             }
             catch (Exception)
@@ -546,27 +507,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void LayoutOnly()
         {
-        }
-
-        private void ApplyMes(Guid? id, string endpoint, string station, string timeout, string retry, bool enabled)
-        {
-            _mesId = id;
-            _mesEndpoint = endpoint;
-            _mesStation = station;
-            _mesTimeout = timeout;
-            _mesRetry = retry;
-            _mesEnabled = enabled ? YesText() : NoText();
-            if (_pageIndex == 1)
-                FillDraft();
-        }
-
-        private static void CopyMes(FlowMesEntity entity, string endpoint, string station, int timeoutMs, int retryCount, bool enabled)
-        {
-            entity.Endpoint = endpoint;
-            entity.Station = station;
-            entity.TimeoutMs = timeoutMs;
-            entity.RetryCount = retryCount;
-            entity.IsEnabled = enabled;
         }
 
         private FlowCard ToCard(FlowEntity row, IReadOnlyList<FlowStepEntity> owned)
@@ -607,53 +547,23 @@ namespace MMSP.App.TemplateMatch.ViewModels
             return steps;
         }
 
+        /// <summary>
+        /// 步骤说明。只从工具配置解释，没有配置时为空。
+        /// </summary>
         private static string DetailText(FlowStepEntity step)
         {
-            if (!string.IsNullOrWhiteSpace(step.CfgValue))
-                return ToolCatalog.Detail(step.ToolKind, step.CfgValue);
-
-            return step.ToolKind == FlowToolKind.Delay && step.NumberValue > 0
-                ? "超时 " + step.NumberValue + " ms"
-                : "";
+            return string.IsNullOrWhiteSpace(step.CfgValue)
+                ? ""
+                : ToolCatalog.Detail(step.ToolKind, step.CfgValue);
         }
 
-        private static string TimeoutText(int timeoutMs)
-        {
-            return string.Create(CultureInfo.InvariantCulture, $"{timeoutMs} ms");
-        }
-
-        private static string RetryText(int retryCount)
-        {
-            return retryCount.ToString(CultureInfo.InvariantCulture);
-        }
-
-        private static bool TryNonNegative(string text, out int value)
-        {
-            var source = text.Trim();
-            if (source.EndsWith("ms", StringComparison.OrdinalIgnoreCase))
-                source = source[..^2].Trim();
-
-            if (int.TryParse(source, NumberStyles.None, CultureInfo.InvariantCulture, out value) && value >= 0)
-                return true;
-
-            value = 0;
-            return false;
-        }
-
+        /// <summary>
+        /// 去掉两端空白，并截到指定长度。
+        /// </summary>
         private static string Limit(string text, int max)
         {
             var value = text.Trim();
             return value.Length <= max ? value : value[..max];
-        }
-
-        private string YesText()
-        {
-            return EnabledChoices.Count > 0 ? EnabledChoices[0] : Text("User_Yes", "是");
-        }
-
-        private string NoText()
-        {
-            return EnabledChoices.Count > 1 ? EnabledChoices[1] : Text("User_No", "否");
         }
 
         private static string Text(string key, string fallback)

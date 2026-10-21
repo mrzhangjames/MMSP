@@ -5,8 +5,11 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!--  字典 MahApps 控件样式 Controls。  -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <!--  字典 MahApps 字体 Fonts。  -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <!--  字典 MahApps 浅色橄榄主题 Light.Olive。  -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Olive.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

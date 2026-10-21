@@ -68,7 +68,13 @@
     <sys:String x:Key="User_NeedRole">请选择角色</sys:String>
     <sys:String x:Key="User_LoginExists">登录名已存在</sys:String>
     <sys:String x:Key="User_SaveFailed">保存失败</sys:String>
-    <sys:String x:Key="Login_BadCredential">用户名或密码不正确。</sys:String>
+    <sys:String x:Key="Login_BadCredential">登录名、密码或角色不正确。</sys:String>
+    <sys:String x:Key="User_Info">用户信息</sys:String>
+    <sys:String x:Key="User_LoginTime">登录时间</sys:String>
+    <sys:String x:Key="User_Manage">用户管理</sys:String>
+    <sys:String x:Key="User_ManageModules">管理模块</sys:String>
+    <sys:String x:Key="User_ModuleAllowed">当前角色可管理。</sys:String>
+    <sys:String x:Key="User_Plugin">插件</sys:String>
     <sys:String x:Key="Login_UserDisabled">该用户已停用。</sys:String>
     <sys:String x:Key="Login_Failed">登录失败。</sys:String>
 
@@ -102,7 +108,6 @@
     <sys:String x:Key="Device_TriggerRead">触发读取</sys:String>
     <sys:String x:Key="Device_Trigger">触发</sys:String>
     <sys:String x:Key="Device_TriggerText">触发字符串</sys:String>
-    <sys:String x:Key="Device_ScanResult">扫码结果</sys:String>
     <sys:String x:Key="Device_BarcodeArea">条码区域</sys:String>
     <sys:String x:Key="Device_ScannerName">扫码枪名称</sys:String>
     <sys:String x:Key="Device_AddPoint">新增点位</sys:String>
@@ -256,14 +261,8 @@
     <sys:String x:Key="Flow_Data">流程数据</sys:String>
     <sys:String x:Key="Flow_Mes">MES</sys:String>
     <sys:String x:Key="Flow_MesTitle">MES配置</sys:String>
-    <sys:String x:Key="Flow_Endpoint">接口地址</sys:String>
-    <sys:String x:Key="Flow_Station">工位</sys:String>
-    <sys:String x:Key="Flow_Timeout">超时</sys:String>
-    <sys:String x:Key="Flow_Retry">重试次数</sys:String>
     <sys:String x:Key="Flow_On">启用</sys:String>
     <sys:String x:Key="Flow_Off">停用</sys:String>
-    <sys:String x:Key="Flow_NeedTimeout">超时请填写非负整数</sys:String>
-    <sys:String x:Key="Flow_NeedRetry">重试次数请填写非负整数</sys:String>
     <sys:String x:Key="Flow_Edit">编辑</sys:String>
     <sys:String x:Key="Flow_AddTitle">新增流程</sys:String>
     <sys:String x:Key="Flow_EditTitle">编辑流程</sys:String>

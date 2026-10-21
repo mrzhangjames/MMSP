@@ -46,7 +46,7 @@ namespace MMSP.Core.Model.DB
         public int Station { get; set; } = 1;
 
         /// <summary>
-        /// 轮询周期，毫秒。小于等于 0 时不轮询。
+        /// 轮询周期，毫秒。只保存。设备页不按它读写点位。
         /// </summary>
         [SugarColumn(ColumnName = "poll_ms")]
         public int PollMs { get; set; }

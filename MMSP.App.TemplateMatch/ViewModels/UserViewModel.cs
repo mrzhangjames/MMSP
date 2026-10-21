@@ -11,7 +11,7 @@ using MMSP.Service.Database;
 namespace MMSP.App.TemplateMatch.ViewModels
 {
     /// <summary>
-    /// 用户页。新增、编辑、删除写入系统库。弹窗保存后再写运行日志。
+    /// 用户页。未登录时在这里登录。登录后按角色显示用户信息和管理区。新增、编辑、删除写入系统库。
     /// </summary>
     public class UserViewModel : BaseViewModel
     {
@@ -32,7 +32,18 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private string _editorRole = "";
         private string _editorError = "";
         private bool _editorEnabled = true;
+        private UserRole _editorRoleEnum = UserRole.Admin;
         private UserRow? _selectedUser;
+        private string _draftLoginName = "";
+        private string _draftPassword = "";
+        private string _loginError = "";
+        private LoginRoleOption? _selectedLoginRole;
+        private bool _logoutPromptOpen;
+
+        /// <summary>
+        /// 当前登录会话。
+        /// </summary>
+        private readonly UserSession _session;
 
         /// <summary>
         /// 创建用户页。
@@ -40,17 +51,25 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public UserViewModel(
             IRegionManager region,
             IContainerExtension container,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator,
+            UserSession session)
             : base(region, container, eventAggregator)
         {
+            _session = session;
             Users = new ObservableCollection<UserRow>();
+            LoginRoles = new ObservableCollection<LoginRoleOption>();
             Roles = RoleOrder.Select(RoleText).ToArray();
             EditorRole = Roles[0];
+            ReloadLoginRoles();
             AddCommand = new DelegateCommand(OpenAdd);
             EditCommand = new DelegateCommand<UserRow?>(OpenEdit);
             DeleteCommand = new DelegateCommand(Delete);
             ConfirmCommand = new DelegateCommand(SaveEditor);
             CancelCommand = new DelegateCommand(CloseEditor);
+            LoginCommand = new DelegateCommand(Login);
+            LogoutCommand = new DelegateCommand(Logout);
+            _session.Changed += OnSessionChanged;
+            AppAppearance.LanguageChanged += OnLanguageChanged;
         }
 
         /// <summary>
@@ -61,7 +80,119 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// <summary>
         /// 角色下拉项。
         /// </summary>
-        public IReadOnlyList<string> Roles { get; }
+        public IReadOnlyList<string> Roles
+        {
+            get => _roles;
+            private set => SetProperty(ref _roles, value);
+        }
+
+        /// <summary>
+        /// 角色下拉项的当前文字。
+        /// </summary>
+        private IReadOnlyList<string> _roles = [];
+
+        /// <summary>
+        /// 登录区的角色列表。
+        /// </summary>
+        public ObservableCollection<LoginRoleOption> LoginRoles { get; }
+
+        /// <summary>
+        /// 登录时点中的角色。必须和账号角色一致。
+        /// </summary>
+        public LoginRoleOption? SelectedLoginRole
+        {
+            get => _selectedLoginRole;
+            set => SetProperty(ref _selectedLoginRole, value);
+        }
+
+        /// <summary>
+        /// 登录名输入。不写入数据库。
+        /// </summary>
+        public string DraftLoginName
+        {
+            get => _draftLoginName;
+            set => SetProperty(ref _draftLoginName, value);
+        }
+
+        /// <summary>
+        /// 密码输入。只在核对时使用，不写日志。
+        /// </summary>
+        public string DraftPassword
+        {
+            get => _draftPassword;
+            set => SetProperty(ref _draftPassword, value);
+        }
+
+        /// <summary>
+        /// 登录失败时留在登录区的提示。空字符串表示没有错误。
+        /// </summary>
+        public string LoginError
+        {
+            get => _loginError;
+            private set => SetProperty(ref _loginError, value);
+        }
+
+        /// <summary>
+        /// 是否已登录。
+        /// </summary>
+        public bool IsLoggedIn => _session.IsLoggedIn;
+
+        /// <summary>
+        /// 未登录时显示居中的登录区。
+        /// </summary>
+        public bool ShowLogin => !_session.IsLoggedIn;
+
+        /// <summary>
+        /// 已登录且右侧要显示管理区。管理员和工程师靠左，其余角色继续居中。
+        /// </summary>
+        public bool ShowSide =>
+            _session.IsLoggedIn && _session.Role is UserRole.Admin or UserRole.Engineer;
+
+        /// <summary>
+        /// 已登录但没有右侧管理区。
+        /// </summary>
+        public bool ShowCenteredSession => _session.IsLoggedIn && !ShowSide;
+
+        /// <summary>
+        /// 右侧显示用户管理。只有管理员。
+        /// </summary>
+        public bool ShowUserAdmin => _session.IsLoggedIn && _session.Role == UserRole.Admin;
+
+        /// <summary>
+        /// 右侧显示配置和插件入口。只有工程师。
+        /// </summary>
+        public bool ShowEngineerModules => _session.IsLoggedIn && _session.Role == UserRole.Engineer;
+
+        /// <summary>
+        /// 当前登录名。
+        /// </summary>
+        public string SessionLoginName => _session.LoginName;
+
+        /// <summary>
+        /// 当前用户名。
+        /// </summary>
+        public string SessionUserName => _session.UserName;
+
+        /// <summary>
+        /// 当前角色文字。
+        /// </summary>
+        public string SessionRoleText => _session.IsLoggedIn ? RoleText(_session.Role) : "";
+
+        /// <summary>
+        /// 本次登录时间。
+        /// </summary>
+        public string SessionLoginTimeText =>
+            _session.LoginTime is { } time ? time.ToString("yyyy-MM-dd HH:mm:ss") : "";
+
+        /// <summary>
+        /// 核对角色、登录名和密码。
+        /// </summary>
+        public DelegateCommand LoginCommand { get; }
+
+        /// <summary>
+        /// 确认后注销。
+        /// </summary>
+        public DelegateCommand LogoutCommand { get; }
 
         /// <summary>
         /// 打开空白的新增弹窗。
@@ -148,7 +279,20 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public string EditorRole
         {
             get => _editorRole;
-            set => SetProperty(ref _editorRole, value);
+            set
+            {
+                if (!SetProperty(ref _editorRole, value))
+                    return;
+
+                foreach (var item in RoleOrder)
+                {
+                    if (RoleText(item) == value)
+                    {
+                        _editorRoleEnum = item;
+                        return;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -174,7 +318,8 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            LoadUsers();
+            if (ShowUserAdmin)
+                LoadUsers();
         }
 
         /// <summary>
@@ -411,6 +556,190 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             role = UserRole.Admin;
             return false;
+        }
+
+        /// <summary>
+        /// 按当前语言重写角色列表。点中的角色保持不变。
+        /// </summary>
+        private void ReloadLoginRoles()
+        {
+            var selected = _selectedLoginRole?.Role ?? UserRole.Admin;
+            LoginRoles.Clear();
+            foreach (var role in RoleOrder)
+                LoginRoles.Add(new LoginRoleOption(role, RoleText(role)));
+
+            SelectedLoginRole = LoginRoles.First(item => item.Role == selected);
+        }
+
+        /// <summary>
+        /// 语言切换后重写角色文字。
+        /// </summary>
+        private void OnLanguageChanged()
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                ApplyLanguage();
+                return;
+            }
+
+            dispatcher.BeginInvoke(new Action(ApplyLanguage));
+        }
+
+        /// <summary>
+        /// 用当前语言替换角色下拉、登录列表和已登录角色名。
+        /// </summary>
+        private void ApplyLanguage()
+        {
+            Roles = RoleOrder.Select(RoleText).ToArray();
+            EditorRole = RoleText(_editorRoleEnum);
+            ReloadLoginRoles();
+            RaiseSession();
+        }
+
+        /// <summary>
+        /// 会话变化后切换登录区和用户信息。注销时关掉编辑窗。
+        /// </summary>
+        private void OnSessionChanged(object? sender, EventArgs e)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                ApplySession();
+                return;
+            }
+
+            dispatcher.BeginInvoke(new Action(ApplySession));
+        }
+
+        /// <summary>
+        /// 把会话反映到界面。管理员重新读用户表。
+        /// </summary>
+        private void ApplySession()
+        {
+            if (!_session.IsLoggedIn)
+                CloseEditor();
+
+            RaiseSession();
+            if (ShowUserAdmin)
+                LoadUsers();
+        }
+
+        /// <summary>
+        /// 通知登录状态和用户信息属性。
+        /// </summary>
+        private void RaiseSession()
+        {
+            RaisePropertyChanged(nameof(IsLoggedIn));
+            RaisePropertyChanged(nameof(ShowLogin));
+            RaisePropertyChanged(nameof(ShowSide));
+            RaisePropertyChanged(nameof(ShowCenteredSession));
+            RaisePropertyChanged(nameof(ShowUserAdmin));
+            RaisePropertyChanged(nameof(ShowEngineerModules));
+            RaisePropertyChanged(nameof(SessionLoginName));
+            RaisePropertyChanged(nameof(SessionUserName));
+            RaisePropertyChanged(nameof(SessionRoleText));
+            RaisePropertyChanged(nameof(SessionLoginTimeText));
+        }
+
+        /// <summary>
+        /// 角色、登录名、密码和同一条账号一致才登录。密码不写日志。
+        /// </summary>
+        private void Login()
+        {
+            if (_session.IsLoggedIn)
+                return;
+
+            var loginName = DraftLoginName.Trim();
+            LoginError = "";
+            if (SelectedLoginRole is null)
+            {
+                LoginError = Text("User_NeedRole");
+                return;
+            }
+
+            if (loginName.Length == 0)
+            {
+                LoginError = Text("User_NeedLogin");
+                return;
+            }
+
+            if (DraftPassword.Length == 0)
+            {
+                LoginError = Text("User_NeedPassword");
+                return;
+            }
+
+            if (!SqlSugarContext.IsOpen)
+            {
+                LoginError = Text("Login_Failed");
+                return;
+            }
+
+            try
+            {
+                var selectedRole = SelectedLoginRole.Role;
+                var matches = SqlSugarContext.SystemDb.Queryable<UserEntity>()
+                    .ToList()
+                    .Where(item => string.Equals(item.LoginName?.Trim(), loginName, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                if (matches.Count != 1
+                    || !string.Equals(matches[0].Password, DraftPassword, StringComparison.Ordinal)
+                    || matches[0].RoleLevel != selectedRole)
+                {
+                    LoginError = Text("Login_BadCredential");
+                    return;
+                }
+
+                if (!matches[0].IsValid)
+                {
+                    LoginError = Text("Login_UserDisabled");
+                    return;
+                }
+
+                var storedName = matches[0].LoginName?.Trim();
+                if (!string.IsNullOrEmpty(storedName))
+                    loginName = storedName;
+
+                DraftPassword = "";
+                LoginError = "";
+                _session.SignIn(loginName, matches[0].UserName?.Trim() ?? "", selectedRole, DateTime.Now);
+                LogHelper.SysInfo($"登录成功 {loginName} 角色={selectedRole}");
+            }
+            catch (Exception ex)
+            {
+                LoginError = Text("Login_Failed");
+                LogHelper.SysError($"登录失败 {loginName}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 确认后注销。取消则保持登录。
+        /// </summary>
+        private async void Logout()
+        {
+            if (!_session.IsLoggedIn || _logoutPromptOpen)
+                return;
+
+            _logoutPromptOpen = true;
+            try
+            {
+                var confirmed = await MetroDialogService.ConfirmAsync(Text("Logout_Title"), Text("Logout_Message"));
+                if (!confirmed)
+                    return;
+
+                var loginName = _session.LoginName;
+                var role = _session.Role;
+                _session.SignOut();
+                DraftLoginName = "";
+                DraftPassword = "";
+                LoginError = "";
+                LogHelper.SysInfo($"注销成功 {loginName} 角色={role}");
+            }
+            finally
+            {
+                _logoutPromptOpen = false;
+            }
         }
 
         /// <summary>

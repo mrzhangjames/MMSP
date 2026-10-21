@@ -6,7 +6,6 @@ using MMSP.App.Main.Models;
 using MMSP.App.WpfBase.Core;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper;
-using MMSP.Common.Helper.Logger;
 using System.ComponentModel;
 using System.Reflection;
 using MMSP.Core.License;
@@ -88,19 +87,9 @@ namespace MMSP.App.Main.ViewModels
         private bool _isLoggedIn;
 
         /// <summary>
-        /// 注销确认框正在显示，避免重复弹出。
-        /// </summary>
-        private bool _logoutPromptOpen;
-
-        /// <summary>
-        /// 当前登录角色。未登录时为空，导航只留主页。
+        /// 当前登录角色。未登录时为空。主页和用户页始终保留。
         /// </summary>
         private UserRole? _currentRole;
-
-        /// <summary>
-        /// 登录窗是否打开。
-        /// </summary>
-        private bool _isLoginOpen;
 
         /// <summary>
         /// 底栏登录名。未登录时是「未登录」。
@@ -108,19 +97,9 @@ namespace MMSP.App.Main.ViewModels
         private string _loginName = "";
 
         /// <summary>
-        /// 登录窗里的登录名。不写入数据库。
+        /// 用户页写入的登录会话。
         /// </summary>
-        private string _draftLoginName = "";
-
-        /// <summary>
-        /// 登录窗里的密码。只在核对时使用，不写日志。
-        /// </summary>
-        private string _draftPassword = "";
-
-        /// <summary>
-        /// 登录失败时留在窗上的提示。空字符串表示没有错误。
-        /// </summary>
-        private string _loginError = "";
+        private readonly UserSession _session;
 
         /// <summary>
         /// 创建主壳数据。未登录时只打开主页。
@@ -130,11 +109,13 @@ namespace MMSP.App.Main.ViewModels
             IContainerExtension container,
             IEventAggregator eventAggregator,
             IFlowRunService flowRun,
-            LicenseStatusStore licenses)
+            LicenseStatusStore licenses,
+            UserSession session)
             : base(region, container, eventAggregator)
         {
             _flowRun = flowRun;
             _licenses = licenses;
+            _session = session;
             _licenses.Changed += OnLicenseChanged;
             _flowRun.RunningChanged += OnFlowRunningChanged;
             Menus = new ObservableCollection<ShellMenuItem>();
@@ -145,9 +126,7 @@ namespace MMSP.App.Main.ViewModels
             VersionText = AppVersionHelper.GetVersionText();
             RefreshLicenseStatus();
             LoginName = ReadText("Footer_NotLoggedIn", "未登录");
-            SessionCommand = new DelegateCommand(OnSession);
-            ConfirmLoginCommand = new DelegateCommand(ConfirmLogin);
-            CancelLoginCommand = new DelegateCommand(CloseLogin);
+            _session.Changed += OnSessionChanged;
             CurrentTimeText = DateTime.Now.ToString(TimeFormat);
             _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _clockTimer.Tick += OnClockTick;
@@ -263,78 +242,8 @@ namespace MMSP.App.Main.ViewModels
         public bool IsLoggedIn
         {
             get => _isLoggedIn;
-            private set
-            {
-                if (SetProperty(ref _isLoggedIn, value))
-                {
-                    RaisePropertyChanged(nameof(SessionIcon));
-                    RaisePropertyChanged(nameof(SessionToolTip));
-                }
-            }
+            private set => SetProperty(ref _isLoggedIn, value);
         }
-
-        /// <summary>
-        /// 登录窗是否打开。
-        /// </summary>
-        public bool IsLoginOpen
-        {
-            get => _isLoginOpen;
-            private set => SetProperty(ref _isLoginOpen, value);
-        }
-
-        /// <summary>
-        /// 登录窗中的登录名。
-        /// </summary>
-        public string DraftLoginName
-        {
-            get => _draftLoginName;
-            set => SetProperty(ref _draftLoginName, value);
-        }
-
-        /// <summary>
-        /// 登录窗中的密码。核对用户表，不写进日志。
-        /// </summary>
-        public string DraftPassword
-        {
-            get => _draftPassword;
-            set => SetProperty(ref _draftPassword, value);
-        }
-
-        /// <summary>
-        /// 登录窗上的错误提示。账号、密码或库异常都写在这里。
-        /// </summary>
-        public string LoginError
-        {
-            get => _loginError;
-            private set => SetProperty(ref _loginError, value);
-        }
-
-        /// <summary>
-        /// 右侧按钮图标。未登录是进入，已登录是离开。
-        /// </summary>
-        public PackIconPhosphorIconsKind SessionIcon =>
-            IsLoggedIn ? PackIconPhosphorIconsKind.SignOut : PackIconPhosphorIconsKind.SignIn;
-
-        /// <summary>
-        /// 右侧按钮提示。未登录是登录，已登录是注销。
-        /// </summary>
-        public string SessionToolTip =>
-            IsLoggedIn ? ReadText("Shell_Logout", "注销") : ReadText("Shell_Login", "登录");
-
-        /// <summary>
-        /// 打开登录窗，或在已登录时回到未登录。
-        /// </summary>
-        public DelegateCommand SessionCommand { get; }
-
-        /// <summary>
-        /// 核对账号密码。正确才关闭登录窗并切换成注销外观。
-        /// </summary>
-        public DelegateCommand ConfirmLoginCommand { get; }
-
-        /// <summary>
-        /// 关闭登录窗，不改变登录外观。
-        /// </summary>
-        public DelegateCommand CancelLoginCommand { get; }
 
         /// <summary>
         /// 底栏时间，每秒更新。
@@ -346,7 +255,7 @@ namespace MMSP.App.Main.ViewModels
         }
 
         /// <summary>
-        /// 按当前角色重算导航。主页每个角色都保留。未登录只留主页。
+        /// 按当前角色重算导航。主页和用户页始终保留。未登录只留这两页。
         /// </summary>
         private void LoadMenus()
         {
@@ -360,12 +269,16 @@ namespace MMSP.App.Main.ViewModels
 
             foreach (var row in rows)
             {
-                if (_currentRole is UserRole role)
+                if (row.Code is MenuCode.Home or MenuCode.User)
                 {
-                    if (row.Code != MenuCode.Home && !UserRoleAccess.CanOpen(role, row.MinRole))
+                    // 主页和用户页不按角色裁掉。用户页负责登录和注销。
+                }
+                else if (_currentRole is UserRole role)
+                {
+                    if (!UserRoleAccess.CanOpen(role, row.MinRole))
                         continue;
                 }
-                else if (row.Code != MenuCode.Home)
+                else
                 {
                     continue;
                 }
@@ -448,7 +361,6 @@ namespace MMSP.App.Main.ViewModels
                 LoginName = ReadText("Footer_NotLoggedIn", "未登录");
 
             RefreshLicenseStatus();
-            RaisePropertyChanged(nameof(SessionToolTip));
             RaisePropertyChanged(nameof(ContentTitle));
         }
 
@@ -631,131 +543,39 @@ namespace MMSP.App.Main.ViewModels
         }
 
         /// <summary>
-        /// 未登录时打开登录窗。已登录时先确认，确认后写日志并回到未登录。
+        /// 用户页登录或注销后刷新底栏和菜单。
         /// </summary>
-        private async void OnSession()
+        private void OnSessionChanged(object? sender, EventArgs e)
         {
-            if (IsLoggedIn)
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
             {
-                if (_logoutPromptOpen)
-                    return;
-
-                _logoutPromptOpen = true;
-                try
-                {
-                    var confirmed = await MetroDialogService.ConfirmAsync(
-                        ReadText("Logout_Title", "注销"),
-                        ReadText("Logout_Message", "是否确认注销？"));
-                    if (!confirmed)
-                        return;
-
-                    var loginName = LoginName;
-                    var role = _currentRole;
-                    IsLoggedIn = false;
-                    _currentRole = null;
-                    LoginName = ReadText("Footer_NotLoggedIn", "未登录");
-                    LogHelper.SysInfo($"注销成功 {loginName} 角色={role}");
-                    LoadMenus();
-                }
-                finally
-                {
-                    _logoutPromptOpen = false;
-                }
-
+                ApplySession();
                 return;
             }
 
-            DraftLoginName = "";
-            DraftPassword = "";
-            LoginError = "";
-            IsLoginOpen = true;
+            dispatcher.BeginInvoke(new Action(ApplySession));
         }
 
         /// <summary>
-        /// 账号和密码都对上才切换注销外观。失败留在登录窗上。
+        /// 把会话抄到底栏角色，并按新角色重算菜单。
         /// </summary>
-        private void ConfirmLogin()
+        private void ApplySession()
         {
-            if (!TryLogin(out var loginName, out var role))
-                return;
+            if (_session.IsLoggedIn)
+            {
+                _currentRole = _session.Role;
+                IsLoggedIn = true;
+                LoginName = _session.LoginName;
+            }
+            else
+            {
+                _currentRole = null;
+                IsLoggedIn = false;
+                LoginName = ReadText("Footer_NotLoggedIn", "未登录");
+            }
 
-            _currentRole = role;
-            IsLoggedIn = true;
-            LoginName = loginName;
-            LogHelper.SysInfo($"登录成功 {loginName} 角色={role}");
-            CloseLogin();
             LoadMenus();
-        }
-
-        /// <summary>
-        /// 用系统库里的登录名和密码核对。密码不写日志。
-        /// </summary>
-        private bool TryLogin(out string loginName, out UserRole role)
-        {
-            loginName = DraftLoginName.Trim();
-            role = UserRole.Admin;
-            LoginError = "";
-
-            if (loginName.Length == 0)
-            {
-                LoginError = ReadText("User_NeedLogin", "请填写登录名");
-                return false;
-            }
-
-            if (DraftPassword.Length == 0)
-            {
-                LoginError = ReadText("User_NeedPassword", "请填写密码");
-                return false;
-            }
-
-            if (!SqlSugarContext.IsOpen)
-            {
-                LoginError = ReadText("Login_Failed", "登录失败。");
-                return false;
-            }
-
-            try
-            {
-                var typedName = loginName;
-                var matches = SqlSugarContext.SystemDb.Queryable<UserEntity>()
-                    .ToList()
-                    .Where(item => string.Equals(item.LoginName?.Trim(), typedName, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-                if (matches.Count != 1 || !string.Equals(matches[0].Password, DraftPassword, StringComparison.Ordinal))
-                {
-                    LoginError = ReadText("Login_BadCredential", "用户名或密码不正确。");
-                    return false;
-                }
-
-                if (!matches[0].IsValid)
-                {
-                    LoginError = ReadText("Login_UserDisabled", "该用户已停用。");
-                    return false;
-                }
-
-                var storedName = matches[0].LoginName?.Trim();
-                if (!string.IsNullOrEmpty(storedName))
-                    loginName = storedName;
-                role = matches[0].RoleLevel;
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LoginError = ReadText("Login_Failed", "登录失败。");
-                LogHelper.SysError($"登录失败 {loginName}", ex);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 关掉登录窗并清掉窗里的输入和错误提示。
-        /// </summary>
-        private void CloseLogin()
-        {
-            IsLoginOpen = false;
-            DraftLoginName = "";
-            DraftPassword = "";
-            LoginError = "";
         }
 
         /// <summary>

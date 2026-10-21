@@ -1,7 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.MergedDictionaries>
+        <!--  字典 画刷 Brushes。颜色和导航尺寸。  -->
         <ResourceDictionary Source="pack://application:,,,/MMSP.App.Shared;component/Themes/Styles/Brushes.xaml" />
+        <!--  字典 导航 Nav。菜单列表和运行列表样式。  -->
         <ResourceDictionary Source="pack://application:,,,/MMSP.App.Shared;component/Themes/Styles/Nav.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
