@@ -45,8 +45,32 @@ namespace MMSP.Service.Flow.Steps
             if (string.IsNullOrWhiteSpace(_tool.Address))
                 return Fail("地址为空");
 
-            var result = context.Devices.Write(_tool.Address.Trim(), _tool.DataType, _tool.Value ?? "", context.Token);
+            if (!TryValue(context, out var text, out var missing))
+                return missing ?? Fail("变量未声明");
+
+            var result = context.Devices.Write(_tool.Address.Trim(), _tool.DataType, text, context.Token);
             return FromPlc(context, result);
+        }
+
+        /// <summary>
+        /// 取出要写入的文本。变量模式下名称必须已声明。
+        /// </summary>
+        private bool TryValue(FlowStepContext context, out string text, out FlowStepResult? missing)
+        {
+            text = _tool?.Value ?? "";
+            missing = null;
+            if (_tool is null || !_tool.UseVariable)
+                return true;
+
+            var name = text.Trim();
+            if (name.Length == 0 || !context.Variables.Contains(name))
+            {
+                missing = Fail("变量未声明");
+                return false;
+            }
+
+            text = context.Variables.Get(name);
+            return true;
         }
     }
 }

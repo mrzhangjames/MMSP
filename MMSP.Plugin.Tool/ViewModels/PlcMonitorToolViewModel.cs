@@ -12,17 +12,23 @@ namespace MMSP.Plugin.Tool.ViewModels
         /// 用一份空配置创建。
         /// </summary>
         public PlcMonitorToolViewModel()
-            : this(new PlcMonitorToolEntity())
+            : this(new PlcMonitorToolEntity(), null)
         {
         }
 
         /// <summary>
-        /// 编辑一份已有的PLC 监控配置。
+        /// 编辑一份已有的 PLC 监控配置。points 是点位列表，数据源默认流程。
         /// </summary>
-        public PlcMonitorToolViewModel(PlcMonitorToolEntity tool)
+        public PlcMonitorToolViewModel(PlcMonitorToolEntity tool, IReadOnlyList<PlcPointChoice>? points = null)
             : base(tool)
         {
+            Points = new PlcPointField(points, tool.Address, tool.DataType, tool.Length, ApplyPoint);
         }
+
+        /// <summary>
+        /// 数据源和点位。选中点位后写回地址、数据类型和长度。
+        /// </summary>
+        public PlcPointField Points { get; }
 
         /// <summary>
         /// 数据类型下拉项。
@@ -54,6 +60,17 @@ namespace MMSP.Plugin.Tool.ViewModels
         {
             get => Tool.Length;
             set => SetNumber(Tool.Length, value, number => Tool.Length = number);
+        }
+
+        /// <summary>
+        /// 把点位上的地址、数据类型和长度写回。长度不是正数时保留原来的长度。
+        /// </summary>
+        private void ApplyPoint(PlcPointChoice point)
+        {
+            Address = point.Address.Trim();
+            DataType = point.DataType;
+            if (point.Length > 0)
+                Length = point.Length;
         }
 
         /// <summary>

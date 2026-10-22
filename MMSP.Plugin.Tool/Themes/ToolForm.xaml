@@ -284,4 +284,39 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!--  样式 ToolButton：表单按钮。白底灰边，悬停变灰。  -->
+    <Style x:Key="ToolButton" TargetType="Button">
+        <Setter Property="Height" Value="32" />
+        <Setter Property="MinWidth" Value="88" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="Background" Value="White" />
+        <Setter Property="BorderBrush" Value="#CCCCCC" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="#333333" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Box"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="#E6E6E6" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="#BDBDBD" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

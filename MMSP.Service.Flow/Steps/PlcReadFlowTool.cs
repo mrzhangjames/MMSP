@@ -46,7 +46,7 @@ namespace MMSP.Service.Flow.Steps
                 return Fail("地址为空");
 
             var result = context.Devices.Read(_tool.Address.Trim(), _tool.DataType, _tool.Length, context.Token);
-            return FromPlc(context, result);
+            return Store(context, _tool.Output, FromPlc(context, result));
         }
     }
 }

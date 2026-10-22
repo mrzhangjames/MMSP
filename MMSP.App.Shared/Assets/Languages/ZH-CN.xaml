@@ -117,6 +117,8 @@
     <sys:String x:Key="Device_EditScanner">编辑扫码枪</sys:String>
     <sys:String x:Key="Device_DeleteScannerTitle">删除扫码枪</sys:String>
     <sys:String x:Key="Device_DeleteMessage">是否确认删除？</sys:String>
+    <sys:String x:Key="Device_KeepSingleton">心跳和状态各保留一条，不能删除。</sys:String>
+    <sys:String x:Key="Device_SingletonPoint">心跳和状态各只能有一条。</sys:String>
     <sys:String x:Key="Device_NeedName">请填写名称</sys:String>
     <sys:String x:Key="Device_NeedAddress">请填写地址</sys:String>
     <sys:String x:Key="Device_Transport">传输</sys:String>
@@ -273,5 +275,10 @@
     <sys:String x:Key="Flow_DeleteFailed">删除失败</sys:String>
     <sys:String x:Key="Flow_DeleteStepTitle">删除步骤</sys:String>
     <sys:String x:Key="Flow_ToolGeneral">通用</sys:String>
+    <sys:String x:Key="Flow_FlowEdit">流程编辑</sys:String>
+    <sys:String x:Key="Flow_VarEdit">变量编辑</sys:String>
+    <sys:String x:Key="Flow_VarName">名称</sys:String>
+    <sys:String x:Key="Flow_VarType">数据类型</sys:String>
+    <sys:String x:Key="Flow_VarInitial">初始值</sys:String>
     <sys:String x:Key="Flow_ToolUnavailable">当前客户未加载此工具</sys:String>
 </ResourceDictionary>

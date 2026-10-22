@@ -4,8 +4,11 @@
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                  Title="{DynamicResource Flow_Property}"
                  TitleCharacterCasing="Normal"
-                 Width="440"
-                 SizeToContent="Height"
+                 Width="980"
+                 Height="640"
+                 MinWidth="980"
+                 MaxWidth="980"
+                 MinHeight="640"
                  MaxHeight="640"
                  WindowStartupLocation="CenterOwner"
                  ResizeMode="NoResize"
@@ -20,7 +23,7 @@
                  WindowTransitionsEnabled="False"
                  FontFamily="Segoe UI, Microsoft YaHei"
                  FontSize="14">
-    <!--  区域 工具属性。按钮：取消、保存。控件 Body 放各工具表单。  -->
+    <!--  区域 工具属性。按钮：取消、保存。控件 Body 放各工具表单。窗口高宽固定，三列各自滚动。  -->
     <DockPanel>
         <Grid DockPanel.Dock="Bottom" Margin="12,0,12,12">
             <Grid.ColumnDefinitions>
@@ -41,7 +44,130 @@
                     IsDefault="True"
                     Click="Accept" />
         </Grid>
-        <!--  控件 Body：当前工具的属性表单。  -->
-        <ContentControl x:Name="Body" />
+        <!--  区域 入参、原表单、出参。立讯报警、PLC 监控、延时和不可用提示不用左右两列。  -->
+        <Grid x:Name="Panes">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="InputColumn" Width="260" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="OutputColumn" Width="260" />
+            </Grid.ColumnDefinitions>
+            <Border x:Name="InputPane" Grid.Column="0" Background="#FAFAF8" BorderBrush="#EEEEEE" BorderThickness="0,0,1,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="14,12,14,8">
+                        <TextBlock Text="入参" FontSize="15" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding InputNote}" FontSize="12" Foreground="#888888" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Inputs}" Margin="0,0,0,8">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.SelectInputCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            BorderThickness="0"
+                                            HorizontalContentAlignment="Stretch"
+                                            Padding="0"
+                                            Height="36">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Selected}" Value="True">
+                                                        <Setter Property="Background" Value="#FFF6D2" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <Grid>
+                                            <Border Width="3" HorizontalAlignment="Left" Background="#FCC800">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Selected}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                            </Border>
+                                            <Grid Margin="14,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Status}" FontSize="12" VerticalAlignment="Center" Foreground="#888888" />
+                                            </Grid>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+            <ScrollViewer x:Name="BodyScroll" Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <ContentControl x:Name="Body" />
+            </ScrollViewer>
+            <Border x:Name="OutputPane" Grid.Column="2" Background="#FAFAF8" BorderBrush="#EEEEEE" BorderThickness="1,0,0,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="14,12,14,8">
+                        <TextBlock Text="出参" FontSize="15" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding OutputHint}" FontSize="12" Foreground="#888888" TextWrapping="Wrap" Margin="0,4,0,0" />
+                        <TextBlock Text="{Binding OutputNote}" FontSize="12" Foreground="#888888" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Outputs}" Margin="0,0,0,8">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            BorderThickness="0"
+                                            HorizontalContentAlignment="Stretch"
+                                            Padding="0"
+                                            Height="36">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Selected}" Value="True">
+                                                        <Setter Property="Background" Value="#FFF6D2" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding UsedByPrior}" Value="True">
+                                                        <Setter Property="Foreground" Value="#9A9A9A" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <Grid>
+                                            <Border Width="3" HorizontalAlignment="Left" Background="#FCC800">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Selected}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                            </Border>
+                                            <Grid Margin="14,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Status}" FontSize="12" VerticalAlignment="Center" Foreground="#888888" />
+                                            </Grid>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
     </DockPanel>
 </mah:MetroWindow>

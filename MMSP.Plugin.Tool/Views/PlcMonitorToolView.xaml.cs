@@ -19,12 +19,12 @@ namespace MMSP.Plugin.Tool.Views
         }
 
         /// <summary>
-        /// 换成另一份PLC 监控配置。
+        /// 换成另一份 PLC 监控配置，并带上点位列表。
         /// </summary>
-        public void Load(PlcMonitorToolEntity tool)
+        public void Load(PlcMonitorToolEntity tool, IReadOnlyList<PlcPointChoice>? points = null)
         {
             ArgumentNullException.ThrowIfNull(tool);
-            DataContext = new PlcMonitorToolViewModel(tool);
+            DataContext = new PlcMonitorToolViewModel(tool, points);
         }
     }
 }

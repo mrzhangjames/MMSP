@@ -1,3 +1,5 @@
+using MMSP.Core.Model.Sys;
+
 namespace MMSP.App.TemplateMatch.Models
 {
     /// <summary>
@@ -76,6 +78,21 @@ namespace MMSP.App.TemplateMatch.Models
             get => _accessText;
             set => SetProperty(ref _accessText, value);
         }
+
+        /// <summary>
+        /// 点位类型。新行默认流程。心跳和状态各只保留一条。界面暂不编辑。
+        /// </summary>
+        public PlcPointKind PointKind { get; set; } = PlcPointKind.Flow;
+
+        /// <summary>
+        /// Bit 位。空表示整字。界面暂不编辑。
+        /// </summary>
+        public int? BitIndex { get; set; }
+
+        /// <summary>
+        /// 点位描述。界面暂不编辑。
+        /// </summary>
+        public string Description { get; set; } = "";
 
         /// <summary>
         /// 是否启用。

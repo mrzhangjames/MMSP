@@ -1,4 +1,5 @@
-﻿using MMSP.Core.Model.Tool;
+﻿using MMSP.Core.Model.Sys;
+using MMSP.Core.Model.Tool;
 
 namespace MMSP.Plugin.Tool.ViewModels
 {
@@ -52,6 +53,56 @@ namespace MMSP.Plugin.Tool.ViewModels
         {
             get => Tool.Trigger;
             set => SetText(Tool.Trigger, value, text => Tool.Trigger = text);
+        }
+
+        /// <summary>
+        /// 扫码结果写入的流程变量。与右侧出参是同一个名称。
+        /// </summary>
+        public string Result
+        {
+            get => Tool.Output;
+            set => SetText(Tool.Output, value, text => Tool.Output = text);
+        }
+
+        /// <summary>
+        /// 写入 PLC 的数据类型下拉项。
+        /// </summary>
+        public IReadOnlyList<PlcDataType> DataTypes { get; } = Enum.GetValues<PlcDataType>();
+
+        /// <summary>
+        /// 扫到后是否写入 PLC。
+        /// </summary>
+        public bool WritePlc
+        {
+            get => Tool.WritePlc;
+            set => SetValue(Tool.WritePlc, value, flag => Tool.WritePlc = flag);
+        }
+
+        /// <summary>
+        /// 写入地址。
+        /// </summary>
+        public string WriteAddress
+        {
+            get => Tool.WriteAddress;
+            set => SetText(Tool.WriteAddress, value, text => Tool.WriteAddress = text);
+        }
+
+        /// <summary>
+        /// 写入的 PLC 数据类型。
+        /// </summary>
+        public PlcDataType WriteDataType
+        {
+            get => Tool.WriteDataType;
+            set => SetValue(Tool.WriteDataType, value, item => Tool.WriteDataType = item);
+        }
+
+        /// <summary>
+        /// 写入长度。
+        /// </summary>
+        public int WriteLength
+        {
+            get => Tool.WriteLength;
+            set => SetNumber(Tool.WriteLength, value, number => Tool.WriteLength = number);
         }
     }
 }

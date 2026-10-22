@@ -5,6 +5,7 @@ using MMSP.App.TemplateMatch.Views;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
+using MMSP.Core.Model.Tool;
 using MMSP.Service.Database;
 using SqlSugar;
 
@@ -117,7 +118,13 @@ namespace MMSP.App.TemplateMatch.ViewModels
             CustomerPluginCatalog? catalog = IContainerProviderExtensions.IsRegistered<CustomerPluginCatalog>(ContainerExt)
                 ? ContainerExt.Resolve<CustomerPluginCatalog>()
                 : null;
-            var window = new ToolPropertyWindow(step.ToolKind, step.CfgValue, step.Kind, catalog);
+            var window = new ToolPropertyWindow(
+                step.ToolKind,
+                step.CfgValue,
+                step.Kind,
+                catalog,
+                VariableNames(SelectedFlow),
+                PriorOutputs(SelectedFlow, step));
             var owner = Application.Current?.MainWindow;
             if (owner is not null && owner.IsLoaded)
                 window.Owner = owner;
@@ -127,6 +134,50 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             if (!SaveProperty(step, window.Result))
                 await MetroDialogService.ShowMessageAsync(Text("Flow_Property", "属性"), Text("User_SaveFailed", "保存失败"));
+        }
+
+        /// <summary>
+        /// 本流程已保存的变量名，按显示顺序。
+        /// </summary>
+        private static IReadOnlyList<string> VariableNames(FlowCard? flow)
+        {
+            if (flow is null || !SqlSugarContext.IsOpen)
+                return [];
+
+            try
+            {
+                return SqlSugarContext.CustomerDb.Queryable<FlowVarEntity>()
+                    .Where(item => item.FlowId == flow.Id)
+                    .OrderBy(item => item.SortIndex)
+                    .ToList()
+                    .Select(item => (item.Name ?? "").Trim())
+                    .Where(name => name.Length > 0)
+                    .ToList();
+            }
+            catch (Exception)
+            {
+                return [];
+            }
+        }
+
+        /// <summary>
+        /// 当前步骤之前已经占用的出参。入参不算，本步自己的出参也不算。
+        /// </summary>
+        private static IReadOnlySet<string> PriorOutputs(FlowCard? flow, FlowStep step)
+        {
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            if (flow is null)
+                return names;
+
+            var index = flow.Steps.IndexOf(step);
+            for (var i = 0; i < index; i++)
+            {
+                var item = flow.Steps[i];
+                foreach (var name in ToolVars.OutputNames(item.ToolKind, item.CfgValue))
+                    names.Add(name);
+            }
+
+            return names;
         }
 
         /// <summary>

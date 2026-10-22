@@ -348,7 +348,8 @@
                                             BorderThickness="1"
                                             ClipToBounds="True"
                                             SnapsToDevicePixels="True"
-                                            PreviewMouseLeftButtonDown="OnFlowCardPreviewMouseDown">
+                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            PreviewMouseRightButtonDown="OnFlowCardPreviewMouseRightButtonDown">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Setter Property="Background" Value="White" />
@@ -361,6 +362,19 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
+                                        <!--  菜单 流程卡片右键。项：流程编辑（EditCommand）、变量编辑（EditVarsCommand）。单击只选中，不打开名称窗。  -->
+                                        <Border.ContextMenu>
+                                            <ContextMenu Style="{StaticResource MahApps.Styles.ContextMenu}">
+                                                <MenuItem Header="{DynamicResource Flow_FlowEdit}"
+                                                          Style="{StaticResource MahApps.Styles.MenuItem}"
+                                                          Command="{Binding PlacementTarget.Tag.EditCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                <MenuItem Header="{DynamicResource Flow_VarEdit}"
+                                                          Style="{StaticResource MahApps.Styles.MenuItem}"
+                                                          Command="{Binding PlacementTarget.Tag.EditVarsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                            </ContextMenu>
+                                        </Border.ContextMenu>
                                         <Grid>
                                             <StackPanel Margin="12,8,12,8">
                                                 <!--  按钮 流程卡片（FlowCard）。命令 SelectCommand。  -->

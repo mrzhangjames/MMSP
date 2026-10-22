@@ -40,6 +40,10 @@ namespace MMSP.Service.Flow.Steps
             if (_error is not null || _tool is null)
                 return Fail(_error ?? "配置无效");
 
+            var missing = RequireInputs(context, _tool.Inputs);
+            if (missing is not null)
+                return missing;
+
             var text = _tool.Script ?? "";
             LogHelper.FlowInfo(text);
             return Ok(text);

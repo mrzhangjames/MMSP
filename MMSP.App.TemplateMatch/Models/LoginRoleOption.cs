@@ -1,3 +1,4 @@
+using MahApps.Metro.IconPacks;
 using MMSP.Core.Model.Sys;
 
 namespace MMSP.App.TemplateMatch.Models
@@ -10,10 +11,14 @@ namespace MMSP.App.TemplateMatch.Models
         /// <summary>
         /// 创建一项角色。
         /// </summary>
-        public LoginRoleOption(UserRole role, string text)
+        /// <param name="role">角色。</param>
+        /// <param name="text">界面文字。</param>
+        /// <param name="icon">行首图标。</param>
+        public LoginRoleOption(UserRole role, string text, PackIconPhosphorIconsKind icon)
         {
             Role = role;
             Text = text;
+            Icon = icon;
         }
 
         /// <summary>
@@ -25,5 +30,10 @@ namespace MMSP.App.TemplateMatch.Models
         /// 界面文字。
         /// </summary>
         public string Text { get; }
+
+        /// <summary>
+        /// 行首图标。管理员盾牌，操作员人，工程师扳手，供应商厂房。
+        /// </summary>
+        public PackIconPhosphorIconsKind Icon { get; }
     }
 }

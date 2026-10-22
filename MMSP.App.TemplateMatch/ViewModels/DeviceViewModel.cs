@@ -720,6 +720,23 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
+        /// 勾选里是否包含最后一条心跳或状态。
+        /// </summary>
+        private bool RemovesLastSingleton(IReadOnlyList<PlcPointRow> rows)
+        {
+            return RemovesLast(rows, PlcPointKind.Heartbeat) || RemovesLast(rows, PlcPointKind.Status);
+        }
+
+        /// <summary>
+        /// 这种类型已经有点，并且勾选会把它删光。
+        /// </summary>
+        private bool RemovesLast(IReadOnlyList<PlcPointRow> rows, PlcPointKind kind)
+        {
+            var existing = Points.Where(item => item.PointKind == kind).ToList();
+            return existing.Count > 0 && existing.All(rows.Contains);
+        }
+
+        /// <summary>
         /// 确认后删除勾选的点位。
         /// </summary>
         private async void DeletePoints()
@@ -727,6 +744,12 @@ namespace MMSP.App.TemplateMatch.ViewModels
             var rows = Points.Where(item => item.IsChecked).ToList();
             if (rows.Count == 0)
                 return;
+
+            if (RemovesLastSingleton(rows))
+            {
+                await MetroDialogService.ShowMessageAsync(Text("Device_DeletePointTitle"), Text("Device_KeepSingleton"));
+                return;
+            }
 
             var confirmed = await MetroDialogService.ConfirmAsync(Text("Device_DeletePointTitle"), Text("Device_DeleteMessage"));
             if (!confirmed)

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using MMSP.Core.Model.Base;
+using MMSP.Core.Model.Tool;
 using MMSP.Service.Device.Plc;
 using MMSP.Service.Device.Scan;
 
@@ -92,6 +93,46 @@ namespace MMSP.Service.Flow.Steps
                 return Ok(result.Value);
 
             return Fail(string.IsNullOrWhiteSpace(result.Message) ? "通讯失败" : result.Message);
+        }
+
+        /// <summary>
+        /// 成功时把结果文本写入出参。名称为空则不写。名称不在名单里时这一步失败，并且不写。
+        /// </summary>
+        protected static FlowStepResult Store(FlowStepContext context, string? name, FlowStepResult result)
+        {
+            if (result.Status != FlowStepStatus.Ok)
+                return result;
+
+            if (string.IsNullOrWhiteSpace(name))
+                return result;
+
+            var key = name.Trim();
+            if (!context.Variables.Contains(key))
+                return Fail("变量未声明");
+
+            context.Variables.Set(key, result.Text);
+            return result;
+        }
+
+        /// <summary>
+        /// 入参里填了的变量必须已经声明。没有入参时返回空。
+        /// </summary>
+        protected static FlowStepResult? RequireInputs(FlowStepContext context, IEnumerable<ToolInput>? inputs)
+        {
+            if (inputs is null)
+                return null;
+
+            foreach (var input in inputs)
+            {
+                var name = (input?.Variable ?? "").Trim();
+                if (name.Length == 0)
+                    continue;
+
+                if (!context.Variables.Contains(name))
+                    return Fail("变量未声明");
+            }
+
+            return null;
         }
 
         /// <summary>

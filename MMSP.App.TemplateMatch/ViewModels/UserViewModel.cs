@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
+using MahApps.Metro.IconPacks;
 using MMSP.App.TemplateMatch.Models;
 using MMSP.App.WpfBase.Core;
 using MMSP.App.WpfBase.Services;
@@ -559,6 +560,21 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
+        /// 角色行图标。和登录效果图一致。
+        /// </summary>
+        private static PackIconPhosphorIconsKind RoleIcon(UserRole role)
+        {
+            return role switch
+            {
+                UserRole.Admin => PackIconPhosphorIconsKind.Shield,
+                UserRole.Operator => PackIconPhosphorIconsKind.User,
+                UserRole.Engineer => PackIconPhosphorIconsKind.Wrench,
+                UserRole.Supplier => PackIconPhosphorIconsKind.Factory,
+                _ => PackIconPhosphorIconsKind.User
+            };
+        }
+
+        /// <summary>
         /// 按当前语言重写角色列表。点中的角色保持不变。
         /// </summary>
         private void ReloadLoginRoles()
@@ -566,7 +582,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             var selected = _selectedLoginRole?.Role ?? UserRole.Admin;
             LoginRoles.Clear();
             foreach (var role in RoleOrder)
-                LoginRoles.Add(new LoginRoleOption(role, RoleText(role)));
+                LoginRoles.Add(new LoginRoleOption(role, RoleText(role), RoleIcon(role)));
 
             SelectedLoginRole = LoginRoles.First(item => item.Role == selected);
         }

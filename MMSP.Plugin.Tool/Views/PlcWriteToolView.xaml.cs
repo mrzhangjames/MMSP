@@ -19,12 +19,12 @@ namespace MMSP.Plugin.Tool.Views
         }
 
         /// <summary>
-        /// 换成另一份PLC 写入配置。
+        /// 换成另一份 PLC 写入配置，并带上点位列表。
         /// </summary>
-        public void Load(PlcWriteToolEntity tool)
+        public void Load(PlcWriteToolEntity tool, IReadOnlyList<PlcPointChoice>? points = null)
         {
             ArgumentNullException.ThrowIfNull(tool);
-            DataContext = new PlcWriteToolViewModel(tool);
+            DataContext = new PlcWriteToolViewModel(tool, points);
         }
     }
 }

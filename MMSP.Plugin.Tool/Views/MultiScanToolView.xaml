@@ -11,17 +11,79 @@
                 <!--  字典 工具表单 ToolForm。样式 ToolLabel、ToolBox、ToolDrop、ToolCheck。  -->
                 <ResourceDictionary Source="pack://application:,,,/MMSP.Plugin.Tool;component/Themes/ToolForm.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <!--  样式 ScanGridHeader：结果表头。高 36，底部分割。  -->
+            <Style x:Key="ScanGridHeader" TargetType="DataGridColumnHeader">
+                <Setter Property="Height" Value="36" />
+                <Setter Property="Background" Value="#F5F5F5" />
+                <Setter Property="Foreground" Value="#333333" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="BorderThickness" Value="0,0,0,1" />
+                <Setter Property="BorderBrush" Value="#EEEEEE" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="DataGridColumnHeader">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!--  样式 ScanGridCell：结果单元格。文字垂直居中，选中不盖住字。  -->
+            <Style x:Key="ScanGridCell" TargetType="DataGridCell">
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="#333333" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="DataGridCell">
+                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter VerticalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="#333333" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <!--  样式 ScanGridRow：结果行。高 36，隔行浅灰。  -->
+            <Style x:Key="ScanGridRow" TargetType="DataGridRow">
+                <Setter Property="Height" Value="36" />
+                <Setter Property="Background" Value="White" />
+                <Setter Property="Foreground" Value="#333333" />
+                <Style.Triggers>
+                    <Trigger Property="AlternationIndex" Value="1">
+                        <Setter Property="Background" Value="#FAFAFA" />
+                    </Trigger>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="#FFF6D2" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
-    <!--  区域 多次扫码。控件：名称 Name、扫码枪 Guns、触发字符串 Trigger、条码数量 Count。样式 ToolLabel、ToolBox、ToolDrop、ToolCheck。  -->
-    <StackPanel Margin="16">
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
-                <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
-            </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="扫码枪" Style="{StaticResource ToolLabel}" />
+    <!--  区域 多次扫码。控件：名称 Name、扫码枪 Guns、触发字符串 Trigger、条码数量 Count、扫码结果 Results、写入 PLC。样式 ToolLabel、ToolBox、ToolDrop、ToolCheck、ScanGridHeader、ScanGridCell、ScanGridRow。写入 PLC 前用分割线。  -->
+    <StackPanel Margin="16,16,16,8">
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="扫码枪" Style="{StaticResource ToolLabel}" />
                 <Grid>
                     <!--  控件 扫码枪 Guns。样式 ToolDrop。绑定 Scanner。  -->
                     <ToggleButton x:Name="Guns"
@@ -56,15 +118,82 @@
                     </Popup>
                 </Grid>
             </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="触发字符串" Style="{StaticResource ToolLabel}" />
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="触发字符串" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding Trigger, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="条码数量" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding Count, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <!--  区域 扫码结果。控件 Results。列：扫码枪、出参结果。高度随行数变，表内不滚动。  -->
+        <TextBlock Text="扫码结果" Style="{StaticResource ToolLabel}" />
+        <DataGrid ItemsSource="{Binding Results}"
+                  Height="{Binding ResultsHeight}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserSortColumns="False"
+                  CanUserReorderColumns="False"
+                  CanUserResizeRows="False"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  HorizontalGridLinesBrush="#EEEEEE"
+                  BorderBrush="#EEEEEE"
+                  BorderThickness="1"
+                  Background="White"
+                  RowBackground="White"
+                  AlternationCount="2"
+                  SelectionMode="Single"
+                  RowHeight="36"
+                  ColumnHeaderHeight="36"
+                  ColumnHeaderStyle="{StaticResource ScanGridHeader}"
+                  CellStyle="{StaticResource ScanGridCell}"
+                  RowStyle="{StaticResource ScanGridRow}"
+                  EnableRowVirtualization="False"
+                  EnableColumnVirtualization="False"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.CanContentScroll="False"
+                  VerticalAlignment="Top"
+                  Margin="0,0,0,16">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="扫码枪" Width="*" MinWidth="96" Binding="{Binding Scanner}" />
+                <DataGridTextColumn Header="出参结果" Width="*" MinWidth="96" Binding="{Binding Variable}" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <!--  分割线。下面是写入 PLC。  -->
+        <Border Height="1" Background="#E0E0E0" Margin="0,4,0,16" />
+        <!--  区域 写入 PLC。控件：是否写入 WritePlc、地址 WriteAddress、数据类型 WriteDataType、长度 WriteLength。  -->
+        <CheckBox Content="是否写入"
+                  Style="{StaticResource ToolCheck}"
+                  IsChecked="{Binding WritePlc}"
+                  Margin="0,0,0,12" />
+        <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="写入地址" Style="{StaticResource ToolLabel}" />
                 <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Trigger, UpdateSourceTrigger=PropertyChanged}" />
+                         Text="{Binding WriteAddress, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="条码数量" Style="{StaticResource ToolLabel}" />
-                <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Count, UpdateSourceTrigger=PropertyChanged}" />
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="数据类型" Style="{StaticResource ToolLabel}" />
+                <ComboBox Style="{StaticResource ToolCombo}"
+                          ItemsSource="{Binding DataTypes}"
+                          SelectedItem="{Binding WriteDataType}" />
             </StackPanel>
+        </Grid>
+        <StackPanel HorizontalAlignment="Left" Width="160" Margin="0,0,0,8">
+            <TextBlock Text="长度" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding WriteLength, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
     </StackPanel>
 </UserControl>

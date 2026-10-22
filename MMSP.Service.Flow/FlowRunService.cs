@@ -249,6 +249,17 @@ namespace MMSP.Service.Flow
             var steps = db.Queryable<FlowStepEntity>()
                 .OrderBy(item => item.SortIndex)
                 .ToList();
+            var variables = db.Queryable<FlowVarEntity>()
+                .OrderBy(item => item.SortIndex)
+                .ToList();
+            var varsByFlow = variables
+                .GroupBy(item => item.FlowId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => (IReadOnlyList<(string Name, string Value)>)group
+                        .OrderBy(item => item.SortIndex)
+                        .Select(item => (item.Name ?? "", item.InitialValue ?? ""))
+                        .ToList());
             var stepsByFlow = steps
                 .GroupBy(item => item.FlowId)
                 .ToDictionary(
@@ -271,7 +282,8 @@ namespace MMSP.Service.Flow
                     }
                 }
 
-                result.Add(new RunnableFlow(flow.Name ?? "", flow.LogOutput, runnableSteps));
+                varsByFlow.TryGetValue(flow.Id, out var seeds);
+                result.Add(new RunnableFlow(flow.Name ?? "", flow.LogOutput, runnableSteps, seeds));
             }
 
             return result;

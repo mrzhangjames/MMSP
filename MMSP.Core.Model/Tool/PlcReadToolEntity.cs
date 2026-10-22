@@ -22,5 +22,10 @@ namespace MMSP.Core.Model.Tool
         /// 读取长度。
         /// </summary>
         public int Length { get; set; } = 1;
+
+        /// <summary>
+        /// 读数写入的流程变量，表单上叫结果。空表示这一步不写出参。
+        /// </summary>
+        public string Output { get; set; } = "";
     }
 }

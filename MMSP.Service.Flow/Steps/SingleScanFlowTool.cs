@@ -49,7 +49,23 @@ namespace MMSP.Service.Flow.Steps
                 return Fail("触发内容为空");
 
             var result = context.Devices.Trigger(_tool.Scanner.Trim(), _tool.Trigger, context.Token);
-            return FromScan(context, result);
+            var scanned = FromScan(context, result);
+            if (scanned.Status != FlowStepStatus.Ok)
+                return scanned;
+
+            if (_tool.WritePlc)
+            {
+                if (string.IsNullOrWhiteSpace(_tool.WriteAddress))
+                    return Fail("地址为空");
+
+                var written = FromPlc(
+                    context,
+                    context.Devices.Write(_tool.WriteAddress.Trim(), _tool.WriteDataType, scanned.Text, context.Token));
+                if (written.Status != FlowStepStatus.Ok)
+                    return written;
+            }
+
+            return Store(context, _tool.Output, scanned);
         }
     }
 }

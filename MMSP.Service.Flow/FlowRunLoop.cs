@@ -50,16 +50,18 @@
             FlowErrorLog error)
         {
             var failures = new FlowFailureLog();
+            var variables = FlowVariables.FromSeeds(flow.Variables);
+            var local = new FlowStepContext(context.Token, context.Devices, variables);
             try
             {
                 while (true)
                 {
-                    if (context.Token.IsCancellationRequested)
+                    if (local.Token.IsCancellationRequested)
                         return;
 
                     var stop = FlowCycle.Execute(
                         new[] { flow },
-                        context,
+                        local,
                         info,
                         message => error(message),
                         failures);
@@ -72,7 +74,7 @@
                         return;
                     }
 
-                    if (!context.Devices.Wait(RoundIntervalMs, context.Token))
+                    if (!local.Devices.Wait(RoundIntervalMs, local.Token))
                         return;
                 }
             }

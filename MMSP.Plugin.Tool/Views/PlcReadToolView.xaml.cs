@@ -19,12 +19,12 @@ namespace MMSP.Plugin.Tool.Views
         }
 
         /// <summary>
-        /// 换成另一份PLC 读取配置。
+        /// 换成另一份 PLC 读取配置，并带上点位列表。
         /// </summary>
-        public void Load(PlcReadToolEntity tool)
+        public void Load(PlcReadToolEntity tool, IReadOnlyList<PlcPointChoice>? points = null)
         {
             ArgumentNullException.ThrowIfNull(tool);
-            DataContext = new PlcReadToolViewModel(tool);
+            DataContext = new PlcReadToolViewModel(tool, points);
         }
     }
 }

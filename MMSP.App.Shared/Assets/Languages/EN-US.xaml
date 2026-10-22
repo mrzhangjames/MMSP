@@ -118,6 +118,8 @@
     <sys:String x:Key="Device_EditScanner">Edit scanner</sys:String>
     <sys:String x:Key="Device_DeleteScannerTitle">Delete scanner</sys:String>
     <sys:String x:Key="Device_DeleteMessage">Delete the selection?</sys:String>
+    <sys:String x:Key="Device_KeepSingleton">Keep the single heartbeat point and the single status point.</sys:String>
+    <sys:String x:Key="Device_SingletonPoint">Only one heartbeat point and one status point are allowed.</sys:String>
     <sys:String x:Key="Device_NeedName">Enter a name</sys:String>
     <sys:String x:Key="Device_NeedAddress">Enter an address</sys:String>
     <sys:String x:Key="Device_Transport">Transport</sys:String>
@@ -274,5 +276,10 @@
     <sys:String x:Key="Flow_DeleteFailed">Delete failed</sys:String>
     <sys:String x:Key="Flow_DeleteStepTitle">Delete step</sys:String>
     <sys:String x:Key="Flow_ToolGeneral">General</sys:String>
+    <sys:String x:Key="Flow_FlowEdit">Edit flow</sys:String>
+    <sys:String x:Key="Flow_VarEdit">Edit variables</sys:String>
+    <sys:String x:Key="Flow_VarName">Name</sys:String>
+    <sys:String x:Key="Flow_VarType">Data type</sys:String>
+    <sys:String x:Key="Flow_VarInitial">Initial value</sys:String>
     <sys:String x:Key="Flow_ToolUnavailable">This tool is not loaded for the current customer</sys:String>
 </ResourceDictionary>

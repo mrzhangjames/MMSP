@@ -8,11 +8,16 @@
         /// <summary>
         /// 创建一条待执行流程。
         /// </summary>
-        public RunnableFlow(string name, bool logOutput, IReadOnlyList<RunnableStep> steps)
+        public RunnableFlow(
+            string name,
+            bool logOutput,
+            IReadOnlyList<RunnableStep> steps,
+            IReadOnlyList<(string Name, string Value)>? variables = null)
         {
             Name = name;
             LogOutput = logOutput;
             Steps = steps;
+            Variables = variables ?? [];
         }
 
         /// <summary>
@@ -29,6 +34,11 @@
         /// 按执行顺序排列的步骤。
         /// </summary>
         public IReadOnlyList<RunnableStep> Steps { get; }
+
+        /// <summary>
+        /// 启动时抄下的变量名和初始值。运行中的值不在这里。
+        /// </summary>
+        public IReadOnlyList<(string Name, string Value)> Variables { get; }
     }
 
     /// <summary>

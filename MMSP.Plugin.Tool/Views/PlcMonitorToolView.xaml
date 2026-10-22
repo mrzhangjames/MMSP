@@ -13,7 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <!--  区域 PLC 监听。控件：名称 Name、地址 Address、数据类型 DataType、长度 Length、期望值 ExpectValue、重置 Reset、间隔 Interval、重置值 ResetValue。样式 ToolLabel、ToolBox、ToolCombo、ToolCheck。  -->
+    <!--  区域 PLC 监听。控件：名称 Name、数据源 Points.Source、点位 Points.Choice、数据类型 DataType、长度 Length、期望值 ExpectValue、重置 Reset、间隔 Interval、重置值 ResetValue。样式 ToolLabel、ToolBox、ToolCombo、ToolCheck。  -->
     <StackPanel Margin="16">
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
@@ -21,9 +21,18 @@
                          Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="地址" Style="{StaticResource ToolLabel}" />
-                <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="数据源" Style="{StaticResource ToolLabel}" />
+                <ComboBox Style="{StaticResource ToolCombo}"
+                          ItemsSource="{Binding Points.Sources}"
+                          SelectedItem="{Binding Points.Source}"
+                          DisplayMemberPath="Text" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="点位" Style="{StaticResource ToolLabel}" />
+                <ComboBox Style="{StaticResource ToolCombo}"
+                          ItemsSource="{Binding Points.Choices}"
+                          SelectedItem="{Binding Points.Choice}"
+                          DisplayMemberPath="Text" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="数据类型" Style="{StaticResource ToolLabel}" />

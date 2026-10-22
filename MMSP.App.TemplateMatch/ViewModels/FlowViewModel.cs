@@ -19,7 +19,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
 {
     /// <summary>
     /// 流程页。流程数据页放列表、工具和流程步，MES 配置单独一页。配置按当前客户和设备选出的类读写。
-    /// 拖入工具会写入流程步，流程步可上下拖动并写回顺序。属性窗口会写回工具配置。新增和编辑只改流程名称。删除会连同流程步一起去掉。
+    /// 拖入工具会写入流程步，流程步可上下拖动并写回顺序。属性窗口会写回工具配置。新增只改流程名称。名称和变量从流程卡片右键进入。删除会连同流程步和变量一起去掉。
     /// </summary>
     public partial class FlowViewModel : BaseViewModel, IDropTarget
     {
@@ -50,6 +50,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             CancelMesCommand = new DelegateCommand(CloseMes);
             AddCommand = new DelegateCommand(OpenAdd);
             EditCommand = new DelegateCommand<FlowCard?>(OpenEdit);
+            EditVarsCommand = new DelegateCommand<FlowCard?>(OpenVars);
             DeleteCommand = new DelegateCommand(Delete);
             RunCommand = new DelegateCommand(LayoutOnly);
             CopyCommand = new DelegateCommand(LayoutOnly);
@@ -158,12 +159,17 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public DelegateCommand AddCommand { get; }
 
         /// <summary>
-        /// 打开编辑流程弹窗。参数是被点中的卡片。
+        /// 打开编辑流程弹窗。参数是被点中的卡片。只改名称。
         /// </summary>
         public DelegateCommand<FlowCard?> EditCommand { get; }
 
         /// <summary>
-        /// 确认后删除当前流程，并删除它的流程步。
+        /// 打开变量列表。参数是被点中的卡片。
+        /// </summary>
+        public DelegateCommand<FlowCard?> EditVarsCommand { get; }
+
+        /// <summary>
+        /// 确认后删除当前流程，并删除它的流程步和变量。
         /// </summary>
         public DelegateCommand DeleteCommand { get; }
 

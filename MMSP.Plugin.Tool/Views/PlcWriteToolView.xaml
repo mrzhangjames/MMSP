@@ -13,7 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <!--  区域 PLC 写入。控件：名称 Name、地址 Address、数据类型 DataType、写入值 Value。样式 ToolLabel、ToolBox、ToolCombo。  -->
+    <!--  区域 PLC 写入。控件：名称 Name、数据源 Points.Source、点位 Points.Choice、数据类型 DataType、取值 ValueMode、写入值 Value。样式 ToolLabel、ToolBox、ToolCombo。  -->
     <StackPanel Margin="16">
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
@@ -21,9 +21,18 @@
                          Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="地址" Style="{StaticResource ToolLabel}" />
-                <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="数据源" Style="{StaticResource ToolLabel}" />
+                <ComboBox Style="{StaticResource ToolCombo}"
+                          ItemsSource="{Binding Points.Sources}"
+                          SelectedItem="{Binding Points.Source}"
+                          DisplayMemberPath="Text" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="点位" Style="{StaticResource ToolLabel}" />
+                <ComboBox Style="{StaticResource ToolCombo}"
+                          ItemsSource="{Binding Points.Choices}"
+                          SelectedItem="{Binding Points.Choice}"
+                          DisplayMemberPath="Text" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="数据类型" Style="{StaticResource ToolLabel}" />
@@ -33,8 +42,23 @@
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="写入值" Style="{StaticResource ToolLabel}" />
-                <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+                <Grid MinWidth="300" HorizontalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" MinWidth="160" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox Style="{StaticResource ToolCombo}"
+                              ItemsSource="{Binding ValueModes}"
+                              SelectedItem="{Binding ValueMode}"
+                              VerticalAlignment="Center" />
+                    <TextBox Grid.Column="2"
+                             Style="{StaticResource ToolBox}"
+                             MinWidth="160"
+                             IsReadOnly="{Binding ValueFromVariable}"
+                             Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                             VerticalAlignment="Center" />
+                </Grid>
             </StackPanel>
     </StackPanel>
 </UserControl>

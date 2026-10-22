@@ -83,6 +83,7 @@ namespace MMSP.Service.Database
             if (db.DbMaintenance.IsAnyTable("biz_flow_mes", false))
                 DropLegacyFlowMes(db);
             TrimLegacyFlowSteps(db);
+            EnsurePlcPointColumns(db);
 
             db.CodeFirst.InitTables(
                 typeof(RunLogEntity),
@@ -93,10 +94,12 @@ namespace MMSP.Service.Database
                 typeof(ScannerEntity),
                 typeof(FlowEntity),
                 typeof(FlowStepEntity),
+                typeof(FlowVarEntity),
                 typeof(FlowMesEntity));
             db.Ado.ExecuteCommand("CREATE INDEX IF NOT EXISTS idx_biz_logs_log_time ON biz_logs (log_time);");
             db.Ado.ExecuteCommand("CREATE UNIQUE INDEX IF NOT EXISTS idx_biz_uph_hour_time ON biz_uph (hour_time);");
             db.Ado.ExecuteCommand("CREATE UNIQUE INDEX IF NOT EXISTS idx_biz_flow_mes_config_type ON biz_flow_mes (config_type);");
+            db.Ado.ExecuteCommand("CREATE UNIQUE INDEX IF NOT EXISTS idx_biz_flow_vars_flow_name ON biz_flow_vars (flow_id, name);");
             if (db.DbMaintenance.IsAnyTable("biz_flow_steps", false))
                 EnsureCfgValueColumn(db);
         }
@@ -199,6 +202,33 @@ namespace MMSP.Service.Database
                 return;
 
             db.Ado.ExecuteCommand("ALTER TABLE biz_flow_steps ADD COLUMN cfg_value TEXT NOT NULL DEFAULT ''");
+        }
+
+        /// <summary>
+        /// 给已经存在的点位表补类型、Bit 位和描述。旧行类型为流程，Bit 位为空，描述为空。
+        /// </summary>
+        internal static void EnsurePlcPointColumns(SqlSugarScope db)
+        {
+            if (!db.DbMaintenance.IsAnyTable("biz_plc_points", false))
+                return;
+
+            AddPlcPointColumn(db, "point_kind", "ALTER TABLE biz_plc_points ADD COLUMN point_kind INTEGER NOT NULL DEFAULT 1");
+            AddPlcPointColumn(db, "bit_index", "ALTER TABLE biz_plc_points ADD COLUMN bit_index INTEGER");
+            AddPlcPointColumn(db, "description", "ALTER TABLE biz_plc_points ADD COLUMN description TEXT NOT NULL DEFAULT ''");
+            db.Ado.ExecuteCommand("UPDATE biz_plc_points SET point_kind = 1 WHERE point_kind = 0");
+        }
+
+        /// <summary>
+        /// 点位表缺列时补上。列名只来自本类的固定语句。
+        /// </summary>
+        private static void AddPlcPointColumn(SqlSugarScope db, string name, string sql)
+        {
+            var count = db.Ado.GetInt(
+                "SELECT COUNT(1) FROM pragma_table_info('biz_plc_points') WHERE name = '" + name + "'");
+            if (count > 0)
+                return;
+
+            db.Ado.ExecuteCommand(sql);
         }
 
         /// <summary>

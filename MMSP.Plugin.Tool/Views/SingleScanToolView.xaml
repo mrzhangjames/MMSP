@@ -13,23 +13,58 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <!--  区域 单次扫码。控件：名称 Name、扫码枪 Scanner、触发字符串 Trigger。样式 ToolLabel、ToolBox、ToolCombo。  -->
-    <StackPanel Margin="16">
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
+    <!--  区域 单次扫码。控件：名称 Name、扫码枪 Scanner、触发字符串 Trigger、扫码结果 Result、写入 PLC。样式 ToolLabel、ToolBox、ToolCombo、ToolCheck。写入 PLC 前用分割线。  -->
+    <StackPanel Margin="16,16,16,8">
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="扫码枪" Style="{StaticResource ToolLabel}" />
+            <ComboBox Style="{StaticResource ToolCombo}"
+                      ItemsSource="{Binding Scanners}"
+                      SelectedItem="{Binding Scanner}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="触发字符串" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding Trigger, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock Text="扫码结果" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding Result, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <!--  分割线。下面是写入 PLC。  -->
+        <Border Height="1" Background="#E0E0E0" Margin="0,4,0,16" />
+        <!--  区域 写入 PLC。控件：是否写入 WritePlc、地址 WriteAddress、数据类型 WriteDataType、长度 WriteLength。  -->
+        <CheckBox Content="是否写入"
+                  Style="{StaticResource ToolCheck}"
+                  IsChecked="{Binding WritePlc}"
+                  Margin="0,0,0,12" />
+        <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="写入地址" Style="{StaticResource ToolLabel}" />
                 <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                         Text="{Binding WriteAddress, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="扫码枪" Style="{StaticResource ToolLabel}" />
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="数据类型" Style="{StaticResource ToolLabel}" />
                 <ComboBox Style="{StaticResource ToolCombo}"
-                          ItemsSource="{Binding Scanners}"
-                          SelectedItem="{Binding Scanner}" />
+                          ItemsSource="{Binding DataTypes}"
+                          SelectedItem="{Binding WriteDataType}" />
             </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="触发字符串" Style="{StaticResource ToolLabel}" />
-                <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Trigger, UpdateSourceTrigger=PropertyChanged}" />
-            </StackPanel>
+        </Grid>
+        <StackPanel HorizontalAlignment="Left" Width="160" Margin="0,0,0,8">
+            <TextBlock Text="长度" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding WriteLength, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
     </StackPanel>
 </UserControl>

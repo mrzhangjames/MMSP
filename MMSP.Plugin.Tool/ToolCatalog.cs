@@ -19,22 +19,23 @@ namespace MMSP.Plugin.Tool
         };
 
         /// <summary>
-        /// 按种类创建配置控件。cfg 为空时使用空配置。scanners 是设备里的扫码枪名称。
+        /// 按种类创建配置控件。cfg 为空时使用空配置。scanners 是设备里的扫码枪名称。points 是 PLC 点位。
         /// </summary>
-        public static UserControl Create(FlowToolKind kind, string cfg, IReadOnlyList<string>? scanners = null)
+        public static UserControl Create(FlowToolKind kind, string cfg, IReadOnlyList<string>? scanners = null, IReadOnlyList<PlcPointChoice>? points = null)
         {
             var names = scanners ?? [];
+            var choices = points ?? [];
             return kind switch
             {
-                FlowToolKind.SingleScan => Load(new SingleScanToolView(), Read<SingleScanToolEntity>(cfg), names),
-                FlowToolKind.MultiScan => Load(new MultiScanToolView(), Read<MultiScanToolEntity>(cfg), names),
-                FlowToolKind.PlcRead => Load(new PlcReadToolView(), Read<PlcReadToolEntity>(cfg), names),
-                FlowToolKind.PlcWrite => Load(new PlcWriteToolView(), Read<PlcWriteToolEntity>(cfg), names),
-                FlowToolKind.PlcMonitor => Load(new PlcMonitorToolView(), Read<PlcMonitorToolEntity>(cfg), names),
-                FlowToolKind.Delay => Load(new DelayToolView(), Read<DelayToolEntity>(cfg), names),
-                FlowToolKind.JsonParse => Load(new JsonParseToolView(), Read<JsonParseToolEntity>(cfg), names),
-                FlowToolKind.Condition => Load(new ConditionToolView(), Read<ConditionToolEntity>(cfg), names),
-                FlowToolKind.Script => Load(new ScriptToolView(), Read<ScriptToolEntity>(cfg), names),
+                FlowToolKind.SingleScan => Load(new SingleScanToolView(), Read<SingleScanToolEntity>(cfg), names, choices),
+                FlowToolKind.MultiScan => Load(new MultiScanToolView(), Read<MultiScanToolEntity>(cfg), names, choices),
+                FlowToolKind.PlcRead => Load(new PlcReadToolView(), Read<PlcReadToolEntity>(cfg), names, choices),
+                FlowToolKind.PlcWrite => Load(new PlcWriteToolView(), Read<PlcWriteToolEntity>(cfg), names, choices),
+                FlowToolKind.PlcMonitor => Load(new PlcMonitorToolView(), Read<PlcMonitorToolEntity>(cfg), names, choices),
+                FlowToolKind.Delay => Load(new DelayToolView(), Read<DelayToolEntity>(cfg), names, choices),
+                FlowToolKind.JsonParse => Load(new JsonParseToolView(), Read<JsonParseToolEntity>(cfg), names, choices),
+                FlowToolKind.Condition => Load(new ConditionToolView(), Read<ConditionToolEntity>(cfg), names, choices),
+                FlowToolKind.Script => Load(new ScriptToolView(), Read<ScriptToolEntity>(cfg), names, choices),
                 _ => new UserControl()
             };
         }
@@ -81,9 +82,9 @@ namespace MMSP.Plugin.Tool
         }
 
         /// <summary>
-        /// 把已有配置装进控件。控件构造时已经建过一份空配置，这里换掉它。扫码页同时带上扫码枪列表。
+        /// 把已有配置装进控件。控件构造时已经建过一份空配置，这里换掉它。扫码页带扫码枪，PLC 页带点位。
         /// </summary>
-        private static UserControl Load<TTool>(UserControl view, TTool tool, IReadOnlyList<string> scanners)
+        private static UserControl Load<TTool>(UserControl view, TTool tool, IReadOnlyList<string> scanners, IReadOnlyList<PlcPointChoice> points)
             where TTool : PluginToolModel
         {
             switch (view)
@@ -95,13 +96,13 @@ namespace MMSP.Plugin.Tool
                     multi.Load(scan, scanners);
                     break;
                 case PlcReadToolView read when tool is PlcReadToolEntity plc:
-                    read.Load(plc);
+                    read.Load(plc, points);
                     break;
                 case PlcWriteToolView write when tool is PlcWriteToolEntity plc:
-                    write.Load(plc);
+                    write.Load(plc, points);
                     break;
                 case PlcMonitorToolView monitor when tool is PlcMonitorToolEntity plc:
-                    monitor.Load(plc);
+                    monitor.Load(plc, points);
                     break;
                 case DelayToolView delay when tool is DelayToolEntity value:
                     delay.Load(value);

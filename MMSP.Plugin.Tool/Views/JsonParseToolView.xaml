@@ -13,7 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <!--  区域 JSON 解析。控件：名称 Name、来源 Source、路径 JsonPath、结果 Target。样式 ToolLabel、ToolBox。  -->
+    <!--  区域 JSON 解析。控件：名称 Name、来源 Source、路径 JsonPath、结果 Target、样例 Sample、试算 TryCommand、试算结果 Preview。样式 ToolLabel、ToolBox、ToolArea、ToolButton。  -->
     <StackPanel Margin="16">
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
@@ -23,7 +23,8 @@
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="来源" Style="{StaticResource ToolLabel}" />
                 <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Source, UpdateSourceTrigger=PropertyChanged}" />
+                         IsReadOnly="True"
+                         Text="{Binding Source, Mode=OneWay}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="路径" Style="{StaticResource ToolLabel}" />
@@ -33,7 +34,33 @@
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="结果" Style="{StaticResource ToolLabel}" />
                 <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Target, UpdateSourceTrigger=PropertyChanged}" />
+                         IsReadOnly="True"
+                         Text="{Binding Target, Mode=OneWay}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="样例" Style="{StaticResource ToolLabel}" />
+                <TextBox Style="{StaticResource ToolArea}"
+                         Text="{Binding Sample, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <Button Content="试算"
+                    Style="{StaticResource ToolButton}"
+                    Command="{Binding TryCommand}"
+                    Margin="0,0,0,12" />
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="试算结果" Style="{StaticResource ToolLabel}" />
+                <TextBox IsReadOnly="True"
+                         MinHeight="72"
+                         Text="{Binding Preview, Mode=OneWay}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource ToolArea}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PreviewFailed}" Value="True">
+                                    <Setter Property="Foreground" Value="#C62828" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
             </StackPanel>
     </StackPanel>
 </UserControl>

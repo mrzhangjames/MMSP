@@ -13,7 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <!--  区域 PLC 读取。控件：名称 Name、地址 Address、数据类型 DataType、长度 Length。样式 ToolLabel、ToolBox、ToolCombo。  -->
+    <!--  区域 PLC 读取。控件：名称 Name、数据源 PointField.Source、点位 PointField.Choice、数据类型 DataType、长度 Length、结果 Result。样式 ToolLabel、ToolBox、ToolCombo。  -->
     <StackPanel Margin="16">
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
@@ -21,9 +21,18 @@
                          Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="地址" Style="{StaticResource ToolLabel}" />
-                <TextBox Style="{StaticResource ToolBox}"
-                         Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="数据源" Style="{StaticResource ToolLabel}" />
+                <ComboBox Style="{StaticResource ToolCombo}"
+                          ItemsSource="{Binding Points.Sources}"
+                          SelectedItem="{Binding Points.Source}"
+                          DisplayMemberPath="Text" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="点位" Style="{StaticResource ToolLabel}" />
+                <ComboBox Style="{StaticResource ToolCombo}"
+                          ItemsSource="{Binding Points.Choices}"
+                          SelectedItem="{Binding Points.Choice}"
+                          DisplayMemberPath="Text" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="数据类型" Style="{StaticResource ToolLabel}" />
@@ -35,6 +44,11 @@
                 <TextBlock Text="长度" Style="{StaticResource ToolLabel}" />
                 <TextBox Style="{StaticResource ToolBox}"
                          Text="{Binding Length, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="结果" Style="{StaticResource ToolLabel}" />
+                <TextBox Style="{StaticResource ToolBox}"
+                         Text="{Binding Result, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
     </StackPanel>
 </UserControl>

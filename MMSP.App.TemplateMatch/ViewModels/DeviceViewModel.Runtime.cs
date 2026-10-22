@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using MMSP.App.TemplateMatch.Models;
@@ -279,7 +280,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     Address = entity.Address,
                     DataType = entity.DataType.ToString(),
                     LengthText = entity.DataLength.ToString(),
-                    AccessText = entity.Access == PlcAccess.ReadOnly ? Text("Device_AccessRead") : Text("Device_AccessReadWrite")
+                    AccessText = entity.Access == PlcAccess.ReadOnly ? Text("Device_AccessRead") : Text("Device_AccessReadWrite"),
+                    PointKind = PlcPointEntity.NormalizeKind(entity.PointKind),
+                    BitIndex = PlcPointEntity.NormalizeBitIndex(entity.DataType, entity.DataLength, entity.BitIndex),
+                    Description = PlcPointEntity.NormalizeDescription(entity.Description)
                 };
                 row.UseEnabledLabels(Text("Device_On"), Text("Device_Off"), entity.IsValid);
                 Points.Add(row);
@@ -489,6 +493,19 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     sort = 0;
 
                 var entity = ToPoint(row, sort);
+                if (PlcPointEntity.IsSingleton(entity.PointKind))
+                {
+                    var another = db.Queryable<PlcPointEntity>()
+                        .Where(item => item.PointKind == entity.PointKind && item.Id != entity.Id)
+                        .ToList()
+                        .FirstOrDefault();
+                    if (another is not null)
+                    {
+                        NotePlc(DeviceLogKind.Timeout, Text("Device_SingletonPoint"), true);
+                        return;
+                    }
+                }
+
                 var existing = db.Queryable<PlcPointEntity>().Where(item => item.Id == row.Id).ToList().FirstOrDefault();
                 if (existing is null)
                     db.Insertable(entity).ExecuteCommand();
@@ -562,6 +579,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
             for (var index = 0; index < imported.Count; index++)
                 entities.Add(ToPoint(imported[index], index));
 
+            if (PlcPointEntity.ExtraSingleton(entities.Select(item => item.PointKind)) is not null)
+                throw new InvalidDataException(Text("Device_SingletonPoint"));
+
             var db = SqlSugarContext.CustomerDb;
             db.Ado.BeginTran();
             try
@@ -606,7 +626,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 DataLength = length,
                 Access = access,
                 IsValid = row.IsEnabled,
-                SortIndex = sort
+                SortIndex = sort,
+                PointKind = PlcPointEntity.NormalizeKind(row.PointKind),
+                BitIndex = PlcPointEntity.NormalizeBitIndex(dataType, length, row.BitIndex),
+                Description = PlcPointEntity.NormalizeDescription(row.Description)
             };
         }
 

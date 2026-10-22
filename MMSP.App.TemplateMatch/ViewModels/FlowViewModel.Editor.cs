@@ -4,12 +4,13 @@ using MMSP.App.TemplateMatch.Views;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
+using MMSP.Core.Model.Tool;
 using MMSP.Service.Database;
 
 namespace MMSP.App.TemplateMatch.ViewModels
 {
     /// <summary>
-    /// 流程页的新增、编辑和删除。弹窗只改名称，开关仍在卡片上保存。
+    /// 流程页的新增、编辑和删除。名称弹窗只改名称。变量在另一张表里改。开关仍在卡片上保存。
     /// </summary>
     public partial class FlowViewModel
     {
@@ -102,7 +103,114 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 确认后删除当前流程及其流程步。取消则不删除。
+        /// 打开变量列表。没有目标或库没打开时不打开。取消不写库。
+        /// </summary>
+        private async void OpenVars(FlowCard? card)
+        {
+            card ??= SelectedFlow;
+            if (card is null || !SqlSugarContext.IsOpen)
+                return;
+
+            Select(card);
+            List<FlowVarEntity> rows;
+            try
+            {
+                rows = SqlSugarContext.CustomerDb.Queryable<FlowVarEntity>()
+                    .Where(item => item.FlowId == card.Id)
+                    .OrderBy(item => item.SortIndex)
+                    .ToList();
+            }
+            catch (Exception)
+            {
+                await MetroDialogService.ShowMessageAsync(Text("Flow_VarEdit", "变量编辑"), "变量无法读取");
+                return;
+            }
+
+            var window = new FlowVarWindow(card.Name, rows, BoundNames(card));
+            var owner = Application.Current?.MainWindow;
+            if (owner is not null && owner.IsLoaded)
+                window.Owner = owner;
+
+            if (window.ShowDialog() != true || window.Result is null)
+                return;
+
+            if (!SaveVars(card, window.Result))
+            {
+                await MetroDialogService.ShowMessageAsync(
+                    Text("Flow_VarEdit", "变量编辑"),
+                    Text("User_SaveFailed", "保存失败"));
+            }
+        }
+
+        /// <summary>
+        /// 本流程步骤已经绑定的变量名。入参和出参都算。
+        /// </summary>
+        private static HashSet<string> BoundNames(FlowCard card)
+        {
+            var bound = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var step in card.Steps)
+            {
+                foreach (var name in ToolVars.Referenced(step.ToolKind, step.CfgValue))
+                    bound.Add(name);
+            }
+
+            return bound;
+        }
+
+        /// <summary>
+        /// 用整份名单替换这一条流程的变量。顺序从 1 起。运行中的值不写回。
+        /// </summary>
+        private static bool SaveVars(FlowCard card, IReadOnlyList<FlowVarDraft> drafts)
+        {
+            if (!SqlSugarContext.IsOpen)
+                return false;
+
+            try
+            {
+                var db = SqlSugarContext.CustomerDb;
+                db.Ado.BeginTran();
+                try
+                {
+                    db.Deleteable<FlowVarEntity>().Where(item => item.FlowId == card.Id).ExecuteCommand();
+                    if (drafts.Count > 0)
+                    {
+                        var rows = new List<FlowVarEntity>(drafts.Count);
+                        for (var index = 0; index < drafts.Count; index++)
+                        {
+                            var draft = drafts[index];
+                            rows.Add(new FlowVarEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                FlowId = card.Id,
+                                Name = (draft.Name ?? "").Trim(),
+                                DataType = draft.DataType,
+                                InitialValue = draft.InitialValue ?? "",
+                                SortIndex = index + 1
+                            });
+                        }
+
+                        db.Insertable(rows).ExecuteCommand();
+                    }
+
+                    db.Ado.CommitTran();
+                }
+                catch (Exception)
+                {
+                    db.Ado.RollbackTran();
+                    throw;
+                }
+
+                LogHelper.FlowInfo($"保存流程变量 {card.Name}");
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 确认后删除当前流程、流程步和变量。取消则不删除。
         /// </summary>
         private async void Delete()
         {
@@ -131,6 +239,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 db.Ado.BeginTran();
                 try
                 {
+                    db.Deleteable<FlowVarEntity>().Where(item => item.FlowId == id).ExecuteCommand();
                     db.Deleteable<FlowStepEntity>().Where(item => item.FlowId == id).ExecuteCommand();
                     db.Deleteable<FlowEntity>().Where(item => item.Id == id).ExecuteCommand();
                     db.Ado.CommitTran();
