@@ -9,6 +9,9 @@ namespace MMSP.Plugin.Lux.WMI
     /// </summary>
     public static class LuxWmiClient
     {
+        /// <summary>
+        /// 共用的 HTTP 客户端。超时由单次调用自己限制。
+        /// </summary>
         private static readonly HttpClient Http = new()
         {
             Timeout = Timeout.InfiniteTimeSpan

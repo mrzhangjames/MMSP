@@ -15,6 +15,9 @@ namespace MMSP.Core.Model.Tool
         /// </summary>
         public const int CurrentVersion = 1;
 
+        /// <summary>
+        /// 写出时用驼峰，中文不转义。
+        /// </summary>
         private static readonly JsonSerializerOptions Json = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -22,18 +25,30 @@ namespace MMSP.Core.Model.Tool
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
+        /// <summary>
+        /// 根对象允许的字段。多出来的字段拒绝。
+        /// </summary>
         private static readonly HashSet<string> RootNames = new(StringComparer.Ordinal) { "version", "flows" };
 
+        /// <summary>
+        /// 一条流程允许的字段。
+        /// </summary>
         private static readonly HashSet<string> FlowNames = new(StringComparer.Ordinal)
         {
             "name", "isEnabled", "logOutput", "sortIndex", "steps", "vars"
         };
 
+        /// <summary>
+        /// 一个流程步允许的字段。
+        /// </summary>
         private static readonly HashSet<string> StepNames = new(StringComparer.Ordinal)
         {
             "toolKind", "title", "cfgValue", "sortIndex"
         };
 
+        /// <summary>
+        /// 一个变量允许的字段。
+        /// </summary>
         private static readonly HashSet<string> VarNames = new(StringComparer.Ordinal)
         {
             "name", "dataType", "initialValue", "sortIndex"
@@ -492,8 +507,14 @@ namespace MMSP.Core.Model.Tool
         /// </summary>
         private sealed class FileBody
         {
+            /// <summary>
+            /// 文件版本。
+            /// </summary>
             public int Version { get; set; }
 
+            /// <summary>
+            /// 全部流程。
+            /// </summary>
             public List<FileFlow> Flows { get; set; } = [];
         }
 
@@ -502,16 +523,34 @@ namespace MMSP.Core.Model.Tool
         /// </summary>
         private sealed class FileFlow
         {
+            /// <summary>
+            /// 流程名称。
+            /// </summary>
             public string Name { get; set; } = "";
 
+            /// <summary>
+            /// 是否参与运行。
+            /// </summary>
             public bool IsEnabled { get; set; }
 
+            /// <summary>
+            /// 是否记录这一轮的输出。
+            /// </summary>
             public bool LogOutput { get; set; }
 
+            /// <summary>
+            /// 列表顺序。
+            /// </summary>
             public int SortIndex { get; set; }
 
+            /// <summary>
+            /// 流程步。
+            /// </summary>
             public List<FileStep> Steps { get; set; } = [];
 
+            /// <summary>
+            /// 变量。
+            /// </summary>
             public List<FileVar> Vars { get; set; } = [];
         }
 
@@ -520,12 +559,24 @@ namespace MMSP.Core.Model.Tool
         /// </summary>
         private sealed class FileStep
         {
+            /// <summary>
+            /// 工具种类数值。
+            /// </summary>
             public int ToolKind { get; set; }
 
+            /// <summary>
+            /// 步骤名称。
+            /// </summary>
             public string Title { get; set; } = "";
 
+            /// <summary>
+            /// 工具配置。JSON 文本。
+            /// </summary>
             public string CfgValue { get; set; } = "";
 
+            /// <summary>
+            /// 步骤顺序。
+            /// </summary>
             public int SortIndex { get; set; }
         }
 
@@ -534,12 +585,24 @@ namespace MMSP.Core.Model.Tool
         /// </summary>
         private sealed class FileVar
         {
+            /// <summary>
+            /// 变量名。
+            /// </summary>
             public string Name { get; set; } = "";
 
+            /// <summary>
+            /// 变量表里的类型。
+            /// </summary>
             public string DataType { get; set; } = "";
 
+            /// <summary>
+            /// 初始值。
+            /// </summary>
             public string InitialValue { get; set; } = "";
 
+            /// <summary>
+            /// 变量顺序。
+            /// </summary>
             public int SortIndex { get; set; }
         }
     }

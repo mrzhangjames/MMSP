@@ -30,6 +30,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private int _pageIndex;
         private string _savedCfg = "";
         private string _mesError = "";
+        /// <summary>
+        /// 单次执行和单步执行走这一条服务。
+        /// </summary>
         private readonly IFlowRunService _flowRun;
 
         /// <summary>

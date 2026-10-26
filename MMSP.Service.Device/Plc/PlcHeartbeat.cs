@@ -9,13 +9,44 @@ namespace MMSP.Service.Device.Plc
     /// </summary>
     public sealed class PlcHeartbeat
     {
+        /// <summary>
+        /// 保护连接、地址和停止标记。
+        /// </summary>
         private readonly object _gate = new();
+
+        /// <summary>
+        /// 配置变化或退出时叫醒等待。
+        /// </summary>
         private readonly ManualResetEventSlim _wake = new(false);
+
+        /// <summary>
+        /// 当前心跳连接。地址为空时没有。
+        /// </summary>
         private PlcConnection? _connection;
+
+        /// <summary>
+        /// 心跳地址。空则不连接。
+        /// </summary>
         private string _address = "";
+
+        /// <summary>
+        /// 断线后的重连间隔，毫秒。
+        /// </summary>
         private int _reconnectMs;
+
+        /// <summary>
+        /// 配置代数。换配置之后，旧循环不再写入。
+        /// </summary>
         private int _version;
+
+        /// <summary>
+        /// 正在退出。
+        /// </summary>
         private bool _stopping;
+
+        /// <summary>
+        /// 心跳线程。没启动时为空。
+        /// </summary>
         private Thread? _thread;
 
         /// <summary>

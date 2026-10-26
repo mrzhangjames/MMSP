@@ -5,6 +5,9 @@
     /// </summary>
     public sealed class LuxWmiResult
     {
+        /// <summary>
+        /// 成功和失败都从这里创建。
+        /// </summary>
         private LuxWmiResult(bool isSuccess, string content, string error)
         {
             IsSuccess = isSuccess;

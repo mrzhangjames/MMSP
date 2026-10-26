@@ -21,11 +21,17 @@ namespace MMSP.Plugin.Lux.WMI
         /// </summary>
         private const string ProtocolPassword = "sysuser";
 
+        /// <summary>
+        /// 明文序列化。中文不转义。
+        /// </summary>
         private static readonly JsonSerializerOptions Json = new()
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
+        /// <summary>
+        /// 从 ASMX 响应里取出 string 节点的内容。
+        /// </summary>
         private static readonly Regex StringBody = new(
             "<string\\b[^>]*>(.*)</string>",
             RegexOptions.Singleline | RegexOptions.CultureInvariant);

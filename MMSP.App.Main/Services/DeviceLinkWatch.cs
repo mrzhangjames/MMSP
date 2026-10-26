@@ -38,10 +38,29 @@ namespace MMSP.App.Main.Services
     /// </summary>
     public sealed class DeviceLinkWatch
     {
+        /// <summary>
+        /// 保护线程和停止标记。
+        /// </summary>
         private readonly object _gate = new();
+
+        /// <summary>
+        /// 提前结束这一轮的等待。
+        /// </summary>
         private readonly ManualResetEventSlim _wake = new(false);
+
+        /// <summary>
+        /// 探测线程。没启动时为空。
+        /// </summary>
         private Thread? _thread;
+
+        /// <summary>
+        /// 正在退出。
+        /// </summary>
         private bool _stopping;
+
+        /// <summary>
+        /// 上一轮读数。没变化时不通知界面。
+        /// </summary>
         private IReadOnlyList<DeviceLinkReading> _last = [];
 
         /// <summary>

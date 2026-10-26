@@ -7,6 +7,9 @@ namespace MMSP.Plugin.Lux.Tests
     /// </summary>
     public class LuxWmiTests
     {
+        /// <summary>
+        /// 测试用的 32 字节密钥。不是现场密钥。
+        /// </summary>
         private const string Key = "12345678901234567890123456789012";
 
         /// <summary>

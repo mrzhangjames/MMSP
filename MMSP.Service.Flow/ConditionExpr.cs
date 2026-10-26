@@ -86,21 +86,84 @@ namespace MMSP.Service.Flow
         /// </summary>
         private enum Kind
         {
+            /// <summary>
+            /// 表达式结束。
+            /// </summary>
             End,
+
+            /// <summary>
+            /// {变量名}。
+            /// </summary>
             Var,
+
+            /// <summary>
+            /// 直接写出的文本。
+            /// </summary>
             Lit,
+
+            /// <summary>
+            /// 「长度」。
+            /// </summary>
             Length,
+
+            /// <summary>
+            /// 「包含」。
+            /// </summary>
             Contains,
+
+            /// <summary>
+            /// 文本相等。
+            /// </summary>
             Eq,
+
+            /// <summary>
+            /// 文本不等。
+            /// </summary>
             Ne,
+
+            /// <summary>
+            /// 大于。
+            /// </summary>
             Gt,
+
+            /// <summary>
+            /// 大于或等于。
+            /// </summary>
             Ge,
+
+            /// <summary>
+            /// 小于。
+            /// </summary>
             Lt,
+
+            /// <summary>
+            /// 小于或等于。
+            /// </summary>
             Le,
+
+            /// <summary>
+            /// 与。
+            /// </summary>
             And,
+
+            /// <summary>
+            /// 或。
+            /// </summary>
             Or,
+
+            /// <summary>
+            /// 非。
+            /// </summary>
             Not,
+
+            /// <summary>
+            /// 左括号。
+            /// </summary>
             LParen,
+
+            /// <summary>
+            /// 右括号。
+            /// </summary>
             RParen
         }
 
@@ -109,21 +172,36 @@ namespace MMSP.Service.Flow
         /// </summary>
         private readonly struct Token
         {
+            /// <summary>
+            /// 记下种类。变量和字面值带文本，运算符的文本为空。
+            /// </summary>
             private Token(Kind kind, string text)
             {
                 Kind = kind;
                 Text = text;
             }
 
+            /// <summary>
+            /// 这一个词的种类。
+            /// </summary>
             public Kind Kind { get; }
 
+            /// <summary>
+            /// 变量名或字面值。运算符为空。
+            /// </summary>
             public string Text { get; }
 
+            /// <summary>
+            /// 不带文本的词。用于运算符和括号。
+            /// </summary>
             public static Token Of(Kind kind)
             {
                 return new Token(kind, "");
             }
 
+            /// <summary>
+            /// 带文本的词。用于变量和字面值。
+            /// </summary>
             public static Token TextOf(Kind kind, string text)
             {
                 return new Token(kind, text);
@@ -291,8 +369,14 @@ namespace MMSP.Service.Flow
         /// </summary>
         private abstract class BoolNode
         {
+            /// <summary>
+            /// 计算这一支。调用前名称已经核对过。
+            /// </summary>
             public abstract bool Eval(FlowVariables variables);
 
+            /// <summary>
+            /// 用到的变量名都已声明时返回 true。
+            /// </summary>
             public abstract bool Check(FlowVariables variables);
         }
 
@@ -301,8 +385,14 @@ namespace MMSP.Service.Flow
         /// </summary>
         private abstract class ValueNode
         {
+            /// <summary>
+            /// 当前文本。带长度时返回字符数。
+            /// </summary>
             public abstract string Text(FlowVariables variables);
 
+            /// <summary>
+            /// 变量已声明时返回 true。字面值始终通过。
+            /// </summary>
             public abstract bool Check(FlowVariables variables);
         }
 
@@ -311,14 +401,27 @@ namespace MMSP.Service.Flow
         /// </summary>
         private sealed class Parser
         {
+            /// <summary>
+            /// 词法结果。末尾是结束标记。
+            /// </summary>
             private readonly List<Token> _tokens;
+
+            /// <summary>
+            /// 当前读到的下标。
+            /// </summary>
             private int _at;
 
+            /// <summary>
+            /// 从已经拆好的词开始。
+            /// </summary>
             private Parser(List<Token> tokens)
             {
                 _tokens = tokens;
             }
 
+            /// <summary>
+            /// 拆词并解析整句。失败时 node 无意义。
+            /// </summary>
             public static bool TryParse(string text, out BoolNode node)
             {
                 node = null!;
@@ -334,6 +437,9 @@ namespace MMSP.Service.Flow
                 return true;
             }
 
+            /// <summary>
+            /// 解析或。没有或时就是与。
+            /// </summary>
             private BoolNode? ParseOr()
             {
                 var left = ParseAnd();
@@ -352,6 +458,9 @@ namespace MMSP.Service.Flow
                 return left;
             }
 
+            /// <summary>
+            /// 解析与。没有与时就是非。
+            /// </summary>
             private BoolNode? ParseAnd()
             {
                 var left = ParseNot();
@@ -370,6 +479,9 @@ namespace MMSP.Service.Flow
                 return left;
             }
 
+            /// <summary>
+            /// 解析非。没有非时就是括号或比较。
+            /// </summary>
             private BoolNode? ParseNot()
             {
                 if (!Eat(Kind.Not))
@@ -379,6 +491,9 @@ namespace MMSP.Service.Flow
                 return inner is null ? null : new NotNode(inner);
             }
 
+            /// <summary>
+            /// 括号里再解析一整句，否则解析比较。
+            /// </summary>
             private BoolNode? ParsePrimary()
             {
                 if (Eat(Kind.LParen))
@@ -393,6 +508,9 @@ namespace MMSP.Service.Flow
                 return ParseComparison();
             }
 
+            /// <summary>
+            /// 解析比较或包含。左侧必须是一个值。
+            /// </summary>
             private BoolNode? ParseComparison()
             {
                 var left = ParseValue();
@@ -412,6 +530,9 @@ namespace MMSP.Service.Flow
                 return other is null ? null : new CompareNode(left, op, other);
             }
 
+            /// <summary>
+            /// 解析变量或字面值。变量后面可以跟「长度」。
+            /// </summary>
             private ValueNode? ParseValue()
             {
                 if (Peek() == Kind.Var)
@@ -427,6 +548,9 @@ namespace MMSP.Service.Flow
                 return new LitNode(Take().Text);
             }
 
+            /// <summary>
+            /// 当前词是比较符时吃掉并返回。
+            /// </summary>
             private bool TryRelation(out Kind op)
             {
                 op = Peek();
@@ -437,16 +561,25 @@ namespace MMSP.Service.Flow
                 return true;
             }
 
+            /// <summary>
+            /// 看当前词的种类，不前进。
+            /// </summary>
             private Kind Peek()
             {
                 return _tokens[_at].Kind;
             }
 
+            /// <summary>
+            /// 取当前词并前进。
+            /// </summary>
             private Token Take()
             {
                 return _tokens[_at++];
             }
 
+            /// <summary>
+            /// 当前词是指定种类时吃掉。
+            /// </summary>
             private bool Eat(Kind kind)
             {
                 if (Peek() != kind)
@@ -462,20 +595,36 @@ namespace MMSP.Service.Flow
         /// </summary>
         private sealed class OrNode : BoolNode
         {
+            /// <summary>
+            /// 左侧。
+            /// </summary>
             private readonly BoolNode _left;
+
+            /// <summary>
+            /// 右侧。
+            /// </summary>
             private readonly BoolNode _right;
 
+            /// <summary>
+            /// 记下左右两支。
+            /// </summary>
             public OrNode(BoolNode left, BoolNode right)
             {
                 _left = left;
                 _right = right;
             }
 
+            /// <summary>
+            /// 有一边成立即可。
+            /// </summary>
             public override bool Eval(FlowVariables variables)
             {
                 return _left.Eval(variables) || _right.Eval(variables);
             }
 
+            /// <summary>
+            /// 两边的名称都核对。
+            /// </summary>
             public override bool Check(FlowVariables variables)
             {
                 var left = _left.Check(variables);
@@ -489,20 +638,36 @@ namespace MMSP.Service.Flow
         /// </summary>
         private sealed class AndNode : BoolNode
         {
+            /// <summary>
+            /// 左侧。
+            /// </summary>
             private readonly BoolNode _left;
+
+            /// <summary>
+            /// 右侧。
+            /// </summary>
             private readonly BoolNode _right;
 
+            /// <summary>
+            /// 记下左右两支。
+            /// </summary>
             public AndNode(BoolNode left, BoolNode right)
             {
                 _left = left;
                 _right = right;
             }
 
+            /// <summary>
+            /// 两边都成立才成立。
+            /// </summary>
             public override bool Eval(FlowVariables variables)
             {
                 return _left.Eval(variables) && _right.Eval(variables);
             }
 
+            /// <summary>
+            /// 两边的名称都核对。
+            /// </summary>
             public override bool Check(FlowVariables variables)
             {
                 var left = _left.Check(variables);
@@ -516,18 +681,30 @@ namespace MMSP.Service.Flow
         /// </summary>
         private sealed class NotNode : BoolNode
         {
+            /// <summary>
+            /// 被否定的那一支。
+            /// </summary>
             private readonly BoolNode _inner;
 
+            /// <summary>
+            /// 记下被否定的式子。
+            /// </summary>
             public NotNode(BoolNode inner)
             {
                 _inner = inner;
             }
 
+            /// <summary>
+            /// 取反。
+            /// </summary>
             public override bool Eval(FlowVariables variables)
             {
                 return !_inner.Eval(variables);
             }
 
+            /// <summary>
+            /// 核对里面的名称。
+            /// </summary>
             public override bool Check(FlowVariables variables)
             {
                 return _inner.Check(variables);
@@ -539,20 +716,36 @@ namespace MMSP.Service.Flow
         /// </summary>
         private sealed class ContainsNode : BoolNode
         {
+            /// <summary>
+            /// 被查找的文本。
+            /// </summary>
             private readonly ValueNode _left;
+
+            /// <summary>
+            /// 要找的片段。
+            /// </summary>
             private readonly ValueNode _right;
 
+            /// <summary>
+            /// 记下两侧文本。
+            /// </summary>
             public ContainsNode(ValueNode left, ValueNode right)
             {
                 _left = left;
                 _right = right;
             }
 
+            /// <summary>
+            /// 左侧是否包含右侧。区分大小写。
+            /// </summary>
             public override bool Eval(FlowVariables variables)
             {
                 return _left.Text(variables).Contains(_right.Text(variables), StringComparison.Ordinal);
             }
 
+            /// <summary>
+            /// 两侧用到的名称都核对。
+            /// </summary>
             public override bool Check(FlowVariables variables)
             {
                 return _left.Check(variables) && _right.Check(variables);
@@ -564,10 +757,24 @@ namespace MMSP.Service.Flow
         /// </summary>
         private sealed class CompareNode : BoolNode
         {
+            /// <summary>
+            /// 左侧文本。
+            /// </summary>
             private readonly ValueNode _left;
+
+            /// <summary>
+            /// 比较符。
+            /// </summary>
             private readonly Kind _op;
+
+            /// <summary>
+            /// 右侧文本。
+            /// </summary>
             private readonly ValueNode _right;
 
+            /// <summary>
+            /// 记下两侧和比较符。
+            /// </summary>
             public CompareNode(ValueNode left, Kind op, ValueNode right)
             {
                 _left = left;
@@ -575,6 +782,9 @@ namespace MMSP.Service.Flow
                 _right = right;
             }
 
+            /// <summary>
+            /// 相等和不等按文本。其余两边都是数字时按数值，否则按码点。
+            /// </summary>
             public override bool Eval(FlowVariables variables)
             {
                 var left = _left.Text(variables);
@@ -588,6 +798,9 @@ namespace MMSP.Service.Flow
                 return Relate(left, right, _op);
             }
 
+            /// <summary>
+            /// 两侧用到的名称都核对。
+            /// </summary>
             public override bool Check(FlowVariables variables)
             {
                 return _left.Check(variables) && _right.Check(variables);
@@ -599,21 +812,37 @@ namespace MMSP.Service.Flow
         /// </summary>
         private sealed class VarNode : ValueNode
         {
+            /// <summary>
+            /// 变量名。
+            /// </summary>
             private readonly string _name;
+
+            /// <summary>
+            /// 为 true 时取字符数，不取变量文本。
+            /// </summary>
             private readonly bool _length;
 
+            /// <summary>
+            /// 记下变量名，以及是否取长度。
+            /// </summary>
             public VarNode(string name, bool length)
             {
                 _name = name;
                 _length = length;
             }
 
+            /// <summary>
+            /// 当前文本。取长度时返回字符数。
+            /// </summary>
             public override string Text(FlowVariables variables)
             {
                 var text = variables.Get(_name);
                 return _length ? text.Length.ToString(CultureInfo.InvariantCulture) : text;
             }
 
+            /// <summary>
+            /// 名称已声明。
+            /// </summary>
             public override bool Check(FlowVariables variables)
             {
                 return variables.Contains(_name);
@@ -625,18 +854,30 @@ namespace MMSP.Service.Flow
         /// </summary>
         private sealed class LitNode : ValueNode
         {
+            /// <summary>
+            /// 字面值原文。
+            /// </summary>
             private readonly string _text;
 
+            /// <summary>
+            /// 记下原文。
+            /// </summary>
             public LitNode(string text)
             {
                 _text = text;
             }
 
+            /// <summary>
+            /// 返回原文。
+            /// </summary>
             public override string Text(FlowVariables variables)
             {
                 return _text;
             }
 
+            /// <summary>
+            /// 字面值不依赖变量。
+            /// </summary>
             public override bool Check(FlowVariables variables)
             {
                 return true;
