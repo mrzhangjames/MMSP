@@ -24,7 +24,7 @@ namespace MMSP.Plugin.Tool.ViewModels
         }
 
         /// <summary>
-        /// 条件表达式。
+        /// 条件表达式。用 {变量名} 取当前文本，例如 {条码} 长度 &gt; 8。
         /// </summary>
         public string Expression
         {

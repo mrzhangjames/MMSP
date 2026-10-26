@@ -1,4 +1,4 @@
-using MMSP.Core.Model.Base;
+﻿using MMSP.Core.Model.Base;
 using SqlSugar;
 
 namespace MMSP.Core.Model.DB
@@ -22,7 +22,7 @@ namespace MMSP.Core.Model.DB
         public string Host { get; set; } = "";
 
         /// <summary>
-        /// 协议。数值与 PlcProtocol 一致，界面上的 TCP 为 ModbusTcp。
+        /// 协议。数值与 PlcProtocol 一致。新建行记为 ModbusTcp，已有值保持不变。
         /// </summary>
         [SugarColumn(ColumnName = "protocol")]
         public int Protocol { get; set; }
@@ -40,13 +40,13 @@ namespace MMSP.Core.Model.DB
         public string DataFormat { get; set; } = "ABCD";
 
         /// <summary>
-        /// 站号。表单不编辑，默认 1。
+        /// 站号。0 到 255，默认 1。
         /// </summary>
         [SugarColumn(ColumnName = "station")]
         public int Station { get; set; } = 1;
 
         /// <summary>
-        /// 轮询周期，毫秒。只保存。设备页不按它读写点位。
+        /// 轮询周期，毫秒。只保存。打开设备页不按它读取点位。
         /// </summary>
         [SugarColumn(ColumnName = "poll_ms")]
         public int PollMs { get; set; }
@@ -58,7 +58,7 @@ namespace MMSP.Core.Model.DB
         public int ReadTimeoutMs { get; set; } = 1000;
 
         /// <summary>
-        /// 写入超时，毫秒。按表单保存。
+        /// 写入超时，毫秒。写入时当作这一次的接收超时。
         /// </summary>
         [SugarColumn(ColumnName = "write_timeout_ms")]
         public int WriteTimeoutMs { get; set; } = 1000;
@@ -74,5 +74,11 @@ namespace MMSP.Core.Model.DB
         /// </summary>
         [SugarColumn(ColumnName = "reconnect_count")]
         public int ReconnectCount { get; set; }
+
+        /// <summary>
+        /// 心跳地址。空表示不启用。
+        /// </summary>
+        [SugarColumn(ColumnName = "heartbeat_address", Length = 64)]
+        public string HeartbeatAddress { get; set; } = "";
     }
 }

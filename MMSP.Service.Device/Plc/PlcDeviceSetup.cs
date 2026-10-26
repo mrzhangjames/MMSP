@@ -1,4 +1,4 @@
-using System.IO.Ports;
+﻿using System.IO.Ports;
 using System.Reflection;
 using HslCommunication.Core;
 using HslCommunication.Core.Device;
@@ -28,6 +28,14 @@ namespace MMSP.Service.Device.Plc
         {
             Set(device, "ConnectTimeOut", connection.ConnectTimeout);
             Set(device, "ReceiveTimeOut", connection.ReceiveTimeout);
+        }
+
+        /// <summary>
+        /// 改这一次调用的接收超时。属性不存在时跳过。
+        /// </summary>
+        public static void SetReceiveTimeout(object device, int timeout)
+        {
+            Set(device, "ReceiveTimeOut", timeout > 0 ? timeout : 1000);
         }
 
         /// <summary>

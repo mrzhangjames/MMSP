@@ -1,10 +1,12 @@
-﻿using MMSP.App.Main.ViewModels;
+﻿using MMSP.App.Main.Services;
+using MMSP.App.Main.ViewModels;
 using MMSP.App.Main.Views;
 using MMSP.App.TemplateMatch;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper.Logger;
 using MMSP.Core.License;
 using MMSP.Core.Model.Base;
+using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using MMSP.Plugin.Lux;
 using MMSP.Service.Database;
@@ -150,6 +152,7 @@ namespace MMSP.App.Main
                 LogHelper.SysError("PLC 协议未登记 " + string.Join(", ", missing));
 
             LogHelper.SysInfo("程序启动");
+            StartPlcHeartbeat();
 
             //从容器换取MainView实例对象
             var container = ContainerLocator.Container;
@@ -173,6 +176,59 @@ namespace MMSP.App.Main
                 view.Show();
             }
             base.OnInitialized();
+        }
+
+        /// <summary>
+        /// 用客户库里的连接启动心跳。地址为空时任务在等，不连接 PLC。
+        /// </summary>
+        private static void StartPlcHeartbeat()
+        {
+            PlcHeartbeat.Shared.Failure = message => LogHelper.PlcError(message);
+            PlcLinkEntity? row = null;
+            try
+            {
+                if (SqlSugarContext.IsOpen)
+                    row = SqlSugarContext.CustomerDb.Queryable<PlcLinkEntity>().ToList().FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.PlcError("读取心跳配置失败 " + ex.Message);
+            }
+
+            if (row is null)
+            {
+                PlcHeartbeat.Shared.Apply(null, "", 0);
+                return;
+            }
+
+            var format = row.DataFormat;
+            if (format is not ("ABCD" or "CDAB" or "BADC" or "DCBA"))
+                format = "ABCD";
+
+            PlcConnection? connection = null;
+            if (Enum.IsDefined(typeof(PlcProtocol), row.Protocol))
+            {
+                connection = PlcConnections.Create(
+                    (PlcProtocol)row.Protocol,
+                    row.Host,
+                    row.Port,
+                    row.Station,
+                    format,
+                    row.ReadTimeoutMs,
+                    row.WriteTimeoutMs);
+            }
+
+            PlcHeartbeat.Shared.Apply(connection, row.HeartbeatAddress, row.ReconnectIntervalMs);
+        }
+
+        /// <summary>
+        /// 退出时先停底栏探测，再停心跳连接。
+        /// </summary>
+        protected override void OnExit(ExitEventArgs e)
+        {
+            DeviceLinkWatch.Shared.Stop();
+            PlcHeartbeat.Shared.Stop();
+            base.OnExit(e);
         }
     }
 

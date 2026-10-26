@@ -13,7 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <!--  区域 条件。控件：名称 Name、条件 Expression。样式 ToolLabel、ToolBox。  -->
+    <!--  区域 条件。控件：名称 Name、条件 Expression、用法提示。样式 ToolLabel、ToolBox。  -->
     <StackPanel Margin="16">
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
@@ -25,5 +25,12 @@
                 <TextBox Style="{StaticResource ToolBox}"
                          Text="{Binding Expression, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
+            <!--  用法。{变量名} 取当前文本；成立写出参 true，不成立本轮失败。  -->
+            <TextBlock FontSize="12"
+                       Foreground="#888888"
+                       TextWrapping="Wrap"
+                       LineHeight="18"
+                       Margin="0,0,0,12"
+                       Text="用 {变量名} 取已声明变量的当前文本。例如 {条码} == SN001、{条码} 长度 &gt; 8、{条码} 包含 SN、{工位状态} &gt; 9。相等、不等和包含按文本比较，区分大小写。大于、大于等于、小于、小于等于在两边都是数字时按数值比，否则按文本比。可用 &amp;&amp;、||、! 和括号，!{工位状态} == 0 表示不等于 0。成立时出参写成 true；不成立则本轮失败，不写出参。" />
     </StackPanel>
 </UserControl>

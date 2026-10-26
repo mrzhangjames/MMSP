@@ -11,6 +11,11 @@ namespace MMSP.Core.License
         public LicenseEvaluation Current { get; private set; } = LicenseEvaluation.Only(LicenseFailureCode.FileMissing);
 
         /// <summary>
+        /// 只有已经过期才限制功能。没有许可证、校验失败和尚未生效都不在这里。
+        /// </summary>
+        public bool IsExpired => Current.Code == LicenseFailureCode.Expired;
+
+        /// <summary>
         /// 结果被替换时通知。底栏用它立刻改字。
         /// </summary>
         public event EventHandler? Changed;

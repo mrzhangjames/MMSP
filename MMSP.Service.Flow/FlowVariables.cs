@@ -17,6 +17,11 @@ namespace MMSP.Service.Flow
         private readonly Dictionary<string, string> _values;
 
         /// <summary>
+        /// 名称到变量表类型。启动时抄下，运行中不改。没有抄到类型时为空。
+        /// </summary>
+        private readonly Dictionary<string, string> _types = new(StringComparer.Ordinal);
+
+        /// <summary>
         /// 用已有的名称和初始值创建。同名后者覆盖前者。
         /// </summary>
         public FlowVariables(IEnumerable<KeyValuePair<string, string>> values)
@@ -34,12 +39,32 @@ namespace MMSP.Service.Flow
         }
 
         /// <summary>
-        /// 按启动时抄下的名称和初始值创建。
+        /// 按启动时抄下的名称和初始值创建。类型留空。
         /// </summary>
         public static FlowVariables FromSeeds(IEnumerable<(string Name, string Value)> seeds)
         {
             ArgumentNullException.ThrowIfNull(seeds);
-            return new FlowVariables(seeds.Select(item => new KeyValuePair<string, string>(item.Name, item.Value)));
+            return FromSeeds(seeds.Select(item => (item.Name, item.Value, "")));
+        }
+
+        /// <summary>
+        /// 按启动时抄下的名称、初始值和变量表类型创建。
+        /// </summary>
+        public static FlowVariables FromSeeds(IEnumerable<(string Name, string Value, string Type)> seeds)
+        {
+            ArgumentNullException.ThrowIfNull(seeds);
+            var rows = seeds as IReadOnlyList<(string Name, string Value, string Type)> ?? seeds.ToList();
+            var variables = new FlowVariables(rows.Select(item => new KeyValuePair<string, string>(item.Name, item.Value)));
+            foreach (var item in rows)
+            {
+                var name = (item.Name ?? "").Trim();
+                if (name.Length == 0 || !variables._values.ContainsKey(name))
+                    continue;
+
+                variables._types[name] = (item.Type ?? "").Trim();
+            }
+
+            return variables;
         }
 
         /// <summary>
@@ -48,6 +73,14 @@ namespace MMSP.Service.Flow
         public bool Contains(string name)
         {
             return _values.ContainsKey((name ?? "").Trim());
+        }
+
+        /// <summary>
+        /// 变量表里的类型。未声明或启动时没抄到时返回空。
+        /// </summary>
+        public string DeclaredType(string name)
+        {
+            return _types.TryGetValue((name ?? "").Trim(), out var type) ? type : "";
         }
 
         /// <summary>

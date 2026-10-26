@@ -2,6 +2,7 @@
 using System.Reflection;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
+using MMSP.Service.Database;
 using SqlSugar;
 
 namespace MMSP.Service.Database.Seed
@@ -12,12 +13,12 @@ namespace MMSP.Service.Database.Seed
     public static class UserSeed
     {
         /// <summary>
-        /// 四个角色共用的初始密码。
+        /// 四个角色共用的初始密码。入库前哈希，列里不留明文。
         /// </summary>
         private const string InitialPassword = "123456";
 
         /// <summary>
-        /// 补齐还没有的默认账号。
+        /// 补齐还没有的默认账号，并把仍是明文的口令改成哈希。
         /// </summary>
         public static void Ensure(SqlSugarScope db)
         {
@@ -32,6 +33,27 @@ namespace MMSP.Service.Database.Seed
             var missing = Build().Where(item => item.LoginName is not null && !taken.Contains(item.LoginName)).ToList();
             if (missing.Count > 0)
                 db.Insertable(missing).ExecuteCommand();
+
+            UpgradePlainPasswords(db);
+        }
+
+        /// <summary>
+        /// 已有账号的明文口令改成哈希。已经是哈希的不重算。空口令留着，登录不会通过。
+        /// </summary>
+        private static void UpgradePlainPasswords(SqlSugarScope db)
+        {
+            var rows = db.Queryable<UserEntity>().Select(item => new { item.Id, item.Password }).ToList();
+            foreach (var row in rows)
+            {
+                if (string.IsNullOrEmpty(row.Password) || UserPassword.IsHashed(row.Password))
+                    continue;
+
+                var hashed = UserPassword.Hash(row.Password);
+                db.Updateable<UserEntity>()
+                    .SetColumns(item => item.Password == hashed)
+                    .Where(item => item.Id == row.Id)
+                    .ExecuteCommand();
+            }
         }
 
         /// <summary>
@@ -59,7 +81,7 @@ namespace MMSP.Service.Database.Seed
                 Id = Guid.NewGuid(),
                 LoginName = loginName,
                 UserName = ReadDescription(role),
-                Password = InitialPassword,
+                Password = UserPassword.Hash(InitialPassword),
                 RoleLevel = role,
                 IsValid = true,
                 SessionTimeout = 0,

@@ -1,4 +1,4 @@
-namespace MMSP.Service.Device.Plc
+﻿namespace MMSP.Service.Device.Plc
 {
     /// <summary>
     /// 一台 PLC 的连接参数。各协议只用自己需要的字段，其余保持默认。
@@ -36,9 +36,14 @@ namespace MMSP.Service.Device.Plc
         public int ConnectTimeout { get; init; } = 1000;
 
         /// <summary>
-        /// 接收超时，毫秒。
+        /// 接收超时，毫秒。读取和连接使用。
         /// </summary>
         public int ReceiveTimeout { get; init; } = 1000;
+
+        /// <summary>
+        /// 写入超时，毫秒。只在一次写入期间当作接收超时。
+        /// </summary>
+        public int WriteTimeout { get; init; } = 1000;
 
         /// <summary>
         /// 西门子 S7 机架号。

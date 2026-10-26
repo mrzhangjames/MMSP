@@ -1,4 +1,5 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -7,13 +8,16 @@ using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using MMSP.Service.Database;
+using MMSP.Service.Device;
 using MMSP.Service.Device.Plc;
 using MMSP.Service.Device.Scan;
+using MMSP.Service.Flow;
+using Prism.Ioc;
 
 namespace MMSP.App.TemplateMatch.ViewModels
 {
     /// <summary>
-    /// 设备页的客户库读写和真实通讯。点位列表不自动读写 PLC。
+    /// 设备页的客户库读写和真实通讯。打开页面不自动读取点位。
     /// </summary>
     public partial class DeviceViewModel
     {
@@ -38,9 +42,19 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private Guid _linkId;
 
         /// <summary>
-        /// 站号。表单不编辑，连接时使用。
+        /// 站号。0 到 255，连接时使用。
         /// </summary>
         private int _station = 1;
+
+        /// <summary>
+        /// 已保存的协议。连接类型下拉写入。
+        /// </summary>
+        private int _protocol = (int)PlcProtocol.ModbusTcp;
+
+        /// <summary>
+        /// 已保存的心跳地址。空表示不启用。
+        /// </summary>
+        private string _heartbeatAddress = "";
 
         /// <summary>
         /// 已保存的 IP。
@@ -58,7 +72,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private string _dataFormat = "ABCD";
 
         /// <summary>
-        /// 已保存的轮询周期。只入库和显示，点位列表不按它读取。
+        /// 已保存的轮询周期。打开页面不按它读取点位。
         /// </summary>
         private int _pollMs = 200;
 
@@ -68,7 +82,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private int _readTimeout = 1000;
 
         /// <summary>
-        /// 已保存的写入超时。只显示和入库。
+        /// 已保存的写入超时。写入时当作这一次的接收超时。
         /// </summary>
         private int _writeTimeout = 1000;
 
@@ -103,7 +117,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private IPlcClient? _plc;
 
         /// <summary>
-        /// 当前客户端对应的地址、端口、字节序、读取超时和站号。
+        /// 当前客户端对应的协议、地址、端口、字节序、读取超时、站号和写入超时。
         /// </summary>
         private string _plcSignature = "";
 
@@ -128,7 +142,46 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private readonly Dictionary<Guid, string> _scanSignatures = new();
 
         /// <summary>
-        /// 进入页面时从客户库加载。不连接 PLC，也不读写点位。
+        /// 告诉底栏设备页的 PLC 是否还连着。
+        /// </summary>
+        private Func<bool> _plcUsed = () => false;
+
+        /// <summary>
+        /// 告诉底栏设备页的扫码枪是否还连着。
+        /// </summary>
+        private Func<Guid, bool> _scanUsed = _ => false;
+
+        /// <summary>
+        /// 把设备页当前连接登记给底栏。页面一直留着，离开时客户端关掉，查询自然变成未连接。
+        /// </summary>
+        private void RegisterLinkUse()
+        {
+            _plcUsed = PlcInUse;
+            _scanUsed = ScanInUse;
+            DeviceLinkUse.AddPlc(_plcUsed);
+            DeviceLinkUse.AddScan(_scanUsed);
+        }
+
+        /// <summary>
+        /// 设备页的 PLC 当前是否已连接。
+        /// </summary>
+        private bool PlcInUse()
+        {
+            lock (_plcLock)
+                return _plc is { IsConnected: true };
+        }
+
+        /// <summary>
+        /// 设备页的这把扫码枪当前是否已连接。
+        /// </summary>
+        private bool ScanInUse(Guid id)
+        {
+            lock (_scanLock)
+                return _scanClients.TryGetValue(id, out var client) && client.IsConnected;
+        }
+
+        /// <summary>
+        /// 进入页面时从客户库加载。不连接 PLC，也不读取点位列表。
         /// </summary>
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
@@ -158,7 +211,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
             var scannerId = SelectedScanner?.Id;
             if (!SqlSugarContext.IsOpen)
             {
-                _pollMs = 0;
+                lock (_plcLock)
+                    _pollMs = 0;
+
                 ClearDeviceLists();
                 NotePlc(DeviceLogKind.Timeout, Text("Device_DbClosed"), true);
                 return;
@@ -172,7 +227,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
             }
             catch (Exception ex)
             {
-                _pollMs = 0;
+                lock (_plcLock)
+                    _pollMs = 0;
+
                 NotePlc(DeviceLogKind.Timeout, ex.Message, true);
             }
         }
@@ -191,12 +248,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
             }
 
             var fix = false;
-            if (row.Protocol != (int)PlcProtocol.ModbusTcp)
-            {
-                row.Protocol = (int)PlcProtocol.ModbusTcp;
-                fix = true;
-            }
-
             if (row.DataFormat is not ("ABCD" or "CDAB" or "BADC" or "DCBA"))
             {
                 row.DataFormat = "ABCD";
@@ -213,6 +264,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 lock (_plcLock)
                 {
                     _host = row.Host ?? "";
+                    _protocol = row.Protocol;
                     _port = row.Port;
                     _dataFormat = row.DataFormat;
                     _station = row.Station;
@@ -221,10 +273,12 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     _writeTimeout = row.WriteTimeoutMs;
                     _reconnectInterval = row.ReconnectIntervalMs;
                     _reconnectCount = row.ReconnectCount;
+                    _heartbeatAddress = row.HeartbeatAddress ?? "";
                 }
 
                 PlcIp = _host;
-                PlcConnectionType = ConnectionTypes[0];
+                ShowProtocols(row.Protocol);
+                PlcStation = row.Station.ToString(CultureInfo.InvariantCulture);
                 PlcPort = row.Port.ToString();
                 PlcDataFormat = row.DataFormat;
                 PlcPoll = row.PollMs + " ms";
@@ -232,11 +286,31 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 PlcWriteTimeout = row.WriteTimeoutMs + " ms";
                 PlcReconnectInterval = row.ReconnectIntervalMs + " ms";
                 PlcReconnectCount = row.ReconnectCount.ToString();
+                PlcHeartbeat = _heartbeatAddress;
             }
             finally
             {
                 _suppressLinkSave = false;
             }
+
+            ApplyHeartbeat();
+        }
+
+        /// <summary>
+        /// 用可编辑网口协议填下拉。已保存但本页不能改的协议留在末尾，不改成 Modbus TCP。
+        /// </summary>
+        private void ShowProtocols(int protocolValue)
+        {
+            var names = PlcLinkProtocols.Editable.Select(PlcLinkProtocols.NameOf).ToList();
+            var defined = Enum.IsDefined(typeof(PlcProtocol), protocolValue);
+            var name = defined
+                ? PlcLinkProtocols.NameOf((PlcProtocol)protocolValue)
+                : protocolValue.ToString(CultureInfo.InvariantCulture);
+            if (!names.Contains(name))
+                names.Add(name);
+
+            ConnectionTypes = names;
+            PlcConnectionType = name;
         }
 
         /// <summary>
@@ -256,7 +330,8 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 ReadTimeoutMs = 1000,
                 WriteTimeoutMs = 1000,
                 ReconnectIntervalMs = 3000,
-                ReconnectCount = 3
+                ReconnectCount = 3,
+                HeartbeatAddress = ""
             };
         }
 
@@ -283,7 +358,8 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     AccessText = entity.Access == PlcAccess.ReadOnly ? Text("Device_AccessRead") : Text("Device_AccessReadWrite"),
                     PointKind = PlcPointEntity.NormalizeKind(entity.PointKind),
                     BitIndex = PlcPointEntity.NormalizeBitIndex(entity.DataType, entity.DataLength, entity.BitIndex),
-                    Description = PlcPointEntity.NormalizeDescription(entity.Description)
+                    Description = PlcPointEntity.NormalizeDescription(entity.Description),
+                    KindText = KindText(PlcPointEntity.NormalizeKind(entity.PointKind))
                 };
                 row.UseEnabledLabels(Text("Device_On"), Text("Device_Off"), entity.IsValid);
                 Points.Add(row);
@@ -367,16 +443,23 @@ namespace MMSP.App.TemplateMatch.ViewModels
             if (_suppressLinkSave || _linkId == Guid.Empty || !SqlSugarContext.IsOpen)
                 return;
 
-            if (!TryReadLink(out var host, out var port, out var format, out var pollMs, out var readTimeout, out var writeTimeout, out var reconnectInterval, out var reconnectCount))
+            if (!TryReadLink(out var host, out var port, out var format, out var pollMs, out var readTimeout, out var writeTimeout, out var reconnectInterval, out var reconnectCount, out var station, out var protocol))
                 return;
 
-            var connectionChanged = host != _host || port != _port || format != _dataFormat || readTimeout != _readTimeout;
+            var heartbeat = (PlcHeartbeat ?? "").Trim();
+            var connectionChanged = host != _host
+                || port != _port
+                || format != _dataFormat
+                || readTimeout != _readTimeout
+                || protocol != _protocol
+                || station != _station
+                || writeTimeout != _writeTimeout;
             var pollChanged = pollMs != _pollMs;
             if (!connectionChanged
                 && !pollChanged
-                && writeTimeout == _writeTimeout
                 && reconnectInterval == _reconnectInterval
-                && reconnectCount == _reconnectCount)
+                && reconnectCount == _reconnectCount
+                && heartbeat == _heartbeatAddress)
                 return;
 
             try
@@ -387,30 +470,36 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     return;
 
                 row.Host = host;
-                row.Protocol = (int)PlcProtocol.ModbusTcp;
+                row.Protocol = protocol;
                 row.Port = port;
                 row.DataFormat = format;
-                row.Station = _station;
+                row.Station = station;
                 row.PollMs = pollMs;
                 row.ReadTimeoutMs = readTimeout;
                 row.WriteTimeoutMs = writeTimeout;
                 row.ReconnectIntervalMs = reconnectInterval;
                 row.ReconnectCount = reconnectCount;
+                row.HeartbeatAddress = heartbeat;
                 db.Updateable(row).ExecuteCommand();
 
                 lock (_plcLock)
                 {
                     _host = host;
+                    _protocol = protocol;
                     _port = port;
                     _dataFormat = format;
+                    _station = station;
                     _pollMs = pollMs;
                     _readTimeout = readTimeout;
                     _writeTimeout = writeTimeout;
                     _reconnectInterval = reconnectInterval;
                     _reconnectCount = reconnectCount;
+                    _heartbeatAddress = heartbeat;
                     if (connectionChanged)
                         ClosePlcLocked();
                 }
+
+                ApplyHeartbeat();
             }
             catch (Exception ex)
             {
@@ -429,7 +518,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
             out int readTimeout,
             out int writeTimeout,
             out int reconnectInterval,
-            out int reconnectCount)
+            out int reconnectCount,
+            out int station,
+            out int protocol)
         {
             host = PlcIp.Trim();
             if (host.Length == 0)
@@ -457,6 +548,13 @@ namespace MMSP.App.TemplateMatch.ViewModels
             if (!TryReadNumber(PlcReconnectCount, out reconnectCount) || reconnectCount < 0)
                 reconnectCount = _reconnectCount;
 
+            if (!TryReadNumber(PlcStation, out station) || station < 0 || station > 255)
+                station = _station;
+
+            protocol = _protocol;
+            if (PlcLinkProtocols.TryParse(PlcConnectionType, out var parsed))
+                protocol = (int)parsed;
+
             return host.Length > 0
                 && port > 0
                 && readTimeout > 0
@@ -478,12 +576,15 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 新增或更新一个点位。
+        /// 新增或更新一个点位。心跳或状态与另一条重复时返回 false。
         /// </summary>
-        private void StorePoint(PlcPointRow row)
+        private bool StorePoint(PlcPointRow row)
         {
             if (!SqlSugarContext.IsOpen)
-                return;
+            {
+                NotePlc(DeviceLogKind.Timeout, Text("Device_DbClosed"), true);
+                return false;
+            }
 
             try
             {
@@ -502,7 +603,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     if (another is not null)
                     {
                         NotePlc(DeviceLogKind.Timeout, Text("Device_SingletonPoint"), true);
-                        return;
+                        return false;
                     }
                 }
 
@@ -511,10 +612,13 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     db.Insertable(entity).ExecuteCommand();
                 else
                     db.Updateable(entity).ExecuteCommand();
+
+                return true;
             }
             catch (Exception ex)
             {
                 NotePlc(DeviceLogKind.Timeout, ex.Message, true);
+                return false;
             }
         }
 
@@ -825,9 +929,15 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 在后台连接并读取或写入。离开页面后返回空。
+        /// 在后台连接并读取或写入。有 Bit 时先读整字再取位或改位。离开页面后返回空。
         /// </summary>
-        private Task<PlcIoResult?> ExchangePlc(string address, string typeName, string lengthText, string? writeValue)
+        private Task<PlcIoResult?> ExchangePlc(
+            string address,
+            string typeName,
+            string lengthText,
+            string? writeValue,
+            int? bitIndex,
+            bool formatStatus)
         {
             var session = Session;
             if (session == 0)
@@ -859,9 +969,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                     try
                     {
-                        return writeValue is null
-                            ? _plc.Read(address, dataType, length)
-                            : _plc.Write(address, dataType, writeValue);
+                        return ExchangeLocked(_plc, address, dataType, length, writeValue, bitIndex, formatStatus);
                     }
                     catch (Exception ex)
                     {
@@ -869,6 +977,80 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     }
                 }
             });
+        }
+
+        /// <summary>
+        /// 在已经持有 PLC 锁时读写。地址原样交给协议。
+        /// </summary>
+        private static PlcIoResult ExchangeLocked(
+            IPlcClient client,
+            string address,
+            PlcDataType dataType,
+            int length,
+            string? writeValue,
+            int? bitIndex,
+            bool formatStatus)
+        {
+            if (writeValue is null)
+            {
+                var read = client.Read(address, dataType, length);
+                if (!read.IsSuccess || (bitIndex is null && !formatStatus))
+                    return read;
+
+                if (bitIndex is int bit)
+                {
+                    if (!PlcBit.TryRead(read.Value, bit, out var bitValue))
+                        return PlcIoResult.Fail("Bit 无法读取");
+
+                    return PlcIoResult.Ok(bitValue.ToString(CultureInfo.InvariantCulture));
+                }
+
+                return PlcIoResult.Ok(PlcStatusText.Format(read.Value));
+            }
+
+            if (bitIndex is int writeBit)
+            {
+                var read = client.Read(address, dataType, length);
+                if (!read.IsSuccess)
+                    return read;
+
+                if (!PlcBit.TryApply(read.Value, dataType, writeBit, writeValue, out var updated, out var error))
+                    return PlcIoResult.Fail(error);
+
+                return client.Write(address, dataType, updated);
+            }
+
+            return client.Write(address, dataType, writeValue);
+        }
+
+        /// <summary>
+        /// 流程是否占用 PLC。容器里没有执行服务时当作没在跑。
+        /// </summary>
+        private bool FlowIsRunning()
+        {
+            try
+            {
+                if (!IContainerProviderExtensions.IsRegistered<IFlowRunService>(ContainerExt))
+                    return false;
+
+                return ContainerExt.Resolve<IFlowRunService>().IsRunning;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 在界面线程上取语言资源。
+        /// </summary>
+        private static string UiText(string key)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+                return Text(key);
+
+            return dispatcher.Invoke(() => Text(key));
         }
 
         /// <summary>
@@ -945,34 +1127,36 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private PlcIoResult ConnectPlc(int session, CancellationToken token)
         {
+            if (FlowIsRunning())
+            {
+                ClosePlc();
+                return PlcIoResult.Fail(UiText("Device_FlowRunning"));
+            }
+
             lock (_plcLock)
             {
                 if (session != Session || token.IsCancellationRequested)
                     return PlcIoResult.Fail(ReleasedMessage);
 
                 var host = _host;
+                var protocol = _protocol;
                 var port = _port;
                 var format = _dataFormat;
                 var timeout = _readTimeout;
                 var station = _station;
+                var writeTimeout = _writeTimeout;
                 var extra = _reconnectCount;
                 var waitMs = _reconnectInterval;
-                var signature = PlcSignature(host, port, format, timeout, station);
+                var signature = PlcSignature(protocol, host, port, format, timeout, station, writeTimeout);
+                if (!Enum.IsDefined(typeof(PlcProtocol), protocol))
+                    return PlcIoResult.Fail("PLC 协议无效");
+
                 if (_plc is null || _plcSignature != signature)
                 {
                     ClosePlcLocked();
                     try
                     {
-                        _plc = PlcClients.Open(new PlcConnection
-                        {
-                            Protocol = PlcProtocol.ModbusTcp,
-                            Host = host,
-                            Port = port,
-                            Station = ClampStation(station),
-                            DataFormat = format,
-                            ConnectTimeout = timeout,
-                            ReceiveTimeout = timeout
-                        });
+                        _plc = PlcClients.Open(PlcConnections.Create((PlcProtocol)protocol, host, port, station, format, timeout, writeTimeout));
                         _plcSignature = signature;
                     }
                     catch (Exception ex)
@@ -1084,11 +1268,45 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 地址、端口、字节序、读取超时和站号拼成客户端签名。
+        /// 协议、地址、端口、字节序、读取超时、站号和写入超时拼成客户端签名。
         /// </summary>
-        private static string PlcSignature(string host, int port, string format, int timeout, int station)
+        private static string PlcSignature(int protocol, string host, int port, string format, int timeout, int station, int writeTimeout)
         {
-            return host + "\u001f" + port + "\u001f" + format + "\u001f" + timeout + "\u001f" + station;
+            return protocol + "\u001f" + host + "\u001f" + port + "\u001f" + format + "\u001f" + timeout + "\u001f" + station + "\u001f" + writeTimeout;
+        }
+
+        /// <summary>
+        /// 用已保存的连接和心跳地址重启后台心跳。空地址只断开心跳连接。
+        /// </summary>
+        private void ApplyHeartbeat()
+        {
+            int protocol;
+            string host;
+            int port;
+            string format;
+            int station;
+            int timeout;
+            int writeTimeout;
+            int reconnect;
+            string address;
+            lock (_plcLock)
+            {
+                protocol = _protocol;
+                host = _host;
+                port = _port;
+                format = _dataFormat;
+                station = _station;
+                timeout = _readTimeout;
+                writeTimeout = _writeTimeout;
+                reconnect = _reconnectInterval;
+                address = _heartbeatAddress;
+            }
+
+            PlcConnection? connection = null;
+            if (Enum.IsDefined(typeof(PlcProtocol), protocol))
+                connection = PlcConnections.Create((PlcProtocol)protocol, host, port, station, format, timeout, writeTimeout);
+
+            MMSP.Service.Device.Plc.PlcHeartbeat.Shared.Apply(connection, address, reconnect);
         }
 
         /// <summary>

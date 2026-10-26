@@ -1,4 +1,4 @@
-using MMSP.Core.Model.Sys;
+﻿using MMSP.Core.Model.Sys;
 
 namespace MMSP.App.WpfBase.Services
 {
@@ -12,6 +12,7 @@ namespace MMSP.App.WpfBase.Services
         private string _userName = "";
         private UserRole _role;
         private DateTime? _loginTime;
+        private int _timeoutMinutes;
 
         /// <summary>
         /// 登录或注销之后通知。主壳据此重算菜单。
@@ -64,14 +65,24 @@ namespace MMSP.App.WpfBase.Services
         }
 
         /// <summary>
+        /// 这次登录带上的超时分钟数。0 表示不超时。密码不进会话。
+        /// </summary>
+        public int TimeoutMinutes
+        {
+            get => _timeoutMinutes;
+            private set => SetProperty(ref _timeoutMinutes, value);
+        }
+
+        /// <summary>
         /// 记下一次成功登录。密码不进会话。
         /// </summary>
-        public void SignIn(string loginName, string userName, UserRole role, DateTime loginTime)
+        public void SignIn(string loginName, string userName, UserRole role, DateTime loginTime, int timeoutMinutes)
         {
             LoginName = loginName;
             UserName = userName;
             Role = role;
             LoginTime = loginTime;
+            TimeoutMinutes = timeoutMinutes;
             IsLoggedIn = true;
             Changed?.Invoke(this, EventArgs.Empty);
         }
@@ -86,6 +97,7 @@ namespace MMSP.App.WpfBase.Services
             UserName = "";
             Role = UserRole.Admin;
             LoginTime = null;
+            TimeoutMinutes = 0;
             Changed?.Invoke(this, EventArgs.Empty);
         }
     }

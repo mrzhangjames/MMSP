@@ -1,4 +1,4 @@
-using HslCommunication.Core;
+﻿using HslCommunication.Core;
 using HslCommunication.Core.Device;
 using MMSP.Core.Model.Sys;
 
@@ -86,7 +86,15 @@ namespace MMSP.Service.Device.Plc
             if (_device is null || !IsConnected)
                 return PlcIoResult.Fail("尚未连接");
 
-            return PlcValueCodec.Write(_device, address, dataType, value);
+            PlcDeviceSetup.SetReceiveTimeout(_device, Connection.WriteTimeout);
+            try
+            {
+                return PlcValueCodec.Write(_device, address, dataType, value);
+            }
+            finally
+            {
+                PlcDeviceSetup.SetReceiveTimeout(_device, Connection.ReceiveTimeout);
+            }
         }
 
         /// <summary>

@@ -3,9 +3,11 @@ using System.Windows;
 using System.Windows.Threading;
 using MahApps.Metro.IconPacks;
 using MMSP.App.Main.Models;
+using MMSP.App.Main.Services;
 using MMSP.App.WpfBase.Core;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper;
+using MMSP.Common.Helper.Logger;
 using System.ComponentModel;
 using System.Reflection;
 using MMSP.Core.License;
@@ -17,7 +19,7 @@ using MMSP.Service.Flow;
 namespace MMSP.App.Main.ViewModels
 {
     /// <summary>
-    /// 主壳。点击菜单切换内容区页面，底栏保持占位。
+    /// 主壳。点击菜单切换内容区页面。底栏按设备配置显示 PLC 和扫码枪连接状态。
     /// </summary>
     public class MainViewModel : BaseViewModel
     {
@@ -37,7 +39,7 @@ namespace MMSP.App.Main.ViewModels
         private const string ContentRegionName = "MainViewContentRegion";
 
         /// <summary>
-        /// 每秒刷新底栏时间。定时器在界面线程上跑。
+        /// 每秒刷新底栏时间，并检查会话超时。定时器在界面线程上跑。
         /// </summary>
         private readonly DispatcherTimer _clockTimer;
 
@@ -60,6 +62,16 @@ namespace MMSP.App.Main.ViewModels
         /// 正在按服务状态回写运行按钮，避免再次启动或停止。
         /// </summary>
         private bool _applyingRun;
+
+        /// <summary>
+        /// 最近一轮设备读数。语言切换时用它重拼状态文字。
+        /// </summary>
+        private IReadOnlyList<DeviceLinkReading> _deviceReadings = [];
+
+        /// <summary>
+        /// 底栏是否已经有设备。集合个数不会通知界面，所以单独记这一位。
+        /// </summary>
+        private bool _hasDeviceLinks;
 
         /// <summary>
         /// 底栏运行状态。在跑是启动，停稳是停止。
@@ -131,7 +143,10 @@ namespace MMSP.App.Main.ViewModels
             _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _clockTimer.Tick += OnClockTick;
             _clockTimer.Start();
+            DeviceLinks = new ObservableCollection<DeviceLinkItem>();
             AppAppearance.LanguageChanged += OnLanguageChanged;
+            DeviceLinkWatch.Shared.Updated += OnDeviceLinks;
+            DeviceLinkWatch.Shared.Start();
         }
 
         /// <summary>
@@ -164,10 +179,22 @@ namespace MMSP.App.Main.ViewModels
                     return;
                 }
 
-                if (value.State == RunState.Start && !_flowRun.TryStart())
+                if (value.State == RunState.Start)
                 {
-                    RaisePropertyChanged(nameof(SelectedRun));
-                    return;
+                    if (_licenses.IsExpired)
+                    {
+                        LogHelper.FlowError(ReadText(
+                            "License_UseBlocked",
+                            "许可证已过期，当前功能不可用。导入有效许可证后即可恢复。"));
+                        RaisePropertyChanged(nameof(SelectedRun));
+                        return;
+                    }
+
+                    if (!_flowRun.TryStart())
+                    {
+                        RaisePropertyChanged(nameof(SelectedRun));
+                        return;
+                    }
                 }
 
                 if (value.State == RunState.Stop)
@@ -175,6 +202,21 @@ namespace MMSP.App.Main.ViewModels
 
                 SetProperty(ref _selectedRun, value);
             }
+        }
+
+        /// <summary>
+        /// 底栏设备文字。PLC 在前，启用的扫码枪按配置顺序排在后面。第一轮读完之前为空。
+        /// 每一项的连接方式见 <see cref="ShowLinks"/>。
+        /// </summary>
+        public ObservableCollection<DeviceLinkItem> DeviceLinks { get; }
+
+        /// <summary>
+        /// 底栏是否显示设备连接。没有 PLC 行、也没有启用的扫码枪时为 false。
+        /// </summary>
+        public bool HasDeviceLinks
+        {
+            get => _hasDeviceLinks;
+            private set => SetProperty(ref _hasDeviceLinks, value);
         }
 
         /// <summary>
@@ -361,6 +403,7 @@ namespace MMSP.App.Main.ViewModels
                 LoginName = ReadText("Footer_NotLoggedIn", "未登录");
 
             RefreshLicenseStatus();
+            ShowLinks();
             RaisePropertyChanged(nameof(ContentTitle));
         }
 
@@ -493,12 +536,85 @@ namespace MMSP.App.Main.ViewModels
         }
 
         /// <summary>
+        /// 探测线程上的读数。切回界面线程再改底栏。
+        /// </summary>
+        private void OnDeviceLinks(IReadOnlyList<DeviceLinkReading> readings)
+        {
+            var copy = readings.ToArray();
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                ApplyDeviceLinks(copy);
+                return;
+            }
+
+            dispatcher.BeginInvoke(new Action(() => ApplyDeviceLinks(copy)));
+        }
+
+        /// <summary>
+        /// 记下这一轮读数，并按当前语言拼底栏文字。
+        /// </summary>
+        private void ApplyDeviceLinks(IReadOnlyList<DeviceLinkReading> readings)
+        {
+            _deviceReadings = readings;
+            ShowLinks();
+        }
+
+        /// <summary>
+        /// 用最近一轮读数重建设备文字。读数来自 DeviceLinkWatch，这里拼成「名称 已连接」或「名称 未连接」。
+        /// 客户库有 PLC 配置行时，第一项固定写 PLC。后面只排启用的扫码枪，按配置顺序。停用的枪不出现。
+        /// 枪名为空时用地址，地址也为空时写扫码枪。客户库没打开，或这一轮没有设备时，底栏不显示这段。
+        /// 是否连上按下面的顺序判断。设备页或流程里这个客户端已经连着，直接算已连接，不再另开一条连接。
+        /// PLC 配了心跳地址时，看最近一次心跳写入。写入成功是已连接，还没写成功、正在重连或写入失败是未连接。这条不做短连接。
+        /// PLC 没有心跳地址，以及没有被占用的扫码枪，按保存的参数做短连接。Connect 成功就是已连接，连完立刻关掉。扫码枪不发送触发。
+        /// 短连接失败后连续再连，一共 3 次，间隔 200 毫秒。一次成功就停，三次都失败才是未连接。这一轮结束后再等 3 秒看下一轮。
+        /// </summary>
+        private void ShowLinks()
+        {
+            var connected = ReadText("Footer_Connected", "已连接");
+            var disconnected = ReadText("Footer_Disconnected", "未连接");
+            if (_deviceReadings.Count == 0)
+            {
+                HasDeviceLinks = false;
+                DeviceLinks.Clear();
+                return;
+            }
+
+            DeviceLinks.Clear();
+            foreach (var reading in _deviceReadings)
+            {
+                var word = reading.IsConnected ? connected : disconnected;
+                DeviceLinks.Add(new DeviceLinkItem(reading.Name, reading.IsConnected, word));
+            }
+
+            HasDeviceLinks = true;
+        }
+
+        /// <summary>
         /// 把底栏时间改成当前时刻。
         /// </summary>
         private void OnClockTick(object? sender, EventArgs e)
         {
             CurrentTimeText = DateTime.Now.ToString(TimeFormat);
             RefreshLicenseStatus();
+            ExpireSession();
+        }
+
+        /// <summary>
+        /// 会话超时到点就注销。0 不注销。不读流程，也不停流程。
+        /// </summary>
+        private void ExpireSession()
+        {
+            if (!_session.IsLoggedIn || _session.LoginTime is not DateTime loginTime)
+                return;
+
+            if (!UserSessionTimeout.Due(_session.TimeoutMinutes, loginTime, DateTime.Now))
+                return;
+
+            var loginName = _session.LoginName;
+            var role = _session.Role;
+            _session.SignOut();
+            LogHelper.SysInfo($"会话超时 {loginName} 角色={role}");
         }
 
         /// <summary>

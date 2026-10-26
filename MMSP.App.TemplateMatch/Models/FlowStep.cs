@@ -1,4 +1,4 @@
-using MMSP.Core.Model.Sys;
+﻿using MMSP.Core.Model.Sys;
 
 namespace MMSP.App.TemplateMatch.Models
 {
@@ -13,6 +13,10 @@ namespace MMSP.App.TemplateMatch.Models
         private bool _showStem;
         private bool _isSelected;
         private string _cfgValue = "";
+        private int _runKind;
+        private string _runStateText = "";
+        private string _elapsedText = "";
+        private string _runDetail = "";
 
         /// <summary>
         /// 主键。
@@ -81,6 +85,61 @@ namespace MMSP.App.TemplateMatch.Models
         {
             get => _cfgValue;
             set => SetProperty(ref _cfgValue, value);
+        }
+
+        /// <summary>
+        /// 执行状态。0 还没跑，其余和 <c>FlowStepRunState</c> 的数值一致。
+        /// </summary>
+        public int RunKind
+        {
+            get => _runKind;
+            private set => SetProperty(ref _runKind, value);
+        }
+
+        /// <summary>
+        /// 执行状态文字。还没跑时为空。
+        /// </summary>
+        public string RunStateText
+        {
+            get => _runStateText;
+            private set => SetProperty(ref _runStateText, value);
+        }
+
+        /// <summary>
+        /// 耗时。显示在步骤卡片右侧末尾。还在执行或被跳过时为空。
+        /// </summary>
+        public string ElapsedText
+        {
+            get => _elapsedText;
+            private set => SetProperty(ref _elapsedText, value);
+        }
+
+        /// <summary>
+        /// 这一步的结果或失败原因。给状态文字做提示。
+        /// </summary>
+        public string RunDetail
+        {
+            get => _runDetail;
+            private set => SetProperty(ref _runDetail, value);
+        }
+
+        /// <summary>
+        /// 写下这一轮的状态、耗时和结果。
+        /// </summary>
+        public void Mark(int kind, string stateText, string elapsedText, string detail)
+        {
+            RunKind = kind;
+            RunStateText = stateText ?? "";
+            ElapsedText = elapsedText ?? "";
+            RunDetail = detail ?? "";
+        }
+
+        /// <summary>
+        /// 清掉上一轮的状态和耗时。
+        /// </summary>
+        public void ClearRun()
+        {
+            Mark(0, "", "", "");
         }
     }
 }

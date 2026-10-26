@@ -101,11 +101,11 @@ namespace MMSP.App.TemplateMatch.Views
         }
 
         /// <summary>
-        /// 通用工具是枚举里的 0 到 8。
+        /// 通用工具是枚举里的 0 到 9。
         /// </summary>
         private static bool IsGeneral(FlowToolKind kind)
         {
-            return (int)kind <= (int)FlowToolKind.Script;
+            return (int)kind <= (int)FlowToolKind.Uph;
         }
 
         /// <summary>
@@ -187,6 +187,9 @@ namespace MMSP.App.TemplateMatch.Views
 
             if (viewModel is JsonParseToolViewModel json)
                 json.Source = text;
+
+            if (viewModel is UphToolViewModel uph)
+                uph.Variable = text;
         }
 
         /// <summary>
@@ -194,7 +197,7 @@ namespace MMSP.App.TemplateMatch.Views
         /// </summary>
         private void OnToolChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName is not ("Count" or "Scanner" or "Target" or "Result" or "Value" or "ValueMode" or "Source"))
+            if (e.PropertyName is not ("Count" or "Scanner" or "Target" or "Result" or "Value" or "ValueMode" or "Source" or "Variable"))
                 return;
 
             if (Panes.DataContext is ToolIoModel model)

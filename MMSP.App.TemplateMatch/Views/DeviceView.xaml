@@ -1,4 +1,4 @@
-<UserControl x:Class="MMSP.App.TemplateMatch.Views.DeviceView"
+﻿<UserControl x:Class="MMSP.App.TemplateMatch.Views.DeviceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
@@ -515,11 +515,12 @@
                                     </Button>
                                 </StackPanel>
                             </Border>
-                            <!--  区域 PLC 配置。控件：IP、连接类型、端口、数据格式、轮询、读超时、写超时、重连间隔、重连次数。样式 DeviceFieldBox、DeviceFieldCombo。不滚动。  -->
+                            <!--  区域 PLC 配置。控件：IP、连接类型、端口、数据格式、轮询、读超时、写超时、重连间隔、重连次数、心跳地址、站号。样式 DeviceFieldBox、DeviceFieldCombo。不滚动。  -->
                             <Grid Grid.Row="1"
                                   Margin="16,4,16,4"
                                   Visibility="{Binding IsPlcConfigTab, Converter={StaticResource BoolVis}}">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
                                     <RowDefinition Height="*" />
                                     <RowDefinition Height="*" />
                                     <RowDefinition Height="*" />
@@ -566,6 +567,14 @@
                                 <StackPanel Grid.Row="4" Grid.Column="0" VerticalAlignment="Center">
                                     <TextBlock Text="{DynamicResource Device_ReconnectCount}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
                                     <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcReconnectCount, UpdateSourceTrigger=LostFocus}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="4" Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_Heartbeat}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcHeartbeat, UpdateSourceTrigger=LostFocus}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="5" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Device_Station}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" />
+                                    <TextBox Style="{StaticResource DeviceFieldBox}" Text="{Binding PlcStation, UpdateSourceTrigger=LostFocus}" />
                                 </StackPanel>
                             </Grid>
                             <!--  区域 PLC 测试。控件：地址、数据类型、长度、写入值。样式 DeviceFieldBox、DeviceFieldCombo。不滚动。  -->
@@ -740,7 +749,7 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
-                        <!--  控件 PointGrid：点位表。列：勾选、名称、地址、数据类型、长度、读写、启用。样式 DeviceGridRowStyle、DeviceGridCellStyle、DeviceGridHeaderStyle。  -->
+                        <!--  控件 PointGrid：点位表。列：勾选、名称、地址、数据类型、长度、读写、点位类型、Bit、描述、启用。样式 DeviceGridRowStyle、DeviceGridCellStyle、DeviceGridHeaderStyle。  -->
                         <DataGrid x:Name="PointGrid"
                                   Grid.Row="1"
                                   ItemsSource="{Binding Points}"
@@ -802,6 +811,9 @@
                                 <DataGridTextColumn Header="{DynamicResource Device_DataType}" Width="140" Binding="{Binding DataType}" IsReadOnly="True" />
                                 <DataGridTextColumn Header="{DynamicResource Device_Length}" Width="90" Binding="{Binding LengthText}" IsReadOnly="True" />
                                 <DataGridTextColumn Header="{DynamicResource Device_Access}" Width="100" Binding="{Binding AccessText}" IsReadOnly="True" />
+                                <DataGridTextColumn Header="{DynamicResource Device_PointKind}" Width="90" Binding="{Binding KindText}" IsReadOnly="True" />
+                                <DataGridTextColumn Header="{DynamicResource Device_Bit}" Width="64" Binding="{Binding BitText}" IsReadOnly="True" />
+                                <DataGridTextColumn Header="{DynamicResource Device_Description}" Width="160" Binding="{Binding Description}" IsReadOnly="True" />
                                 <DataGridTemplateColumn Header="{DynamicResource Device_On}" Width="100">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -1132,8 +1144,9 @@
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="20,0">
                         <TextBlock Text="{Binding EditorTitle}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
                     </Border>
-                    <StackPanel Grid.Row="1" Margin="24,18,24,8">
-                        <!--  区域 点位编辑。控件：名称、地址、数据类型、长度、读写。样式 DeviceUnderlineBox、DeviceCombo。  -->
+                    <ScrollViewer Grid.Row="1" Margin="24,10,24,0" MaxHeight="460" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,8,0,8">
+                        <!--  区域 点位编辑。控件：名称、地址、数据类型、长度、读写、点位类型、Bit、描述。样式 DeviceUnderlineBox、DeviceCombo。  -->
                         <StackPanel Visibility="{Binding IsPointEditor, Converter={StaticResource BoolVis}}">
                             <TextBlock Text="{DynamicResource Device_PointName}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorName, UpdateSourceTrigger=PropertyChanged}" />
@@ -1145,8 +1158,14 @@
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorLength, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBlock Text="{DynamicResource Device_Access}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding AccessModes}" SelectedItem="{Binding EditorAccess}" />
+                            <TextBlock Text="{DynamicResource Device_PointKind}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
+                            <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding PointKinds}" SelectedItem="{Binding EditorPointKind}" />
+                            <TextBlock Text="{DynamicResource Device_Bit}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
+                            <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorBit, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Text="{DynamicResource Device_Description}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
+                            <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorDescription, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
-                        <!--  区域 扫码枪编辑。控件：名称、传输、IP 或 COM、端口、触发字符串。样式 DeviceUnderlineBox、DeviceCombo。  -->
+                        <!--  区域 扫码枪编辑。控件：名称、传输、IP 或 COM、端口、串口参数、触发字符串。样式 DeviceUnderlineBox、DeviceCombo。  -->
                         <StackPanel Visibility="{Binding IsScannerEditor, Converter={StaticResource BoolVis}}">
                             <TextBlock Text="{DynamicResource Device_ScannerName}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,0,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorName, UpdateSourceTrigger=PropertyChanged}" />
@@ -1169,6 +1188,16 @@
                                 <TextBlock Text="{DynamicResource Device_Port}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                                 <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorPort, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
+                            <StackPanel Visibility="{Binding IsEditorSerial, Converter={StaticResource BoolVis}}">
+                                <TextBlock Text="{DynamicResource Device_Baud}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
+                                <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorBaud, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="{DynamicResource Device_Parity}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
+                                <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding ParityChoices}" SelectedItem="{Binding EditorParity}" />
+                                <TextBlock Text="{DynamicResource Device_DataBits}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
+                                <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding DataBitChoices}" SelectedItem="{Binding EditorDataBits}" />
+                                <TextBlock Text="{DynamicResource Device_StopBits}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
+                                <ComboBox Style="{StaticResource DeviceCombo}" ItemsSource="{Binding StopBitChoices}" SelectedItem="{Binding EditorStopBits}" />
+                            </StackPanel>
                             <TextBlock Text="{DynamicResource Device_TriggerText}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
                             <TextBox Style="{StaticResource DeviceUnderlineBox}" Text="{Binding EditorTrigger, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
@@ -1179,6 +1208,7 @@
                                   Foreground="{DynamicResource HighestBlack}" />
                         <TextBlock Text="{Binding EditorError}" Margin="0,10,0,0" Foreground="#CE3D3A" FontSize="12" />
                     </StackPanel>
+                    </ScrollViewer>
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,16,0">
                         <Button Style="{StaticResource DeviceToolButtonStyle}"
                                 Margin="0,0,8,0"

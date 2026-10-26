@@ -41,8 +41,8 @@ namespace MMSP.Service.Flow.Tests
             Assert.Equal(1, failed.Calls);
             Assert.Equal(0, skipped.Calls);
             Assert.Equal(1, next.Calls);
-            Assert.Equal(new[] { "甲 1 一步 a", "乙 1 四步 c" }, infos);
-            Assert.Equal(new[] { "甲 2 二步 断了" }, errors);
+            FlowLogAssert.Lines(new[] { "甲 1 一步 a", "乙 1 四步 c" }, infos);
+            FlowLogAssert.Lines(new[] { "甲 2 二步 断了" }, errors);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace MMSP.Service.Flow.Tests
             FlowCycle.Execute(flows, Context(), infos.Add, errors.Add);
 
             Assert.Empty(infos);
-            Assert.Equal("甲 2 二步 断了", errors[0]);
+            FlowLogAssert.Line("甲 2 二步 断了", errors[0]);
         }
 
         /// <summary>
@@ -104,8 +104,40 @@ namespace MMSP.Service.Flow.Tests
         [Fact]
         public void LogText_JoinsParts()
         {
-            Assert.Equal("甲 2 扫码 BC", FlowLogText.Format("甲", 2, "扫码", "BC"));
-            Assert.Equal("甲 2 扫码", FlowLogText.Format(" 甲 ", 2, " 扫码 ", " "));
+            Assert.Equal("甲 2 扫码 15 ms BC", FlowLogText.Format("甲", 2, "扫码", 15, "BC"));
+            Assert.Equal("甲 2 扫码 0 ms", FlowLogText.Format(" 甲 ", 2, " 扫码 ", 0, " "));
+        }
+
+        /// <summary>
+        /// 每步先报执行中，结束后带耗时和结果。失败后面的步骤标成跳过。
+        /// </summary>
+        [Fact]
+        public void Progress_ReportsStateAndElapsed_SkipsRest()
+        {
+            var flows = new[]
+            {
+                new RunnableFlow("甲", true, new[]
+                {
+                    new RunnableStep(1, "一步", new FixedTool(FlowStepResult.Ok("条码"))),
+                    new RunnableStep(2, "二步", new FixedTool(FlowStepResult.Fail("断了"))),
+                    new RunnableStep(3, "三步", new FixedTool(FlowStepResult.Ok("不会跑")))
+                })
+            };
+            var infos = new List<string>();
+            var errors = new List<string>();
+            var marks = new List<FlowStepProgress>();
+
+            FlowCycle.Execute(flows, Context(), infos.Add, errors.Add, progress: marks.Add);
+
+            Assert.Equal(
+                new[] { FlowStepRunState.Running, FlowStepRunState.Ok, FlowStepRunState.Running, FlowStepRunState.Failed, FlowStepRunState.Skipped },
+                marks.Select(item => item.State).ToArray());
+            Assert.Equal("条码", marks[1].Detail);
+            Assert.Equal("断了", marks[3].Detail);
+            Assert.Equal(3, marks[4].SortIndex);
+            FlowLogAssert.Line("甲 1 一步 条码", infos[0]);
+            FlowLogAssert.Line("甲 2 二步 断了", errors[0]);
+            Assert.Contains(marks[1].ElapsedMs.ToString(System.Globalization.CultureInfo.InvariantCulture) + " ms", infos[0]);
         }
 
         /// <summary>

@@ -19,6 +19,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void OpenAdd()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             EditName(null, "", "");
         }
 
@@ -27,6 +30,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void OpenEdit(FlowCard? card)
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             card ??= SelectedFlow;
             if (card is null)
                 return;
@@ -107,6 +113,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private async void OpenVars(FlowCard? card)
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             card ??= SelectedFlow;
             if (card is null || !SqlSugarContext.IsOpen)
                 return;
@@ -214,6 +223,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private async void Delete()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             var card = SelectedFlow;
             if (card is null || !SqlSugarContext.IsOpen)
                 return;

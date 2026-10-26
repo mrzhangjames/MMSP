@@ -32,7 +32,7 @@ namespace MMSP.Core.Model.DB
         public string? LoginName { get; set; }
 
         /// <summary>
-        /// 密码
+        /// 口令哈希，格式 pbkdf2$迭代$盐$哈希。不存明文。
         /// </summary>
         [SugarColumn(ColumnName = "password")]
         public string? Password { get; set; }
@@ -50,7 +50,7 @@ namespace MMSP.Core.Model.DB
         public bool IsValid { get; set; }
 
         /// <summary>
-        /// TODO:会话超时时间（分钟），0：表示不超时
+        /// 会话超时（分钟）。保存写 0，表示不超时。非 0 到点注销，与流程无关。
         /// </summary>
         [SugarColumn(ColumnName = "session_timeout")]
         public int SessionTimeout { get; set; }

@@ -13,7 +13,7 @@ namespace MMSP.Service.Flow.Tests
     public class FlowToolTests
     {
         /// <summary>
-        /// 十种已知工具都能从登记表创建出来。
+        /// 十一种已知工具都能从登记表创建出来。
         /// </summary>
         [Fact]
         public void Catalog_CreatesEachKind()
@@ -27,6 +27,7 @@ namespace MMSP.Service.Flow.Tests
             Assert.IsType<JsonParseFlowTool>(FlowToolCatalog.Create(FlowToolKind.JsonParse, ""));
             Assert.IsType<ConditionFlowTool>(FlowToolCatalog.Create(FlowToolKind.Condition, ""));
             Assert.IsType<ScriptFlowTool>(FlowToolCatalog.Create(FlowToolKind.Script, ""));
+            Assert.IsType<UphFlowTool>(FlowToolCatalog.Create(FlowToolKind.Uph, ""));
             Assert.IsType<LuxAlarmLogFlowTool>(FlowToolCatalog.Create(FlowToolKind.Lux_AlarmLogTool, ""));
         }
 
@@ -382,19 +383,6 @@ namespace MMSP.Service.Flow.Tests
             Assert.Contains("进站报文", names);
             Assert.Contains("解析值", names);
             Assert.Equal(["解析值"], ToolVars.OutputNames(FlowToolKind.JsonParse, cfg).ToArray());
-        }
-
-        /// <summary>
-        /// Json 和条件这一期都直接失败。
-        /// </summary>
-        [Theory]
-        [InlineData(FlowToolKind.JsonParse)]
-        [InlineData(FlowToolKind.Condition)]
-        public void Unimplemented_Fails(FlowToolKind kind)
-        {
-            var result = FlowToolCatalog.Create(kind, """{"Name":"x"}""").Execute(Context());
-            Assert.Equal(FlowStepStatus.Failed, result.Status);
-            Assert.Equal("未实现", result.Text);
         }
 
         /// <summary>

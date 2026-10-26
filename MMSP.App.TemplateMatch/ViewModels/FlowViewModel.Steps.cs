@@ -21,7 +21,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         public void DragOver(IDropInfo dropInfo)
         {
-            if (SelectedFlow is null)
+            if (LicenseGate.IsExpired(ContainerExt) || SelectedFlow is null)
             {
                 dropInfo.Effects = DragDropEffects.None;
                 return;
@@ -49,7 +49,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         public void Drop(IDropInfo dropInfo)
         {
-            if (SelectedFlow is null)
+            if (LicenseGate.Block(ContainerExt) || SelectedFlow is null)
                 return;
 
             if (DraggedTool(dropInfo) is FlowTool tool)
@@ -111,7 +111,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private async void ShowProperty(FlowStep? step)
         {
-            if (step is null)
+            if (LicenseGate.Block(ContainerExt) || step is null)
                 return;
 
             SelectStep(step);
@@ -185,6 +185,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private async void DeleteStep(FlowStep? step)
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             var flow = SelectedFlow;
             if (flow is null || step is null || !flow.Steps.Contains(step))
                 return;

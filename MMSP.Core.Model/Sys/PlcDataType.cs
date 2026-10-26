@@ -35,6 +35,12 @@ namespace MMSP.Core.Model.Sys
         /// 16 位无符号整数。
         /// </summary>
         [Description("UInt16")]
-        UInt16 = 4
+        UInt16 = 4,
+
+        /// <summary>
+        /// 16 位无符号整数数组。常用 6 元表示年/月/日/时/分/秒。
+        /// </summary>
+        [Description("UInt16Array")]
+        UInt16Array = 5
     }
 }

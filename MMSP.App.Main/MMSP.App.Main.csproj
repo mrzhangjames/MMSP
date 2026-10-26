@@ -6,10 +6,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <!-- 程序图标 Resources\app.ico。写入 exe，任务栏和资源管理器使用。 -->
+    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
     <!-- 版本前三位在 ProductVersion.cs 手写。关闭确定性编译，编译器才能展开最后一位。 -->
     <Deterministic>false</Deterministic>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 窗口 Icon 读取这份资源。与 ApplicationIcon 是同一文件。 -->
+    <Resource Include="Resources\app.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MahApps.Metro" Version="2.4.11" />

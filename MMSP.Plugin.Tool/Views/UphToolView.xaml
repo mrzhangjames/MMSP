@@ -1,0 +1,40 @@
+<UserControl x:Class="MMSP.Plugin.Tool.Views.UphToolView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource CardBackground}"
+             FontFamily="Segoe UI, Microsoft YaHei"
+             FontSize="14"
+             Foreground="{DynamicResource HighestBlack}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--  字典 工具表单 ToolForm。样式 ToolLabel、ToolBox、ToolCombo。  -->
+                <ResourceDictionary Source="pack://application:,,,/MMSP.Plugin.Tool;component/Themes/ToolForm.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <!--  区域 UPH。控件：名称 Name、判定 Variable、类型 ValueType。样式 ToolLabel、ToolBox、ToolCombo。  -->
+    <StackPanel Margin="16">
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="判定" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     IsReadOnly="True"
+                     Text="{Binding Variable, Mode=OneWay}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="类型" Style="{StaticResource ToolLabel}" />
+            <ComboBox Style="{StaticResource ToolCombo}"
+                      ItemsSource="{Binding ValueTypes}"
+                      SelectedItem="{Binding ValueType}" />
+            <TextBlock Margin="0,8,0,0"
+                       FontSize="12"
+                       Foreground="#888888"
+                       Text="true、1 为 OK。false、0 为 NG。" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

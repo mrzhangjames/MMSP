@@ -36,6 +36,7 @@ namespace MMSP.Plugin.Tool
                 FlowToolKind.JsonParse => Load(new JsonParseToolView(), Read<JsonParseToolEntity>(cfg), names, choices),
                 FlowToolKind.Condition => Load(new ConditionToolView(), Read<ConditionToolEntity>(cfg), names, choices),
                 FlowToolKind.Script => Load(new ScriptToolView(), Read<ScriptToolEntity>(cfg), names, choices),
+                FlowToolKind.Uph => Load(new UphToolView(), Read<UphToolEntity>(cfg), names, choices),
                 _ => new UserControl()
             };
         }
@@ -67,6 +68,7 @@ namespace MMSP.Plugin.Tool
                 FlowToolKind.JsonParse => Join(Read<JsonParseToolEntity>(cfg).Source, Read<JsonParseToolEntity>(cfg).JsonPath, Read<JsonParseToolEntity>(cfg).Target),
                 FlowToolKind.Condition => Read<ConditionToolEntity>(cfg).Expression.Trim(),
                 FlowToolKind.Script => Short(Read<ScriptToolEntity>(cfg).Script),
+                FlowToolKind.Uph => UphText(Read<UphToolEntity>(cfg)),
                 FlowToolKind.Lux_AlarmLogTool => AlarmText(Read<LuxAlarmLogToolEntity>(cfg)),
                 _ => ""
             };
@@ -116,6 +118,9 @@ namespace MMSP.Plugin.Tool
                 case ScriptToolView script when tool is ScriptToolEntity value:
                     script.Load(value);
                     break;
+                case UphToolView uph when tool is UphToolEntity value:
+                    uph.Load(value);
+                    break;
             }
 
             return view;
@@ -156,6 +161,7 @@ namespace MMSP.Plugin.Tool
                 FlowToolKind.JsonParse => Read<JsonParseToolEntity>(cfg).Name,
                 FlowToolKind.Condition => Read<ConditionToolEntity>(cfg).Name,
                 FlowToolKind.Script => Read<ScriptToolEntity>(cfg).Name,
+                FlowToolKind.Uph => Read<UphToolEntity>(cfg).Name,
                 FlowToolKind.Lux_AlarmLogTool => Read<LuxAlarmLogToolEntity>(cfg).Name,
                 _ => ""
             };
@@ -210,6 +216,15 @@ namespace MMSP.Plugin.Tool
             var interval = tool.Interval > 0 ? "间隔 " + tool.Interval : "";
             var resetValue = tool.Reset && !string.IsNullOrWhiteSpace(tool.ResetValue) ? "重置值 " + tool.ResetValue.Trim() : "";
             return Join(tool.Address, tool.DataType.ToString(), expect, reset, interval, resetValue);
+        }
+
+        /// <summary>
+        /// UPH 说明。类型缺省显示 bool。
+        /// </summary>
+        private static string UphText(UphToolEntity tool)
+        {
+            var type = tool.ValueType == "int" ? "int" : "bool";
+            return Join(tool.Variable, type);
         }
 
         /// <summary>

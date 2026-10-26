@@ -666,6 +666,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private async void Delete()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             if (_selectedChart is null || !SqlSugarContext.IsOpen)
                 return;
 
@@ -685,6 +688,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void SaveEditor()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             if (!TrySave(out var name, out var id, out var created))
                 return;
 

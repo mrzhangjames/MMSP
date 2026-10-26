@@ -23,6 +23,8 @@
     <sys:String x:Key="Footer_LicenseExpiring">{0}到期</sys:String>
     <sys:String x:Key="Footer_LicenseExpired">授权到期</sys:String>
     <sys:String x:Key="Footer_DeviceConnected">设备 已连接</sys:String>
+    <sys:String x:Key="Footer_Connected">已连接</sys:String>
+    <sys:String x:Key="Footer_Disconnected">未连接</sys:String>
     <sys:String x:Key="Footer_LoginUser">登录人</sys:String>
     <sys:String x:Key="Footer_Time">时间</sys:String>
     <sys:String x:Key="Footer_Run">运行</sys:String>
@@ -92,6 +94,7 @@
     <sys:String x:Key="Device_WriteTimeout">写入超时</sys:String>
     <sys:String x:Key="Device_ReconnectInterval">重连间隔</sys:String>
     <sys:String x:Key="Device_ReconnectCount">重连次数</sys:String>
+    <sys:String x:Key="Device_Heartbeat">心跳地址</sys:String>
     <sys:String x:Key="Device_PointName">点位名称</sys:String>
     <sys:String x:Key="Device_Address">地址</sys:String>
     <sys:String x:Key="Device_DataType">数据类型</sys:String>
@@ -144,6 +147,24 @@
     <sys:String x:Key="Device_PointFile">点位配置</sys:String>
     <sys:String x:Key="Device_ImportFailed">点位文件格式不正确</sys:String>
     <sys:String x:Key="Device_ExportFailed">点位文件无法保存</sys:String>
+    <sys:String x:Key="Device_Station">站号</sys:String>
+    <sys:String x:Key="Device_PointKind">点位类型</sys:String>
+    <sys:String x:Key="Device_Bit">Bit</sys:String>
+    <sys:String x:Key="Device_Description">描述</sys:String>
+    <sys:String x:Key="Device_NeedBit">请填写 Bit</sys:String>
+    <sys:String x:Key="Device_Baud">波特率</sys:String>
+    <sys:String x:Key="Device_Parity">校验</sys:String>
+    <sys:String x:Key="Device_DataBits">数据位</sys:String>
+    <sys:String x:Key="Device_StopBits">停止位</sys:String>
+    <sys:String x:Key="Device_NeedBaud">请填写波特率</sys:String>
+    <sys:String x:Key="Device_FlowRunning">流程正在运行</sys:String>
+    <sys:String x:Key="Device_KindFlow">流程</sys:String>
+    <sys:String x:Key="Device_KindMonitor">监控</sys:String>
+    <sys:String x:Key="Device_KindHeartbeat">心跳</sys:String>
+    <sys:String x:Key="Device_KindStatus">状态</sys:String>
+    <sys:String x:Key="Device_NeedKind">请选择点位类型</sys:String>
+    <sys:String x:Key="Device_BadBit">Bit 不正确</sys:String>
+    <sys:String x:Key="Device_BadSerial">串口参数不正确</sys:String>
 
     <sys:String x:Key="Chart_Line">折线图</sys:String>
     <sys:String x:Key="Chart_Column">柱状图</sys:String>
@@ -221,6 +242,8 @@
     <sys:String x:Key="License_MachineMismatch">许可证与本机不匹配。</sys:String>
     <sys:String x:Key="License_NotYetValid">许可证尚未生效。</sys:String>
     <sys:String x:Key="License_Expired">许可证已过期。插件不会加载。</sys:String>
+    <sys:String x:Key="License_UseBlockedTitle">许可证</sys:String>
+    <sys:String x:Key="License_UseBlocked">许可证已过期，当前功能不可用。导入有效许可证后即可恢复。</sys:String>
     <sys:String x:Key="License_ClockRollback">检测到系统时钟回拨。</sys:String>
     <sys:String x:Key="License_MachineUnreadable">无法读取本机标识。</sys:String>
     <sys:String x:Key="License_ToleranceInvalid">时钟容差无效。</sys:String>
@@ -247,6 +270,7 @@
     <sys:String x:Key="Flow_Add">新增</sys:String>
     <sys:String x:Key="Flow_Delete">删除</sys:String>
     <sys:String x:Key="Flow_Run">执行</sys:String>
+    <sys:String x:Key="Flow_RunStep">单步执行</sys:String>
     <sys:String x:Key="Flow_Copy">复制</sys:String>
     <sys:String x:Key="Flow_Export">导出</sys:String>
     <sys:String x:Key="Flow_Import">导入</sys:String>
@@ -281,4 +305,14 @@
     <sys:String x:Key="Flow_VarType">数据类型</sys:String>
     <sys:String x:Key="Flow_VarInitial">初始值</sys:String>
     <sys:String x:Key="Flow_ToolUnavailable">当前客户未加载此工具</sys:String>
+    <sys:String x:Key="Flow_ImportTitle">导入流程</sys:String>
+    <sys:String x:Key="Flow_ImportMessage">将替换全部流程配置。是否继续？</sys:String>
+    <sys:String x:Key="Flow_ImportFailed">导入失败</sys:String>
+    <sys:String x:Key="Flow_ExportFailed">导出失败</sys:String>
+    <sys:String x:Key="Flow_RunRunning">执行中</sys:String>
+    <sys:String x:Key="Flow_RunOk">成功</sys:String>
+    <sys:String x:Key="Flow_RunFailed">失败</sys:String>
+    <sys:String x:Key="Flow_RunSkipped">跳过</sys:String>
+    <sys:String x:Key="Flow_RunCancelled">已取消</sys:String>
+    <sys:String x:Key="Flow_CopyFailed">复制失败</sys:String>
 </ResourceDictionary>

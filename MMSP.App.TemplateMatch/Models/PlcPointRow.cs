@@ -1,3 +1,4 @@
+﻿using System.Globalization;
 using MMSP.Core.Model.Sys;
 
 namespace MMSP.App.TemplateMatch.Models
@@ -19,6 +20,10 @@ namespace MMSP.App.TemplateMatch.Models
         private string _valueDetail = "";
         private string _enabledOn = "";
         private string _enabledOff = "";
+        private PlcPointKind _pointKind = PlcPointKind.Flow;
+        private int? _bitIndex;
+        private string _description = "";
+        private string _kindText = "";
 
         /// <summary>
         /// 行标识。和 biz_plc_points 主键相同。当前值和勾选不入库。
@@ -80,19 +85,49 @@ namespace MMSP.App.TemplateMatch.Models
         }
 
         /// <summary>
-        /// 点位类型。新行默认流程。心跳和状态各只保留一条。界面暂不编辑。
+        /// 点位类型。新行默认流程。心跳和状态各只保留一条。
         /// </summary>
-        public PlcPointKind PointKind { get; set; } = PlcPointKind.Flow;
+        public PlcPointKind PointKind
+        {
+            get => _pointKind;
+            set => SetProperty(ref _pointKind, value);
+        }
 
         /// <summary>
-        /// Bit 位。空表示整字。界面暂不编辑。
+        /// 点位类型的显示文字。
         /// </summary>
-        public int? BitIndex { get; set; }
+        public string KindText
+        {
+            get => _kindText;
+            set => SetProperty(ref _kindText, value);
+        }
 
         /// <summary>
-        /// 点位描述。界面暂不编辑。
+        /// Bit 位。空表示整字。
         /// </summary>
-        public string Description { get; set; } = "";
+        public int? BitIndex
+        {
+            get => _bitIndex;
+            set
+            {
+                if (SetProperty(ref _bitIndex, value))
+                    RaisePropertyChanged(nameof(BitText));
+            }
+        }
+
+        /// <summary>
+        /// Bit 位文字。整字时为空。
+        /// </summary>
+        public string BitText => BitIndex is null ? "" : BitIndex.Value.ToString(CultureInfo.InvariantCulture);
+
+        /// <summary>
+        /// 点位描述。
+        /// </summary>
+        public string Description
+        {
+            get => _description;
+            set => SetProperty(ref _description, value);
+        }
 
         /// <summary>
         /// 是否启用。

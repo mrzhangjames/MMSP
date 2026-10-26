@@ -26,7 +26,7 @@ namespace MMSP.Service.Flow.Tests
             var cancelled = Run(new[] { Flow("甲", tool) }, devices, _ => { }, errors.Add);
 
             Assert.False(cancelled);
-            Assert.Equal(new[] { "甲 1 一步 断了", "甲 1 一步 换了" }, errors);
+            FlowLogAssert.Lines(new[] { "甲 1 一步 断了", "甲 1 一步 换了" }, errors);
             Assert.Equal(new[] { FlowRunLoop.RoundIntervalMs, FlowRunLoop.RoundIntervalMs, FlowRunLoop.RoundIntervalMs }, devices.Waits);
             Assert.Equal(3, tool.Calls);
         }
@@ -49,8 +49,8 @@ namespace MMSP.Service.Flow.Tests
 
             Run(new[] { Flow("甲", true, tool) }, devices, infos.Add, errors.Add);
 
-            Assert.Equal(new[] { "甲 1 一步 好" }, infos);
-            Assert.Equal(new[] { "甲 1 一步 断了", "甲 1 一步 断了" }, errors);
+            FlowLogAssert.Lines(new[] { "甲 1 一步 好" }, infos);
+            FlowLogAssert.Lines(new[] { "甲 1 一步 断了", "甲 1 一步 断了" }, errors);
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace MMSP.Service.Flow.Tests
                 cts.Token);
 
             Assert.True(goodCalls >= 1);
-            Assert.Equal(new[] { "甲 1 一步 断了" }, errors);
+            FlowLogAssert.Lines(new[] { "甲 1 一步 断了" }, errors);
         }
 
         /// <summary>

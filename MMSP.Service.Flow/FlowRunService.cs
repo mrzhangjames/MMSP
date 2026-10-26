@@ -7,6 +7,7 @@ namespace MMSP.Service.Flow
 {
     /// <summary>
     /// 流程执行。启动时抄下启用流程，每条流程单独在后台循环，直到停止。
+    /// 页面上的执行只跑选中的一条，单步执行只跑右键的那一步。跑完即停，并按步通知状态和耗时。
     /// </summary>
     public sealed class FlowRunService : IFlowRunService
     {
@@ -145,6 +146,65 @@ namespace MMSP.Service.Flow
         }
 
         /// <summary>
+        /// 单次执行一条流程。已经在跑或库没打开时返回 false。完成后任务结束。
+        /// </summary>
+        public Task<bool> RunOnceAsync(Guid flowId, IProgress<FlowStepProgress>? progress)
+        {
+            return StartPass((token, started, runId) => RunOnce(flowId, token, started, runId, progress, null));
+        }
+
+        /// <summary>
+        /// 只执行一步。和单次执行共用空闲门闩，壳上的循环也占着这道门。
+        /// </summary>
+        public Task<bool> RunStepAsync(Guid flowId, Guid stepId, IProgress<FlowStepProgress>? progress)
+        {
+            return StartPass((token, started, runId) => RunOnce(flowId, token, started, runId, progress, stepId));
+        }
+
+        /// <summary>
+        /// 接受一轮单次执行并在后台跑完。已经在跑或库没打开时返回 false。
+        /// </summary>
+        private Task<bool> StartPass(Func<CancellationToken, ManualResetEventSlim, int, bool> body)
+        {
+            if (!SqlSugarContext.IsOpen)
+            {
+                LogHelper.FlowError("客户库未打开");
+                return Task.FromResult(false);
+            }
+
+            ManualResetEventSlim? started = null;
+            Task<bool>? task = null;
+            lock (_gate)
+            {
+                if (_state == RunPhase.Idle)
+                {
+                    _cts = new CancellationTokenSource();
+                    var token = _cts.Token;
+                    started = new ManualResetEventSlim(false);
+                    _runId++;
+                    var runId = _runId;
+                    _state = RunPhase.Running;
+                    var gate = started;
+                    task = Task.Factory.StartNew(
+                        () => body(token, gate, runId),
+                        CancellationToken.None,
+                        TaskCreationOptions.LongRunning,
+                        TaskScheduler.Default);
+                }
+            }
+
+            if (task is null || started is null)
+            {
+                LogHelper.FlowError("流程正在运行");
+                return Task.FromResult(false);
+            }
+
+            Notify(true);
+            started.Set();
+            return task;
+        }
+
+        /// <summary>
         /// 后台循环。启动等待放行后才读快照，避免停止通知早于启动通知。
         /// </summary>
         private void Run(CancellationToken token, ManualResetEventSlim started, int runId)
@@ -188,52 +248,141 @@ namespace MMSP.Service.Flow
             }
             finally
             {
-                var cancelled = token.IsCancellationRequested;
-                if (session is not null)
-                {
-                    try
-                    {
-                        session.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.FlowError("释放设备连接失败", ex);
-                    }
-                }
+                Release(runId, token, session, started);
+            }
+        }
 
-                var notifyStop = false;
-                lock (_gate)
-                {
-                    if (_runId == runId)
-                    {
-                        _state = RunPhase.Idle;
-                        _cts?.Dispose();
-                        _cts = null;
-                        notifyStop = true;
-                    }
-                }
-
-                if (notifyStop)
-                {
-                    lock (_gate)
-                        notifyStop = _runId == runId && _state == RunPhase.Idle;
-                }
-
+        /// <summary>
+        /// 单次执行。启动等待放行后才读这一条，避免停止通知早于开始通知。
+        /// </summary>
+        private bool RunOnce(
+            Guid flowId,
+            CancellationToken token,
+            ManualResetEventSlim started,
+            int runId,
+            IProgress<FlowStepProgress>? progress,
+            Guid? stepId)
+        {
+            FlowDeviceSession? session = null;
+            try
+            {
                 try
                 {
-                    started.Dispose();
+                    started.Wait(token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return false;
+                }
+
+                if (token.IsCancellationRequested)
+                    return false;
+
+                var flow = LoadOne(flowId);
+                if (flow is null)
+                {
+                    LogHelper.FlowError("流程不存在");
+                    return false;
+                }
+
+                if (stepId is Guid only)
+                {
+                    var step = flow.Steps.FirstOrDefault(item => item.Id == only);
+                    if (step is null)
+                    {
+                        LogHelper.FlowError("步骤不存在");
+                        return false;
+                    }
+
+                    LogHelper.FlowInfo($"执行步骤 {flow.Name.Trim()} {step.Title.Trim()}");
+                    flow = new RunnableFlow(flow.Name, flow.LogOutput, new[] { step }, flow.Variables);
+                }
+                else
+                {
+                    LogHelper.FlowInfo($"执行流程 {flow.Name.Trim()}");
+                }
+
+                if (token.IsCancellationRequested)
+                    return false;
+
+                session = new FlowDeviceSession(LoadLink(), LoadScanners());
+                var local = new FlowStepContext(token, session, FlowVariables.FromSeeds(flow.Variables));
+                var stop = FlowCycle.Execute(
+                    new[] { flow },
+                    local,
+                    LogHelper.FlowInfo,
+                    message => LogHelper.FlowError(message),
+                    progress: progress is null ? null : progress.Report);
+                if (stop == FlowCycleStop.Empty)
+                    LogHelper.FlowError("没有可执行的步骤");
+
+                return !token.IsCancellationRequested;
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.FlowError("流程执行失败", ex);
+                return false;
+            }
+            finally
+            {
+                Release(runId, token, session, started);
+            }
+        }
+
+        /// <summary>
+        /// 释放这一轮的连接和取消源，并在仍是这一轮时通知界面已停止。
+        /// </summary>
+        private void Release(int runId, CancellationToken token, FlowDeviceSession? session, ManualResetEventSlim started)
+        {
+            var cancelled = token.IsCancellationRequested;
+            if (session is not null)
+            {
+                try
+                {
+                    session.Dispose();
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.FlowError("释放启动等待失败", ex);
+                    LogHelper.FlowError("释放设备连接失败", ex);
                 }
-
-                if (cancelled)
-                    LogHelper.FlowInfo("流程停止");
-
-                if (notifyStop)
-                    Notify(false);
             }
+
+            var notifyStop = false;
+            lock (_gate)
+            {
+                if (_runId == runId)
+                {
+                    _state = RunPhase.Idle;
+                    _cts?.Dispose();
+                    _cts = null;
+                    notifyStop = true;
+                }
+            }
+
+            if (notifyStop)
+            {
+                lock (_gate)
+                    notifyStop = _runId == runId && _state == RunPhase.Idle;
+            }
+
+            try
+            {
+                started.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.FlowError("释放启动等待失败", ex);
+            }
+
+            if (cancelled)
+                LogHelper.FlowInfo("流程停止");
+
+            if (notifyStop)
+                Notify(false);
         }
 
         /// <summary>
@@ -252,41 +401,68 @@ namespace MMSP.Service.Flow
             var variables = db.Queryable<FlowVarEntity>()
                 .OrderBy(item => item.SortIndex)
                 .ToList();
-            var varsByFlow = variables
-                .GroupBy(item => item.FlowId)
-                .ToDictionary(
-                    group => group.Key,
-                    group => (IReadOnlyList<(string Name, string Value)>)group
-                        .OrderBy(item => item.SortIndex)
-                        .Select(item => (item.Name ?? "", item.InitialValue ?? ""))
-                        .ToList());
             var stepsByFlow = steps
                 .GroupBy(item => item.FlowId)
-                .ToDictionary(
-                    group => group.Key,
-                    group => group.OrderBy(item => item.SortIndex).ToList());
+                .ToDictionary(group => group.Key, group => group.ToList());
+            var varsByFlow = variables
+                .GroupBy(item => item.FlowId)
+                .ToDictionary(group => group.Key, group => group.ToList());
 
             var result = new List<RunnableFlow>(flows.Count);
             foreach (var flow in flows)
             {
                 stepsByFlow.TryGetValue(flow.Id, out var owned);
-                var runnableSteps = new List<RunnableStep>();
-                if (owned is not null)
-                {
-                    foreach (var step in owned)
-                    {
-                        runnableSteps.Add(new RunnableStep(
-                            step.SortIndex,
-                            step.Title ?? "",
-                            FlowToolCatalog.Create(step.ToolKind, step.CfgValue ?? "")));
-                    }
-                }
-
                 varsByFlow.TryGetValue(flow.Id, out var seeds);
-                result.Add(new RunnableFlow(flow.Name ?? "", flow.LogOutput, runnableSteps, seeds));
+                result.Add(ToRunnable(flow, owned ?? [], seeds ?? []));
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 抄下一条流程，不论是否启用。没有这一行时返回空。
+        /// </summary>
+        private static RunnableFlow? LoadOne(Guid flowId)
+        {
+            var db = SqlSugarContext.CustomerDb;
+            var flow = db.Queryable<FlowEntity>().Where(item => item.Id == flowId).ToList().FirstOrDefault();
+            if (flow is null)
+                return null;
+
+            var steps = db.Queryable<FlowStepEntity>()
+                .Where(item => item.FlowId == flowId)
+                .OrderBy(item => item.SortIndex)
+                .ToList();
+            var variables = db.Queryable<FlowVarEntity>()
+                .Where(item => item.FlowId == flowId)
+                .OrderBy(item => item.SortIndex)
+                .ToList();
+            return ToRunnable(flow, steps, variables);
+        }
+
+        /// <summary>
+        /// 把库里的一条流程收成一轮快照。步骤和变量按顺序号排列。
+        /// </summary>
+        private static RunnableFlow ToRunnable(
+            FlowEntity flow,
+            IReadOnlyList<FlowStepEntity> steps,
+            IReadOnlyList<FlowVarEntity> variables)
+        {
+            var runnableSteps = new List<RunnableStep>(steps.Count);
+            foreach (var step in steps.OrderBy(item => item.SortIndex))
+            {
+                runnableSteps.Add(new RunnableStep(
+                    step.SortIndex,
+                    step.Title ?? "",
+                    FlowToolCatalog.Create(step.ToolKind, step.CfgValue ?? ""),
+                    step.Id));
+            }
+
+            var seeds = variables
+                .OrderBy(item => item.SortIndex)
+                .Select(item => (item.Name ?? "", item.InitialValue ?? "", item.DataType ?? ""))
+                .ToList();
+            return new RunnableFlow(flow.Name ?? "", flow.LogOutput, runnableSteps, seeds);
         }
 
         /// <summary>

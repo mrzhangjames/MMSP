@@ -411,6 +411,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private async void Delete()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             var ids = Users.Where(item => item.IsChecked).Select(item => item.Id).ToList();
             if (ids.Count == 0 || !SqlSugarContext.IsOpen)
                 return;
@@ -430,6 +433,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void SaveEditor()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             if (!TrySave(out var loginName, out var created))
                 return;
 
@@ -501,7 +507,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     entity.RoleLevel = role;
                     entity.IsValid = EditorEnabled;
                     if (EditorPassword.Length > 0)
-                        entity.Password = EditorPassword;
+                        entity.Password = UserPassword.Hash(EditorPassword);
                     db.Updateable(entity).ExecuteCommand();
                 }
                 else
@@ -511,7 +517,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                         Id = Guid.NewGuid(),
                         LoginName = loginName,
                         UserName = userName,
-                        Password = EditorPassword,
+                        Password = UserPassword.Hash(EditorPassword),
                         RoleLevel = role,
                         IsValid = EditorEnabled,
                         SessionTimeout = 0,
@@ -659,7 +665,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 角色、登录名、密码和同一条账号一致才登录。密码不写日志。
+        /// 角色、登录名、口令哈希和同一条账号一致才登录。不按明文比较，密码不写日志。
         /// </summary>
         private void Login()
         {
@@ -700,7 +706,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     .Where(item => string.Equals(item.LoginName?.Trim(), loginName, StringComparison.OrdinalIgnoreCase))
                     .ToList();
                 if (matches.Count != 1
-                    || !string.Equals(matches[0].Password, DraftPassword, StringComparison.Ordinal)
+                    || !UserPassword.Verify(matches[0].Password, DraftPassword)
                     || matches[0].RoleLevel != selectedRole)
                 {
                     LoginError = Text("Login_BadCredential");
@@ -719,7 +725,12 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 DraftPassword = "";
                 LoginError = "";
-                _session.SignIn(loginName, matches[0].UserName?.Trim() ?? "", selectedRole, DateTime.Now);
+                _session.SignIn(
+                    loginName,
+                    matches[0].UserName?.Trim() ?? "",
+                    selectedRole,
+                    DateTime.Now,
+                    matches[0].SessionTimeout);
                 LogHelper.SysInfo($"登录成功 {loginName} 角色={selectedRole}");
             }
             catch (Exception ex)
@@ -730,7 +741,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 确认后注销。取消则保持登录。
+        /// 确认后注销。取消则保持登录。不读流程，也不停流程。
         /// </summary>
         private async void Logout()
         {
@@ -741,7 +752,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             try
             {
                 var confirmed = await MetroDialogService.ConfirmAsync(Text("Logout_Title"), Text("Logout_Message"));
-                if (!confirmed)
+                if (!confirmed || !_session.IsLoggedIn)
                     return;
 
                 var loginName = _session.LoginName;

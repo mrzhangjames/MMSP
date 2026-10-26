@@ -13,7 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <!--  区域 JSON 解析。控件：名称 Name、来源 Source、路径 JsonPath、结果 Target、样例 Sample、试算 TryCommand、试算结果 Preview。样式 ToolLabel、ToolBox、ToolArea、ToolButton。  -->
+    <!--  区域 JSON 解析。控件：名称 Name、来源 Source、路径 JsonPath、结果 Target、表达式提示、样例 Sample、试算 TryCommand、试算结果 Preview。样式 ToolLabel、ToolBox、ToolArea、ToolButton。  -->
     <StackPanel Margin="16">
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
@@ -37,6 +37,12 @@
                          IsReadOnly="True"
                          Text="{Binding Target, Mode=OneWay}" />
             </StackPanel>
+            <TextBlock FontSize="12"
+                       Foreground="#888888"
+                       TextWrapping="Wrap"
+                       LineHeight="18"
+                       Margin="0,0,0,12"
+                       Text="点号和方括号取值，例如 $.data.items[0].name。空路径或 $ 取整份文本。{变量名} 运行时换成当前值，只替换一层，例如 $.rows[{工位状态}].code。试算不替换变量。字符串去掉引号。数字、布尔、空值、对象和数组保留原文。" />
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="样例" Style="{StaticResource ToolLabel}" />
                 <TextBox Style="{StaticResource ToolArea}"

@@ -25,5 +25,6 @@
   <Folder Name="/Test/">
     <Project Path="MMSP.Core.License.Tests/MMSP.Core.License.Tests.csproj" />
     <Project Path="MMSP.Service.Flow.Tests/MMSP.Service.Flow.Tests.csproj" />
+    <Project Path="MMSP.Plugin.Lux.Tests/MMSP.Plugin.Lux.Tests.csproj" />
   </Folder>
 </Solution>

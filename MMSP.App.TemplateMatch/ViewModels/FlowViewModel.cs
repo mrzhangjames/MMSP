@@ -14,12 +14,14 @@ using MMSP.Core.Model.Helper;
 using MMSP.Core.Model.Sys;
 using MMSP.Plugin.Tool;
 using MMSP.Service.Database;
+using MMSP.Service.Flow;
 
 namespace MMSP.App.TemplateMatch.ViewModels
 {
     /// <summary>
     /// 流程页。流程数据页放列表、工具和流程步，MES 配置单独一页。配置按当前客户和设备选出的类读写。
     /// 拖入工具会写入流程步，流程步可上下拖动并写回顺序。属性窗口会写回工具配置。新增只改流程名称。名称和变量从流程卡片右键进入。删除会连同流程步和变量一起去掉。
+    /// 执行跑当前流程一轮，单步执行只跑右键的那一步，并在步骤上显示状态和耗时。复制会连同流程步和变量一起新增一条。
     /// </summary>
     public partial class FlowViewModel : BaseViewModel, IDropTarget
     {
@@ -28,6 +30,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private int _pageIndex;
         private string _savedCfg = "";
         private string _mesError = "";
+        private readonly IFlowRunService _flowRun;
 
         /// <summary>
         /// 创建流程页。工具按种类生成，流程等进入页面后再读库。
@@ -35,15 +38,18 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public FlowViewModel(
             IRegionManager region,
             IContainerExtension container,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator,
+            IFlowRunService flowRun)
             : base(region, container, eventAggregator)
         {
+            _flowRun = flowRun;
             Flows = [];
             GeneralTools = [];
             CustomerTools = [];
             MesFields = [];
             SelectCommand = new DelegateCommand<FlowCard?>(Select);
             SelectStepCommand = new DelegateCommand<FlowStep?>(SelectStep);
+            RunStepCommand = new DelegateCommand<FlowStep?>(RunStep);
             ShowPropertyCommand = new DelegateCommand<FlowStep?>(ShowProperty);
             DeleteStepCommand = new DelegateCommand<FlowStep?>(DeleteStep);
             SaveMesCommand = new DelegateCommand(SaveMes);
@@ -52,10 +58,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
             EditCommand = new DelegateCommand<FlowCard?>(OpenEdit);
             EditVarsCommand = new DelegateCommand<FlowCard?>(OpenVars);
             DeleteCommand = new DelegateCommand(Delete);
-            RunCommand = new DelegateCommand(LayoutOnly);
-            CopyCommand = new DelegateCommand(LayoutOnly);
-            ExportCommand = new DelegateCommand(LayoutOnly);
-            ImportCommand = new DelegateCommand(LayoutOnly);
+            RunCommand = new DelegateCommand(RunSelected);
+            CopyCommand = new DelegateCommand(CopySelected);
+            ExportCommand = new DelegateCommand(ExportFlows);
+            ImportCommand = new DelegateCommand(ImportFlows);
             _loading = false;
         }
 
@@ -65,7 +71,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public ObservableCollection<FlowCard> Flows { get; }
 
         /// <summary>
-        /// 通用工具。编号 0 到 8。
+        /// 通用工具。编号 0 到 9。
         /// </summary>
         public ObservableCollection<FlowTool> GeneralTools { get; }
 
@@ -88,6 +94,11 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// 选中一张流程步卡片。
         /// </summary>
         public DelegateCommand<FlowStep?> SelectStepCommand { get; }
+
+        /// <summary>
+        /// 只执行右键的这一步。流程未启用也可以跑。
+        /// </summary>
+        public DelegateCommand<FlowStep?> RunStepCommand { get; }
 
         /// <summary>
         /// 打开选中流程步的工具属性。
@@ -174,22 +185,22 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public DelegateCommand DeleteCommand { get; }
 
         /// <summary>
-        /// 执行。这一批只摆按钮。
+        /// 执行当前流程一轮，并在步骤卡片上显示状态和耗时。
         /// </summary>
         public DelegateCommand RunCommand { get; }
 
         /// <summary>
-        /// 复制。这一批只摆按钮。
+        /// 复制当前流程、流程步和变量。
         /// </summary>
         public DelegateCommand CopyCommand { get; }
 
         /// <summary>
-        /// 导出。这一批只摆按钮。
+        /// 导出全部流程配置。
         /// </summary>
         public DelegateCommand ExportCommand { get; }
 
         /// <summary>
-        /// 导入。这一批只摆按钮。
+        /// 导入全部流程配置。确认后替换客户库里的流程、流程步和变量。
         /// </summary>
         public DelegateCommand ImportCommand { get; }
 
@@ -203,7 +214,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 通用工具固定为 0 到 8。客户工具只取当前插件登记的种类。同一次运行里再次进入不重复生成。
+        /// 通用工具固定为 0 到 9。客户工具只取当前插件登记的种类。同一次运行里再次进入不重复生成。
         /// </summary>
         private void LoadTools()
         {
@@ -212,7 +223,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             foreach (var kind in Enum.GetValues<FlowToolKind>())
             {
-                if ((int)kind > (int)FlowToolKind.Script)
+                if ((int)kind > (int)FlowToolKind.Uph)
                     continue;
 
                 GeneralTools.Add(MakeTool(kind));
@@ -295,6 +306,12 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void SaveFlags(FlowCard card)
         {
+            if (LicenseGate.Block(ContainerExt))
+            {
+                RestoreFlags(card);
+                return;
+            }
+
             if (!SqlSugarContext.IsOpen)
                 return;
 
@@ -455,6 +472,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void SaveMes()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             MesError = "";
             var model = CurrentModel();
             if (model is null || !SqlSugarContext.IsOpen)
@@ -506,13 +526,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private void CloseMes()
         {
             FillDraft();
-        }
-
-        /// <summary>
-        /// 工具栏按钮只出现在界面上，不改列表。
-        /// </summary>
-        private void LayoutOnly()
-        {
         }
 
         private FlowCard ToCard(FlowEntity row, IReadOnlyList<FlowStepEntity> owned)
@@ -599,6 +612,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 FlowToolKind.Delay => PackIconPhosphorIconsKind.Timer,
                 FlowToolKind.JsonParse => PackIconPhosphorIconsKind.BracketsCurly,
                 FlowToolKind.Condition => PackIconPhosphorIconsKind.GitFork,
+                FlowToolKind.Uph => PackIconPhosphorIconsKind.ChartLine,
                 FlowToolKind.Lux_AlarmLogTool => PackIconPhosphorIconsKind.Warning,
                 _ => PackIconPhosphorIconsKind.Code
             };

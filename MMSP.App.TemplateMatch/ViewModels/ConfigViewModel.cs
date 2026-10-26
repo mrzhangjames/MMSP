@@ -344,6 +344,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void SaveGeneral()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             SaveError = "";
             if (!LogRetention.TryParseDays(DbLogDaysText, out var dbDays)
                 || !LogRetention.TryParseDays(FileLogDaysText, out var fileDays))
@@ -529,6 +532,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void UseTheme(bool light)
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             IsLightTheme = light;
             AppAppearance.ApplyTheme(light);
             try
@@ -546,6 +552,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private void UseLanguage(bool chinese)
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             IsChinese = chinese;
             var language = chinese ? AppConfigDefaults.LanguageZh : AppConfigDefaults.LanguageEn;
             AppAppearance.ApplyLanguage(language);

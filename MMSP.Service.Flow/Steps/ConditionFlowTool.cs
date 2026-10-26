@@ -3,7 +3,9 @@
 namespace MMSP.Service.Flow.Steps
 {
     /// <summary>
-    /// 条件判断。这一期不计算表达式。不成立时仍按失败结束本轮。
+    /// 条件判断。表达式写法见 <see cref="ConditionExpr"/>。
+    /// 成立时成功，并把 true 写入出参。不成立返回「条件不成立」，本轮失败，不写出参。
+    /// 没写表达式返回「条件为空」，写错返回「条件无效」，名称没有返回「变量未声明」。
     /// </summary>
     public sealed class ConditionFlowTool : FlowToolStep
     {
@@ -18,7 +20,7 @@ namespace MMSP.Service.Flow.Steps
         private readonly string? _error;
 
         /// <summary>
-        /// 解析配置。表达式计算留到后面。
+        /// 解析配置。表达式在执行时计算。
         /// </summary>
         public ConditionFlowTool(string cfg)
         {
@@ -32,18 +34,31 @@ namespace MMSP.Service.Flow.Steps
         }
 
         /// <summary>
-        /// 入参必须已声明。表达式这一期仍失败，所以不会写出参。
+        /// 先核对入参已经声明，再计算表达式。成立时结果文本是 true。
+        /// 不成立、表达式为空或无效时失败，不写出参。
         /// </summary>
         public override FlowStepResult Execute(FlowStepContext context)
         {
             if (_error is not null || _tool is null)
                 return Fail(_error ?? "配置无效");
 
+            if (context.Token.IsCancellationRequested)
+                return Cancelled();
+
             var missing = RequireInputs(context, _tool.Inputs);
             if (missing is not null)
                 return missing;
 
-            return Fail("未实现");
+            if (string.IsNullOrWhiteSpace(_tool.Expression))
+                return Fail("条件为空");
+
+            if (!ConditionExpr.TryEval(_tool.Expression, context.Variables, out var passed, out var error))
+                return Fail(error);
+
+            if (!passed)
+                return Fail("条件不成立");
+
+            return Store(context, _tool.Output, Ok("true"));
         }
     }
 }

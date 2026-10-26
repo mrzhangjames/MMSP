@@ -1,5 +1,6 @@
 ﻿using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
+using MMSP.Service.Device;
 using MMSP.Service.Device.Plc;
 using MMSP.Service.Device.Scan;
 
@@ -51,6 +52,16 @@ namespace MMSP.Service.Flow
         private bool _disposed;
 
         /// <summary>
+        /// 告诉底栏这轮流程的 PLC 是否还连着。释放时用同一份委托去掉登记。
+        /// </summary>
+        private readonly Func<bool> _plcUsed;
+
+        /// <summary>
+        /// 告诉底栏这轮流程的扫码枪是否还连着。
+        /// </summary>
+        private readonly Func<Guid, bool> _scanUsed;
+
+        /// <summary>
         /// 记下启动时抄下的连接。此时还不打开设备。
         /// </summary>
         public FlowDeviceSession(PlcLinkEntity? link, IReadOnlyList<ScannerEntity> scanners)
@@ -71,6 +82,10 @@ namespace MMSP.Service.Flow
             _scanners = scanners;
             _openPlc = openPlc;
             _openScan = openScan;
+            _plcUsed = PlcUsed;
+            _scanUsed = ScanUsed;
+            DeviceLinkUse.AddPlc(_plcUsed);
+            DeviceLinkUse.AddScan(_scanUsed);
         }
 
         /// <summary>
@@ -152,6 +167,8 @@ namespace MMSP.Service.Flow
                     return;
 
                 _disposed = true;
+                DeviceLinkUse.RemovePlc(_plcUsed);
+                DeviceLinkUse.RemoveScan(_scanUsed);
                 scans = _scans.Values.ToArray();
                 _scans.Clear();
                 plc = _plc;
@@ -182,6 +199,24 @@ namespace MMSP.Service.Flow
 
             if (error is not null)
                 throw error;
+        }
+
+        /// <summary>
+        /// 这轮流程的 PLC 是否还连着。底栏据此显示已连接，不再另开短连接。
+        /// </summary>
+        private bool PlcUsed()
+        {
+            lock (_gate)
+                return !_disposed && _plc is { IsConnected: true };
+        }
+
+        /// <summary>
+        /// 这轮流程的这把扫码枪是否还连着。
+        /// </summary>
+        private bool ScanUsed(Guid id)
+        {
+            lock (_gate)
+                return !_disposed && _scans.TryGetValue(id, out var client) && client.IsConnected;
         }
 
         /// <summary>
@@ -390,7 +425,8 @@ namespace MMSP.Service.Flow
                 Station = ClampStation(link.Station),
                 DataFormat = format,
                 ConnectTimeout = link.ReadTimeoutMs,
-                ReceiveTimeout = link.ReadTimeoutMs
+                ReceiveTimeout = link.ReadTimeoutMs,
+                WriteTimeout = link.WriteTimeoutMs > 0 ? link.WriteTimeoutMs : 1000
             };
         }
 

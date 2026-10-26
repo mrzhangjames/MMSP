@@ -27,6 +27,7 @@ namespace MMSP.Service.Device.Plc
                     PlcDataType.Int32 => From(device.ReadInt32(address)),
                     PlcDataType.Float => From(device.ReadFloat(address)),
                     PlcDataType.String => From(device.ReadString(address, ToLength(length))),
+                    PlcDataType.UInt16Array => FromUInt16Array(device.ReadUInt16(address, ToLength(length))),
                     _ => PlcIoResult.Fail("不支持的数据类型")
                 };
             }
@@ -86,6 +87,28 @@ namespace MMSP.Service.Device.Plc
             return result.IsSuccess
                 ? PlcIoResult.Ok("")
                 : PlcIoResult.Fail(string.IsNullOrWhiteSpace(result.Message) ? "通讯失败" : result.Message);
+        }
+
+        /// <summary>
+        /// 6 元按年/月/日/时/分/秒收成时间。其它长度保留逗号分隔的原值。
+        /// </summary>
+        private static PlcIoResult FromUInt16Array(OperateResult<ushort[]> result)
+        {
+            if (!result.IsSuccess)
+                return PlcIoResult.Fail(string.IsNullOrWhiteSpace(result.Message) ? "通讯失败" : result.Message);
+
+            var values = result.Content;
+            if (values is null || values.Length == 0)
+                return PlcIoResult.Fail("通讯失败");
+
+            if (values.Length == 6)
+            {
+                return PlcTimeText.TryFormat(values, out var time)
+                    ? PlcIoResult.Ok(time)
+                    : PlcIoResult.Fail("时间无效");
+            }
+
+            return PlcIoResult.Ok(string.Join(",", values.Select(item => item.ToString(CultureInfo.InvariantCulture))));
         }
 
         /// <summary>

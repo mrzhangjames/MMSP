@@ -25,6 +25,7 @@ namespace MMSP.Service.Flow.Tests
             Assert.Null(PlcPointEntity.NormalizeBitIndex(PlcDataType.Int32, 1, 32));
             Assert.Null(PlcPointEntity.NormalizeBitIndex(PlcDataType.Float, 1, 0));
             Assert.Null(PlcPointEntity.NormalizeBitIndex(PlcDataType.String, 1, 0));
+            Assert.Null(PlcPointEntity.NormalizeBitIndex(PlcDataType.UInt16Array, 6, 0));
             Assert.Null(PlcPointEntity.NormalizeBitIndex(PlcDataType.Int16, 2, 0));
             Assert.Null(PlcPointEntity.NormalizeBitIndex(PlcDataType.Int32, 1, null));
         }

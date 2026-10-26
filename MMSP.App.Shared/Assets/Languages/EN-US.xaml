@@ -24,6 +24,8 @@
     <sys:String x:Key="Footer_LicenseExpiring">Expires {0}</sys:String>
     <sys:String x:Key="Footer_LicenseExpired">Authorization expired</sys:String>
     <sys:String x:Key="Footer_DeviceConnected">Device connected</sys:String>
+    <sys:String x:Key="Footer_Connected">Connected</sys:String>
+    <sys:String x:Key="Footer_Disconnected">Disconnected</sys:String>
     <sys:String x:Key="Footer_LoginUser">User</sys:String>
     <sys:String x:Key="Footer_Time">Time</sys:String>
     <sys:String x:Key="Footer_Run">Run</sys:String>
@@ -93,6 +95,7 @@
     <sys:String x:Key="Device_WriteTimeout">Write timeout</sys:String>
     <sys:String x:Key="Device_ReconnectInterval">Reconnect interval</sys:String>
     <sys:String x:Key="Device_ReconnectCount">Reconnect count</sys:String>
+    <sys:String x:Key="Device_Heartbeat">Heartbeat address</sys:String>
     <sys:String x:Key="Device_PointName">Point name</sys:String>
     <sys:String x:Key="Device_Address">Address</sys:String>
     <sys:String x:Key="Device_DataType">Data type</sys:String>
@@ -145,6 +148,24 @@
     <sys:String x:Key="Device_PointFile">Points</sys:String>
     <sys:String x:Key="Device_ImportFailed">The point file is not valid</sys:String>
     <sys:String x:Key="Device_ExportFailed">The point file could not be saved</sys:String>
+    <sys:String x:Key="Device_Station">Station</sys:String>
+    <sys:String x:Key="Device_PointKind">Point type</sys:String>
+    <sys:String x:Key="Device_Bit">Bit</sys:String>
+    <sys:String x:Key="Device_Description">Description</sys:String>
+    <sys:String x:Key="Device_NeedBit">Enter a bit</sys:String>
+    <sys:String x:Key="Device_Baud">Baud rate</sys:String>
+    <sys:String x:Key="Device_Parity">Parity</sys:String>
+    <sys:String x:Key="Device_DataBits">Data bits</sys:String>
+    <sys:String x:Key="Device_StopBits">Stop bits</sys:String>
+    <sys:String x:Key="Device_NeedBaud">Enter a baud rate</sys:String>
+    <sys:String x:Key="Device_FlowRunning">A flow is running</sys:String>
+    <sys:String x:Key="Device_KindFlow">Flow</sys:String>
+    <sys:String x:Key="Device_KindMonitor">Monitor</sys:String>
+    <sys:String x:Key="Device_KindHeartbeat">Heartbeat</sys:String>
+    <sys:String x:Key="Device_KindStatus">Status</sys:String>
+    <sys:String x:Key="Device_NeedKind">Select a point type</sys:String>
+    <sys:String x:Key="Device_BadBit">The bit is not valid</sys:String>
+    <sys:String x:Key="Device_BadSerial">The serial settings are not valid</sys:String>
 
     <sys:String x:Key="Chart_Line">Line</sys:String>
     <sys:String x:Key="Chart_Column">Column</sys:String>
@@ -222,6 +243,8 @@
     <sys:String x:Key="License_MachineMismatch">The license does not match this machine.</sys:String>
     <sys:String x:Key="License_NotYetValid">The license is not valid yet.</sys:String>
     <sys:String x:Key="License_Expired">The license has expired. Plug-ins will not load.</sys:String>
+    <sys:String x:Key="License_UseBlockedTitle">License</sys:String>
+    <sys:String x:Key="License_UseBlocked">The license has expired. This action is unavailable until a valid license is imported.</sys:String>
     <sys:String x:Key="License_ClockRollback">A backward system clock change was detected.</sys:String>
     <sys:String x:Key="License_MachineUnreadable">The machine id could not be read.</sys:String>
     <sys:String x:Key="License_ToleranceInvalid">The clock tolerance is invalid.</sys:String>
@@ -248,6 +271,7 @@
     <sys:String x:Key="Flow_Add">Add</sys:String>
     <sys:String x:Key="Flow_Delete">Delete</sys:String>
     <sys:String x:Key="Flow_Run">Run</sys:String>
+    <sys:String x:Key="Flow_RunStep">Run step</sys:String>
     <sys:String x:Key="Flow_Copy">Copy</sys:String>
     <sys:String x:Key="Flow_Export">Export</sys:String>
     <sys:String x:Key="Flow_Import">Import</sys:String>
@@ -282,4 +306,14 @@
     <sys:String x:Key="Flow_VarType">Data type</sys:String>
     <sys:String x:Key="Flow_VarInitial">Initial value</sys:String>
     <sys:String x:Key="Flow_ToolUnavailable">This tool is not loaded for the current customer</sys:String>
+    <sys:String x:Key="Flow_ImportTitle">Import flows</sys:String>
+    <sys:String x:Key="Flow_ImportMessage">This replaces every flow configuration. Continue?</sys:String>
+    <sys:String x:Key="Flow_ImportFailed">Import failed</sys:String>
+    <sys:String x:Key="Flow_ExportFailed">Export failed</sys:String>
+    <sys:String x:Key="Flow_RunRunning">Running</sys:String>
+    <sys:String x:Key="Flow_RunOk">Succeeded</sys:String>
+    <sys:String x:Key="Flow_RunFailed">Failed</sys:String>
+    <sys:String x:Key="Flow_RunSkipped">Skipped</sys:String>
+    <sys:String x:Key="Flow_RunCancelled">Cancelled</sys:String>
+    <sys:String x:Key="Flow_CopyFailed">Copy failed</sys:String>
 </ResourceDictionary>

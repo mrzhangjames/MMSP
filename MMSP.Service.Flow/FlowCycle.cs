@@ -12,7 +12,7 @@
             string name,
             bool logOutput,
             IReadOnlyList<RunnableStep> steps,
-            IReadOnlyList<(string Name, string Value)>? variables = null)
+            IReadOnlyList<(string Name, string Value, string Type)>? variables = null)
         {
             Name = name;
             LogOutput = logOutput;
@@ -36,9 +36,9 @@
         public IReadOnlyList<RunnableStep> Steps { get; }
 
         /// <summary>
-        /// 启动时抄下的变量名和初始值。运行中的值不在这里。
+        /// 启动时抄下的变量名、初始值和变量表类型。运行中的值不在这里。
         /// </summary>
-        public IReadOnlyList<(string Name, string Value)> Variables { get; }
+        public IReadOnlyList<(string Name, string Value, string Type)> Variables { get; }
     }
 
     /// <summary>
@@ -47,13 +47,14 @@
     internal sealed class RunnableStep
     {
         /// <summary>
-        /// 创建一步。
+        /// 创建一步。没有主键时界面改用顺序号对上卡片。
         /// </summary>
-        public RunnableStep(int sortIndex, string title, Steps.FlowToolStep tool)
+        public RunnableStep(int sortIndex, string title, Steps.FlowToolStep tool, Guid id = default)
         {
             SortIndex = sortIndex;
             Title = title;
             Tool = tool;
+            Id = id;
         }
 
         /// <summary>
@@ -70,6 +71,11 @@
         /// 这一步的工具。
         /// </summary>
         public Steps.FlowToolStep Tool { get; }
+
+        /// <summary>
+        /// 流程步主键。
+        /// </summary>
+        public Guid Id { get; }
     }
 
     /// <summary>
@@ -94,16 +100,20 @@
     }
 
     /// <summary>
-    /// 把流程名、顺序、标题和结果拼成一行日志。
+    /// 把流程名、顺序、标题、耗时和结果拼成一行日志。
     /// </summary>
     internal static class FlowLogText
     {
         /// <summary>
-        /// 拼一行。结果文本为空时只留前面三段。
+        /// 拼一行。结果文本为空时不留尾部空格。耗时用不变文化的毫秒数。
         /// </summary>
-        public static string Format(string flowName, int sortIndex, string title, string text)
+        public static string Format(string flowName, int sortIndex, string title, long elapsedMs, string text)
         {
-            var head = $"{flowName.Trim()} {sortIndex.ToString(System.Globalization.CultureInfo.InvariantCulture)} {title.Trim()}".Trim();
+            if (elapsedMs < 0)
+                elapsedMs = 0;
+
+            var culture = System.Globalization.CultureInfo.InvariantCulture;
+            var head = $"{flowName.Trim()} {sortIndex.ToString(culture)} {title.Trim()} {elapsedMs.ToString(culture)} ms".Trim();
             var detail = (text ?? "").Trim();
             if (detail.Length == 0)
                 return head;
@@ -120,25 +130,36 @@
         /// <summary>
         /// 跑完一轮。失败只打断当前流程，后面的流程继续。成功日志交给 <paramref name="info"/>。
         /// <paramref name="failures"/> 跨轮记住同一步的失败原因；为空时每次失败都写日志。
+        /// <paramref name="progress"/> 在调用线程上通知每步状态，为空时不通知。
         /// </summary>
         public static FlowCycleStop Execute(
             IReadOnlyList<RunnableFlow> flows,
             FlowStepContext context,
             Action<string> info,
             Action<string> error,
-            FlowFailureLog? failures = null)
+            FlowFailureLog? failures = null,
+            Action<FlowStepProgress>? progress = null)
         {
             var executed = 0;
             foreach (var flow in flows)
             {
                 if (context.Token.IsCancellationRequested)
+                {
+                    SkipFrom(flow, 0, progress);
                     return FlowCycleStop.Cancelled;
+                }
 
-                foreach (var step in flow.Steps)
+                for (var index = 0; index < flow.Steps.Count; index++)
                 {
                     if (context.Token.IsCancellationRequested)
+                    {
+                        SkipFrom(flow, index, progress);
                         return FlowCycleStop.Cancelled;
+                    }
 
+                    var step = flow.Steps[index];
+                    Report(progress, step, FlowStepRunState.Running, 0, "");
+                    var watch = System.Diagnostics.Stopwatch.StartNew();
                     FlowStepResult result;
                     try
                     {
@@ -146,6 +167,9 @@
                     }
                     catch (OperationCanceledException)
                     {
+                        watch.Stop();
+                        Report(progress, step, FlowStepRunState.Cancelled, watch.ElapsedMilliseconds, "");
+                        SkipFrom(flow, index + 1, progress);
                         return FlowCycleStop.Cancelled;
                     }
                     catch (Exception ex)
@@ -153,20 +177,29 @@
                         result = FlowStepResult.Fail(ex.Message);
                     }
 
+                    watch.Stop();
+                    var elapsed = watch.ElapsedMilliseconds;
                     if (result.Status == FlowStepStatus.Cancelled)
+                    {
+                        Report(progress, step, FlowStepRunState.Cancelled, elapsed, "");
+                        SkipFrom(flow, index + 1, progress);
                         return FlowCycleStop.Cancelled;
+                    }
 
                     executed++;
-                    var line = FlowLogText.Format(flow.Name, step.SortIndex, step.Title, result.Text);
+                    var line = FlowLogText.Format(flow.Name, step.SortIndex, step.Title, elapsed, result.Text);
                     if (result.Status == FlowStepStatus.Failed)
                     {
+                        Report(progress, step, FlowStepRunState.Failed, elapsed, result.Text);
                         if (failures is null || failures.ShouldWrite(step.SortIndex, result.Text))
                             error(line);
 
+                        SkipFrom(flow, index + 1, progress);
                         break;
                     }
 
                     failures?.Clear(step.SortIndex);
+                    Report(progress, step, FlowStepRunState.Ok, elapsed, result.Text);
                     if (flow.LogOutput)
                         info(line);
                 }
@@ -176,6 +209,28 @@
                 return FlowCycleStop.Cancelled;
 
             return executed == 0 ? FlowCycleStop.Empty : FlowCycleStop.None;
+        }
+
+        /// <summary>
+        /// 通知界面。没有订阅时什么都不做。
+        /// </summary>
+        private static void Report(
+            Action<FlowStepProgress>? progress,
+            RunnableStep step,
+            FlowStepRunState state,
+            long elapsedMs,
+            string detail)
+        {
+            progress?.Invoke(new FlowStepProgress(step.Id, step.SortIndex, state, elapsedMs, detail));
+        }
+
+        /// <summary>
+        /// 从这一下标开始的步骤都标成跳过。
+        /// </summary>
+        private static void SkipFrom(RunnableFlow flow, int index, Action<FlowStepProgress>? progress)
+        {
+            for (var skip = index; skip < flow.Steps.Count; skip++)
+                Report(progress, flow.Steps[skip], FlowStepRunState.Skipped, 0, "");
         }
     }
 

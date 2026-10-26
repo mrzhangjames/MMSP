@@ -220,6 +220,12 @@ namespace MMSP.App.TemplateMatch.Views
                 return;
             }
 
+            if (_kind == FlowToolKind.Uph)
+            {
+                ApplyUph(row.Selected ? "" : row.Name);
+                return;
+            }
+
             var inputs = ToolVars.Inputs(_tool);
             if (inputs is null)
                 return;
@@ -269,6 +275,23 @@ namespace MMSP.App.TemplateMatch.Views
         }
 
         /// <summary>
+        /// UPH 只留一个判定变量，并把名称填进判定框。
+        /// </summary>
+        private void ApplyUph(string name)
+        {
+            if (_tool is not UphToolEntity uph)
+                return;
+
+            _setInput(name);
+            uph.Inputs ??= [];
+            uph.Inputs.Clear();
+            if (name.Length > 0)
+                uph.Inputs.Add(new ToolInput { Variable = name });
+
+            Refresh();
+        }
+
+        /// <summary>
         /// 把选中的变量名写进写入值。还在固定值时先改成变量，名称才会出现在框里。
         /// </summary>
         private void ApplyWriteVariable(string name)
@@ -310,6 +333,8 @@ namespace MMSP.App.TemplateMatch.Views
                 InputNote = write.UseVariable ? "点选要写入的变量。" : "当前写入固定值。";
             else if (_tool is JsonParseToolEntity)
                 InputNote = "点选来源变量。";
+            else if (_tool is UphToolEntity)
+                InputNote = "点选判定变量。";
             else
                 InputNote = "点选本步读取的变量。";
             var selected = SelectedInputs();
@@ -347,6 +372,15 @@ namespace MMSP.App.TemplateMatch.Views
                 var source = (json.Source ?? "").Trim();
                 if (source.Length > 0)
                     selected.Add(source);
+
+                return selected;
+            }
+
+            if (_tool is UphToolEntity uph)
+            {
+                var variable = (uph.Variable ?? "").Trim();
+                if (variable.Length > 0)
+                    selected.Add(variable);
 
                 return selected;
             }

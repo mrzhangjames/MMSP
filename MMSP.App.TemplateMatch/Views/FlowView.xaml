@@ -495,7 +495,7 @@
                                   dd:DragDrop.IsDropTarget="True"
                                   dd:DragDrop.DropHandler="{Binding}">
                         <ItemsControl.ItemTemplate>
-                            <!--  模板 步骤项：序号、类型、标题、说明。说明为空时显示未配置。  -->
+                            <!--  模板 步骤项：序号、类型、标题、说明、执行状态。耗时在卡片右侧末尾。说明为空时显示未配置。  -->
                             <DataTemplate>
                                 <Grid PreviewMouseLeftButtonDown="OnStepPreviewMouseDown">
                                     <Grid.ColumnDefinitions>
@@ -505,7 +505,27 @@
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Column="0">
                                         <Border Width="2" HorizontalAlignment="Center" Background="{DynamicResource CardBorderBrush}" Margin="0,22,0,0" Visibility="{Binding ShowStem, Converter={StaticResource BoolVis}}" />
-                                        <Border Width="22" Height="22" VerticalAlignment="Top" CornerRadius="11" Background="{StaticResource ThemeBrushColorAssist}">
+                                        <Border Width="22" Height="22" VerticalAlignment="Top" CornerRadius="11">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{StaticResource ThemeBrushColorAssist}" />
+                                                    <Style.Triggers>
+                                                        <!--  2 成功，3 失败，4 跳过，5 已取消。执行中仍用主题色。  -->
+                                                        <DataTrigger Binding="{Binding RunKind}" Value="2">
+                                                            <Setter Property="Background" Value="#2E9B4F" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding RunKind}" Value="3">
+                                                            <Setter Property="Background" Value="#C4473A" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding RunKind}" Value="4">
+                                                            <Setter Property="Background" Value="#C8C8C8" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding RunKind}" Value="5">
+                                                            <Setter Property="Background" Value="#C8C8C8" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
                                             <TextBlock Text="{Binding Number}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                     </Grid>
@@ -534,9 +554,13 @@
                                                           Command="{Binding DataContext.SelectStepCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                           CommandParameter="{Binding}" />
                                         </Border.InputBindings>
-                                        <!--  菜单 步骤右键。项：属性（ShowPropertyCommand）、删除（DeleteStepCommand）。样式 MahApps.Styles.ContextMenu、MahApps.Styles.MenuItem。  -->
+                                        <!--  菜单 步骤右键。项：单步执行（RunStepCommand）、属性（ShowPropertyCommand）、删除（DeleteStepCommand）。样式 MahApps.Styles.ContextMenu、MahApps.Styles.MenuItem。  -->
                                         <Border.ContextMenu>
                                             <ContextMenu Style="{StaticResource MahApps.Styles.ContextMenu}">
+                                                <MenuItem Header="{DynamicResource Flow_RunStep}"
+                                                          Style="{StaticResource MahApps.Styles.MenuItem}"
+                                                          Command="{Binding PlacementTarget.Tag.RunStepCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                 <MenuItem Header="{DynamicResource Flow_Property}"
                                                           Style="{StaticResource MahApps.Styles.MenuItem}"
                                                           Command="{Binding PlacementTarget.Tag.ShowPropertyCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -547,13 +571,23 @@
                                                           CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                             </ContextMenu>
                                         </Border.ContextMenu>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Border MinWidth="52" Height="20" Padding="6,0" CornerRadius="2" Background="{DynamicResource NavSelectedBackground}" VerticalAlignment="Center">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" MinWidth="52" Height="20" Padding="6,0" CornerRadius="2" Background="{DynamicResource NavSelectedBackground}" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Kind}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             </Border>
-                                            <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" />
-                                                <TextBlock FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,2,0,0">
+                                            <Grid Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Grid.Row="0" Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Row="1" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Text" Value="{Binding Detail}" />
@@ -565,8 +599,40 @@
                                                         </Style>
                                                     </TextBlock.Style>
                                                 </TextBlock>
-                                            </StackPanel>
-                                        </StackPanel>
+                                            </Grid>
+                                            <TextBlock Grid.Column="2" Text="{Binding RunStateText}" FontSize="12" VerticalAlignment="Center" ToolTip="{Binding RunDetail}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="#888888" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RunStateText}" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding RunKind}" Value="1">
+                                                                <Setter Property="Foreground" Value="#333333" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding RunKind}" Value="2">
+                                                                <Setter Property="Foreground" Value="#2E9B4F" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding RunKind}" Value="3">
+                                                                <Setter Property="Foreground" Value="#C4473A" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Grid.Column="3" Margin="12,0,0,0" FontSize="12" Foreground="{DynamicResource MediumNormalGray}" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding ElapsedText}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ElapsedText}" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
                                     </Border>
                                 </Grid>
                             </DataTemplate>

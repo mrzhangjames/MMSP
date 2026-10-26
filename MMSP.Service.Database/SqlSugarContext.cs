@@ -102,6 +102,24 @@ namespace MMSP.Service.Database
             db.Ado.ExecuteCommand("CREATE UNIQUE INDEX IF NOT EXISTS idx_biz_flow_vars_flow_name ON biz_flow_vars (flow_id, name);");
             if (db.DbMaintenance.IsAnyTable("biz_flow_steps", false))
                 EnsureCfgValueColumn(db);
+            EnsurePlcLinkColumns(db);
+        }
+
+        /// <summary>
+        /// 给已经存在的连接表补心跳地址。旧行地址为空，不启用心跳。
+        /// </summary>
+        private static void EnsurePlcLinkColumns(SqlSugarScope db)
+        {
+            if (!db.DbMaintenance.IsAnyTable("biz_plc_link", false))
+                return;
+
+            var count = db.Ado.GetInt(
+                "SELECT COUNT(1) FROM pragma_table_info('biz_plc_link') WHERE name = 'heartbeat_address'");
+            if (count > 0)
+                return;
+
+            db.Ado.ExecuteCommand(
+                "ALTER TABLE biz_plc_link ADD COLUMN heartbeat_address TEXT NOT NULL DEFAULT ''");
         }
 
         /// <summary>

@@ -11,11 +11,20 @@ namespace MMSP.Common.Helper
     public static class CsvFileHelper
     {
         /// <summary>
+        /// 登记 GB18030，供 Excel 中文 CSV 使用。
+        /// </summary>
+        static CsvFileHelper()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
+        /// <summary>
         /// 读出全部行。没有表头概念，第一行也是数据。空文件返回空列表。
+        /// UTF-8 可带或不带 BOM。不是 UTF-8 时按 GB18030 读，Excel 中文 CSV 用这种编码。
         /// </summary>
         public static IReadOnlyList<string[]> Read(string filePath)
         {
-            using var reader = new StreamReader(filePath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            using var reader = OpenReader(filePath);
             using var csv = new CsvReader(reader, CreateConfig());
             var rows = new List<string[]>();
             while (csv.Read())
@@ -50,7 +59,7 @@ namespace MMSP.Common.Helper
         /// </summary>
         public static CsvTable ReadTable(string filePath)
         {
-            using var reader = new StreamReader(filePath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            using var reader = OpenReader(filePath);
             using var csv = new CsvReader(reader, CreateHeaderConfig());
             if (!csv.Read())
                 return new CsvTable([], []);
@@ -102,6 +111,43 @@ namespace MMSP.Common.Helper
                 }
 
                 csv.NextRecord();
+            }
+        }
+
+        /// <summary>
+        /// 按字节判断编码后打开。有 BOM 时仍交给 StreamReader 识别。
+        /// </summary>
+        private static StreamReader OpenReader(string filePath)
+        {
+            var bytes = File.ReadAllBytes(filePath);
+            return new StreamReader(new MemoryStream(bytes), TextEncoding(bytes), detectEncodingFromByteOrderMarks: true);
+        }
+
+        /// <summary>
+        /// 能按 UTF-8 严格解码就用 UTF-8。否则用 GB18030。
+        /// </summary>
+        private static Encoding TextEncoding(byte[] bytes)
+        {
+            if (IsUtf8(bytes))
+                return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
+            return Encoding.GetEncoding("GB18030");
+        }
+
+        /// <summary>
+        /// 空文件和带 BOM 的 UTF-8 都算 UTF-8。非法字节返回 false。
+        /// </summary>
+        private static bool IsUtf8(byte[] bytes)
+        {
+            try
+            {
+                var utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+                utf8.GetString(bytes);
+                return true;
+            }
+            catch (DecoderFallbackException)
+            {
+                return false;
             }
         }
 

@@ -25,7 +25,8 @@ namespace MMSP.Core.Model.Tool
             return kind is FlowToolKind.PlcWrite
                 or FlowToolKind.JsonParse
                 or FlowToolKind.Condition
-                or FlowToolKind.Script;
+                or FlowToolKind.Script
+                or FlowToolKind.Uph;
         }
 
         /// <summary>
@@ -172,6 +173,7 @@ namespace MMSP.Core.Model.Tool
                 JsonParseToolEntity json => json.Inputs ??= [],
                 ConditionToolEntity condition => condition.Inputs ??= [],
                 ScriptToolEntity script => script.Inputs ??= [],
+                UphToolEntity uph => uph.Inputs ??= [],
                 _ => null
             };
         }
@@ -196,6 +198,7 @@ namespace MMSP.Core.Model.Tool
                     FlowToolKind.JsonParse => Deserialize<JsonParseToolEntity>(cfg),
                     FlowToolKind.Condition => Deserialize<ConditionToolEntity>(cfg),
                     FlowToolKind.Script => Deserialize<ScriptToolEntity>(cfg),
+                    FlowToolKind.Uph => Deserialize<UphToolEntity>(cfg),
                     _ => null
                 };
             }
@@ -275,6 +278,12 @@ namespace MMSP.Core.Model.Tool
 
                     foreach (var input in script.Inputs)
                         yield return input?.Variable ?? "";
+                    break;
+                case UphToolEntity uph:
+                    if (!includeInputs)
+                        yield break;
+
+                    yield return uph.Variable ?? "";
                     break;
             }
         }

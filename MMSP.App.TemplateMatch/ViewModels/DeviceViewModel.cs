@@ -1,13 +1,15 @@
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using Microsoft.Win32;
 using MMSP.App.TemplateMatch.Models;
 using MMSP.App.WpfBase.Core;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper;
+using MMSP.Common.Helper.Logger;
+using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using MMSP.Service.Database;
+using MMSP.Service.Device.Plc;
 using MMSP.Service.Device.Scan;
 
 namespace MMSP.App.TemplateMatch.ViewModels
@@ -39,10 +41,18 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private string _editorTrigger = "";
         private string _editorTransport = "";
         private bool _editorEnabled = true;
+        private string _editorPointKind = "";
+        private string _editorBit = "";
+        private string _editorDescription = "";
+        private string _editorBaud = "9600";
+        private string _editorParity = "None";
+        private string _editorDataBits = "8";
+        private string _editorStopBits = "One";
         private PlcPointRow? _selectedPoint;
         private ScannerCard? _selectedScanner;
         private string _plcIp = "192.168.1.10";
-        private string _plcConnectionType = "TCP";
+        private string _plcConnectionType = "";
+        private string _plcStation = "1";
         private string _plcPort = "502";
         private string _plcDataFormat = "ABCD";
         private string _plcPoll = "200 ms";
@@ -50,6 +60,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private string _plcWriteTimeout = "1000 ms";
         private string _plcReconnectInterval = "3000 ms";
         private string _plcReconnectCount = "3";
+        private string _plcHeartbeat = "";
         private string _testAddress = "";
         private string _testDataType = "Int16";
         private string _testLength = "1";
@@ -71,15 +82,21 @@ namespace MMSP.App.TemplateMatch.ViewModels
             Scanners = new ObservableCollection<ScannerCard>();
             PlcLogs = new ObservableCollection<DeviceLogLine>();
             ScanLogs = new ObservableCollection<DeviceLogLine>();
-            ConnectionTypes = ["TCP"];
+            ConnectionTypes = PlcLinkProtocols.Editable.Select(PlcLinkProtocols.NameOf).ToArray();
             DataFormats = ["ABCD", "CDAB", "BADC", "DCBA"];
-            DataTypes = ["Int16", "Int32", "Float", "String"];
+            DataTypes = ["Int16", "UInt16", "Int32", "Float", "String", "UInt16Array"];
             AccessModes = [Text("Device_AccessReadWrite"), Text("Device_AccessRead")];
             ScanTransports = [Text("Device_Tcp"), Text("Device_Serial")];
+            PointKinds = KindChoices();
+            ParityChoices = ["None", "Odd", "Even", "Mark", "Space"];
+            DataBitChoices = ["7", "8"];
+            StopBitChoices = ["One", "OnePointFive", "Two"];
             AppAppearance.LanguageChanged += OnLanguageChanged;
             EditorDataType = DataTypes[0];
             EditorAccess = AccessModes[0];
             EditorTransport = ScanTransports[0];
+            EditorPointKind = PointKinds[0];
+            PlcConnectionType = ConnectionTypes[0];
 
             ShowPlcConfigCommand = new DelegateCommand(() => IsPlcConfigTab = true);
             ShowPlcTestCommand = new DelegateCommand(() => IsPlcConfigTab = false);
@@ -98,6 +115,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             ReadPointCommand = new DelegateCommand(ReadSelectedPoint);
             WritePointCommand = new DelegateCommand(WriteSelectedPoint);
             TriggerCommand = new DelegateCommand(TriggerScanner);
+            RegisterLinkUse();
         }
 
         /// <summary>
@@ -121,9 +139,47 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public ObservableCollection<DeviceLogLine> ScanLogs { get; }
 
         /// <summary>
+        /// 连接类型下拉项。已保存的串口或 S7 会追加在末尾，避免被改成 Modbus TCP。
+        /// </summary>
+        private IReadOnlyList<string> _connectionTypes = [];
+
+        /// <summary>
+        /// 点位类型下拉项。
+        /// </summary>
+        private IReadOnlyList<string> _pointKinds = [];
+
+        /// <summary>
         /// 连接类型下拉项。
         /// </summary>
-        public IReadOnlyList<string> ConnectionTypes { get; }
+        public IReadOnlyList<string> ConnectionTypes
+        {
+            get => _connectionTypes;
+            private set => SetProperty(ref _connectionTypes, value);
+        }
+
+        /// <summary>
+        /// 点位类型下拉项。
+        /// </summary>
+        public IReadOnlyList<string> PointKinds
+        {
+            get => _pointKinds;
+            private set => SetProperty(ref _pointKinds, value);
+        }
+
+        /// <summary>
+        /// 串口校验位。
+        /// </summary>
+        public IReadOnlyList<string> ParityChoices { get; }
+
+        /// <summary>
+        /// 串口数据位。
+        /// </summary>
+        public IReadOnlyList<string> DataBitChoices { get; }
+
+        /// <summary>
+        /// 串口停止位。
+        /// </summary>
+        public IReadOnlyList<string> StopBitChoices { get; }
 
         /// <summary>
         /// 数据格式下拉项。
@@ -177,6 +233,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             var accessIndex = ChoiceIndex(AccessModes, EditorAccess);
             var transportIndex = ChoiceIndex(ScanTransports, EditorTransport);
+            var kindIndex = ChoiceIndex(PointKinds, EditorPointKind);
             var previousAccess = AccessModes;
             var readWrite = Text("Device_AccessReadWrite");
             var readOnly = Text("Device_AccessRead");
@@ -190,6 +247,8 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     point.AccessText = readWrite;
                 else if (index == 1)
                     point.AccessText = readOnly;
+
+                point.KindText = KindText(point.PointKind);
             }
 
             foreach (var card in Scanners)
@@ -197,10 +256,13 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             AccessModes = [readWrite, readOnly];
             ScanTransports = [Text("Device_Tcp"), Text("Device_Serial")];
+            PointKinds = KindChoices();
             if (accessIndex >= 0 && accessIndex < AccessModes.Count)
                 EditorAccess = AccessModes[accessIndex];
             if (transportIndex >= 0 && transportIndex < ScanTransports.Count)
                 EditorTransport = ScanTransports[transportIndex];
+            if (kindIndex >= 0 && kindIndex < PointKinds.Count)
+                EditorPointKind = PointKinds[kindIndex];
         }
 
         /// <summary>
@@ -439,13 +501,82 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     return;
 
                 RaisePropertyChanged(nameof(IsEditorTcp));
+                RaisePropertyChanged(nameof(IsEditorSerial));
             }
         }
 
         /// <summary>
-        /// 弹窗当前选的是 TCP。串口时隐藏端口。
+        /// 弹窗当前选的是 TCP。串口时隐藏端口，并显示波特率等参数。
         /// </summary>
         public bool IsEditorTcp => EditorTransport == Text("Device_Tcp");
+
+        /// <summary>
+        /// 弹窗当前选的是串口。
+        /// </summary>
+        public bool IsEditorSerial => !IsEditorTcp;
+
+        /// <summary>
+        /// 弹窗点位类型。
+        /// </summary>
+        public string EditorPointKind
+        {
+            get => _editorPointKind;
+            set => SetProperty(ref _editorPointKind, value);
+        }
+
+        /// <summary>
+        /// 弹窗 Bit。空表示整字。
+        /// </summary>
+        public string EditorBit
+        {
+            get => _editorBit;
+            set => SetProperty(ref _editorBit, value);
+        }
+
+        /// <summary>
+        /// 弹窗描述。
+        /// </summary>
+        public string EditorDescription
+        {
+            get => _editorDescription;
+            set => SetProperty(ref _editorDescription, value);
+        }
+
+        /// <summary>
+        /// 弹窗波特率。
+        /// </summary>
+        public string EditorBaud
+        {
+            get => _editorBaud;
+            set => SetProperty(ref _editorBaud, value);
+        }
+
+        /// <summary>
+        /// 弹窗校验位。
+        /// </summary>
+        public string EditorParity
+        {
+            get => _editorParity;
+            set => SetProperty(ref _editorParity, value);
+        }
+
+        /// <summary>
+        /// 弹窗数据位。
+        /// </summary>
+        public string EditorDataBits
+        {
+            get => _editorDataBits;
+            set => SetProperty(ref _editorDataBits, value);
+        }
+
+        /// <summary>
+        /// 弹窗停止位。
+        /// </summary>
+        public string EditorStopBits
+        {
+            get => _editorStopBits;
+            set => SetProperty(ref _editorStopBits, value);
+        }
 
         /// <summary>
         /// 弹窗启用。
@@ -508,6 +639,19 @@ namespace MMSP.App.TemplateMatch.ViewModels
             set
             {
                 if (SetProperty(ref _plcConnectionType, value))
+                    CommitLink();
+            }
+        }
+
+        /// <summary>
+        /// 站号。0 到 255。
+        /// </summary>
+        public string PlcStation
+        {
+            get => _plcStation;
+            set
+            {
+                if (SetProperty(ref _plcStation, value))
                     CommitLink();
             }
         }
@@ -604,6 +748,19 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
+        /// 心跳地址。留空则不启用。
+        /// </summary>
+        public string PlcHeartbeat
+        {
+            get => _plcHeartbeat;
+            set
+            {
+                if (SetProperty(ref _plcHeartbeat, value))
+                    CommitLink();
+            }
+        }
+
+        /// <summary>
         /// 测试区地址。自定义读写用它。
         /// </summary>
         public string TestAddress
@@ -693,6 +850,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
             EditorDataType = DataTypes[0];
             EditorLength = "1";
             EditorAccess = AccessModes[0];
+            EditorPointKind = PointKinds.Count > 0 ? PointKinds[0] : KindText(PlcPointKind.Flow);
+            EditorBit = "";
+            EditorDescription = "";
             EditorEnabled = true;
             EditorError = "";
             SetEditor(EditorKind.Point);
@@ -714,6 +874,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
             EditorDataType = row.DataType;
             EditorLength = row.LengthText;
             EditorAccess = row.AccessText;
+            EditorPointKind = string.IsNullOrEmpty(row.KindText) ? KindText(row.PointKind) : row.KindText;
+            EditorBit = row.BitText;
+            EditorDescription = row.Description;
             EditorEnabled = row.IsEnabled;
             EditorError = "";
             SetEditor(EditorKind.Point);
@@ -781,6 +944,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 var imported = ReadPointFile(CsvFileHelper.Read(dialog.FileName));
                 if (!SqlSugarContext.IsOpen)
                 {
+                    LogHelper.PlcError("导入点位配置失败");
                     await MetroDialogService.ShowMessageAsync(Text("Device_Import"), Text("Device_DbClosed"));
                     return;
                 }
@@ -792,9 +956,11 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     Points.Add(row);
 
                 SelectedPoint = Points.FirstOrDefault();
+                LogHelper.PlcInfo($"导入点位配置 {imported.Count}");
             }
             catch (Exception)
             {
+                LogHelper.PlcError("导入点位配置失败");
                 await MetroDialogService.ShowMessageAsync(Text("Device_Import"), Text("Device_ImportFailed"));
             }
         }
@@ -825,7 +991,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
                         Text("Device_DataType"),
                         Text("Device_Length"),
                         Text("Device_Access"),
-                        Text("Device_On")
+                        Text("Device_On"),
+                        Text("Device_PointKind"),
+                        Text("Device_Bit"),
+                        Text("Device_Description")
                     }
                 };
                 foreach (var point in Points)
@@ -837,7 +1006,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
                         point.DataType,
                         point.LengthText,
                         point.AccessText,
-                        point.EnabledText
+                        point.EnabledText,
+                        string.IsNullOrEmpty(point.KindText) ? KindText(point.PointKind) : point.KindText,
+                        point.BitText,
+                        point.Description
                     });
                 }
 
@@ -850,47 +1022,26 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 读点位 CSV。第一行长度不是正整数时当作表头跳过。
+        /// 读点位 CSV，并换成当前语言的读写和启用文字。
         /// </summary>
         private List<PlcPointRow> ReadPointFile(IReadOnlyList<string[]> table)
         {
-            if (table.Count == 0)
-                throw new InvalidDataException();
-
-            var start = 0;
-            if (table[0].Length < 4 || !int.TryParse(table[0][3].Trim(), out var headerLength) || headerLength <= 0)
-                start = 1;
-
             var rows = new List<PlcPointRow>();
-            for (var index = start; index < table.Count; index++)
+            foreach (var item in PlcPointImport.Read(table))
             {
-                var cells = table[index];
-                if (cells.Length == 1 && cells[0].Trim().Length == 0)
-                    continue;
-
-                if (cells.Length < 6)
-                    throw new InvalidDataException();
-
-                var name = cells[0].Trim();
-                var address = cells[1].Trim();
-                var dataType = cells[2].Trim();
-                var length = cells[3].Trim();
-                if (name.Length == 0 || address.Length == 0 || !Enum.TryParse<PlcDataType>(dataType, out var parsedType) || !Enum.IsDefined(parsedType))
-                    throw new InvalidDataException();
-
-                if (!int.TryParse(length, out var lengthValue) || lengthValue <= 0)
-                    throw new InvalidDataException();
-
-                var enabled = ParseEnabled(cells[5]);
                 var row = new PlcPointRow
                 {
-                    Name = name,
-                    Address = address,
-                    DataType = dataType,
-                    LengthText = length,
-                    AccessText = NormalizeAccess(cells[4])
+                    Name = item.Name,
+                    Address = item.Address,
+                    DataType = item.DataTypeText,
+                    LengthText = item.LengthText,
+                    AccessText = NormalizeAccess(item.AccessText),
+                    PointKind = item.Kind,
+                    BitIndex = item.BitIndex,
+                    Description = item.Description,
+                    KindText = KindText(item.Kind)
                 };
-                row.UseEnabledLabels(Text("Device_On"), Text("Device_Off"), enabled);
+                row.UseEnabledLabels(Text("Device_On"), Text("Device_Off"), item.Enabled);
                 rows.Add(row);
             }
 
@@ -917,31 +1068,6 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 启用文字。认不出时整份文件视为无效。
-        /// </summary>
-        private static bool ParseEnabled(string text)
-        {
-            var value = text.Trim();
-            if (value.Equals("启用", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("Enabled", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("true", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("1", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("是", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("yes", StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            if (value.Equals("停用", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("Disabled", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("false", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("0", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("否", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("no", StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            throw new InvalidDataException();
-        }
-
-        /// <summary>
         /// 打开空白扫码枪弹窗。
         /// </summary>
         private void OpenAddScanner()
@@ -953,6 +1079,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
             EditorPort = "9004";
             EditorTrigger = "LON";
             EditorTransport = ScanTransports[0];
+            EditorBaud = "9600";
+            EditorParity = ParityChoices[0];
+            EditorDataBits = DataBitChoices[1];
+            EditorStopBits = StopBitChoices[0];
             EditorEnabled = true;
             EditorError = "";
             SetEditor(EditorKind.Scanner);
@@ -973,6 +1103,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
             EditorPort = SelectedScanner.Port;
             EditorTrigger = SelectedScanner.TriggerText;
             EditorTransport = TransportText(SelectedScanner.Transport);
+            EditorBaud = SelectedScanner.BaudRate.ToString();
+            EditorParity = SelectedScanner.Parity;
+            EditorDataBits = SelectedScanner.DataBits.ToString();
+            EditorStopBits = SelectedScanner.StopBits;
             EditorEnabled = SelectedScanner.IsEnabled;
             EditorError = "";
             SetEditor(EditorKind.Scanner);
@@ -1041,10 +1175,49 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 return;
             }
 
+            if (!TryParseKind(EditorPointKind, out var kind))
+            {
+                EditorError = Text("Device_NeedKind");
+                return;
+            }
+
+            if (!Enum.TryParse<PlcDataType>(EditorDataType, out var dataType) || !Enum.IsDefined(dataType))
+            {
+                EditorError = Text("Device_BadType");
+                return;
+            }
+
+            int? bitIndex = null;
+            var bitText = EditorBit.Trim();
+            if (bitText.Length > 0)
+            {
+                if (!int.TryParse(bitText, out var bitValue))
+                {
+                    EditorError = Text("Device_BadBit");
+                    return;
+                }
+
+                bitIndex = PlcPointEntity.NormalizeBitIndex(dataType, lengthValue, bitValue);
+                if (bitIndex is null)
+                {
+                    EditorError = Text("Device_BadBit");
+                    return;
+                }
+            }
+
+            var description = PlcPointEntity.NormalizeDescription(EditorDescription);
             var row = _editingId is null ? null : Points.FirstOrDefault(item => item.Id == _editingId);
+            if (PlcPointEntity.IsSingleton(kind) && Points.Any(item => item.PointKind == kind && item.Id != (row?.Id ?? Guid.Empty)))
+            {
+                EditorError = Text("Device_SingletonPoint");
+                return;
+            }
+
+            var created = false;
             if (row is null)
             {
                 row = AddPoint(name, address, EditorDataType, length, EditorAccess, EditorEnabled, false);
+                created = true;
                 SelectedPoint = row;
             }
             else
@@ -1059,7 +1232,21 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     ApplyPoint(row);
             }
 
-            StorePoint(row);
+            row.PointKind = kind;
+            row.KindText = KindText(kind);
+            row.BitIndex = bitIndex;
+            row.Description = description;
+            if (!StorePoint(row))
+            {
+                if (created)
+                {
+                    Points.Remove(row);
+                    SelectedPoint = Points.FirstOrDefault();
+                }
+
+                EditorError = Text("Device_SingletonPoint");
+                return;
+            }
             StorePointOrder();
             CloseEditor();
         }
@@ -1098,6 +1285,39 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 return;
             }
 
+            var baud = 9600;
+            var parity = "None";
+            var dataBits = 8;
+            var stopBits = "One";
+            if (transport == ScanTransport.Serial)
+            {
+                if (!int.TryParse(EditorBaud.Trim(), out baud) || baud <= 0)
+                {
+                    EditorError = Text("Device_NeedBaud");
+                    return;
+                }
+
+                parity = EditorParity.Trim();
+                if (!ParityChoices.Contains(parity))
+                {
+                    EditorError = Text("Device_BadSerial");
+                    return;
+                }
+
+                if (!int.TryParse(EditorDataBits.Trim(), out dataBits) || dataBits is not (7 or 8))
+                {
+                    EditorError = Text("Device_BadSerial");
+                    return;
+                }
+
+                stopBits = EditorStopBits.Trim();
+                if (!StopBitChoices.Contains(stopBits))
+                {
+                    EditorError = Text("Device_BadSerial");
+                    return;
+                }
+            }
+
             var card = _editingId is null ? null : Scanners.FirstOrDefault(item => item.Id == _editingId);
             if (card is null)
             {
@@ -1112,8 +1332,24 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 card.Ip = host;
                 card.Port = transport == ScanTransport.Tcp ? port : "";
                 card.TriggerText = trigger;
+                if (transport == ScanTransport.Serial)
+                {
+                    card.BaudRate = baud;
+                    card.Parity = parity;
+                    card.DataBits = dataBits;
+                    card.StopBits = stopBits;
+                }
+
                 card.UseEnabledLabels(Text("Device_On"), Text("Device_Off"), EditorEnabled);
                 _suppressScanSave = false;
+            }
+
+            if (card.Transport == ScanTransport.Serial && _editingId is null)
+            {
+                card.BaudRate = baud;
+                card.Parity = parity;
+                card.DataBits = dataBits;
+                card.StopBits = stopBits;
             }
 
             StoreScanner(card);
@@ -1137,6 +1373,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private async void ReadCustom()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             var address = TestAddress.Trim();
             if (address.Length == 0)
                 return;
@@ -1163,7 +1402,13 @@ namespace MMSP.App.TemplateMatch.ViewModels
             }
 
             NotePlc(DeviceLogKind.Send, "读取 地址 " + address + " 类型 " + type + " 长度 " + length, false);
-            var result = await ExchangePlc(address, type, length, null);
+            var bitIndex = BitOf(point, type, length);
+            var formatStatus = point is not null
+                && bitIndex is null
+                && point.PointKind == PlcPointKind.Status
+                && string.Equals(point.DataType, type, StringComparison.Ordinal)
+                && string.Equals(point.LengthText.Trim(), length, StringComparison.Ordinal);
+            var result = await ExchangePlc(address, type, length, null, bitIndex, formatStatus);
             if (result is null)
                 return;
 
@@ -1182,6 +1427,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private async void WriteCustom()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             var address = TestAddress.Trim();
             if (address.Length == 0)
                 return;
@@ -1208,7 +1456,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             }
 
             NotePlc(DeviceLogKind.Send, "写入 地址 " + address + " 类型 " + type + " 值 " + value, false);
-            var result = await ExchangePlc(address, type, "1", value);
+            var result = await ExchangePlc(address, type, "1", value, BitOf(point, type, "1"), false);
             if (result is null)
                 return;
 
@@ -1256,6 +1504,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// </summary>
         private async void TriggerScanner()
         {
+            if (LicenseGate.Block(ContainerExt))
+                return;
+
             var scanner = SelectedScanner;
             if (scanner is null)
                 return;
@@ -1298,11 +1549,28 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 按地址找点位。自定义读写用来回写当前值。
+        /// 按地址找点位。自定义读写用来回写当前值。同地址只取第一行。
         /// </summary>
         private PlcPointRow? FindByAddress(string address)
         {
             return Points.FirstOrDefault(item => string.Equals(item.Address, address, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// 类型和长度与这一行一致时，带上它的 Bit。
+        /// </summary>
+        private static int? BitOf(PlcPointRow? point, string type, string length)
+        {
+            if (point is null)
+                return null;
+
+            if (!string.Equals(point.DataType, type, StringComparison.Ordinal))
+                return null;
+
+            if (!string.Equals(point.LengthText.Trim(), length, StringComparison.Ordinal))
+                return null;
+
+            return point.BitIndex;
         }
 
         /// <summary>
@@ -1418,6 +1686,67 @@ namespace MMSP.App.TemplateMatch.ViewModels
             RaisePropertyChanged(nameof(IsEditorOpen));
             RaisePropertyChanged(nameof(IsPointEditor));
             RaisePropertyChanged(nameof(IsScannerEditor));
+        }
+
+        /// <summary>
+        /// 点位类型下拉。顺序与枚举说明一致。
+        /// </summary>
+        private static string[] KindChoices()
+        {
+            return
+            [
+                KindText(PlcPointKind.Flow),
+                KindText(PlcPointKind.Monitor),
+                KindText(PlcPointKind.Heartbeat),
+                KindText(PlcPointKind.Status)
+            ];
+        }
+
+        /// <summary>
+        /// 点位类型的当前语言文字。
+        /// </summary>
+        private static string KindText(PlcPointKind kind)
+        {
+            var key = kind switch
+            {
+                PlcPointKind.Monitor => "Device_KindMonitor",
+                PlcPointKind.Heartbeat => "Device_KindHeartbeat",
+                PlcPointKind.Status => "Device_KindStatus",
+                _ => "Device_KindFlow"
+            };
+            return Text(key);
+        }
+
+        /// <summary>
+        /// 下拉文字或 CSV 文字转成点位类型。
+        /// </summary>
+        private static bool TryParseKind(string text, out PlcPointKind kind)
+        {
+            if (text == Text("Device_KindFlow"))
+            {
+                kind = PlcPointKind.Flow;
+                return true;
+            }
+
+            if (text == Text("Device_KindMonitor"))
+            {
+                kind = PlcPointKind.Monitor;
+                return true;
+            }
+
+            if (text == Text("Device_KindHeartbeat"))
+            {
+                kind = PlcPointKind.Heartbeat;
+                return true;
+            }
+
+            if (text == Text("Device_KindStatus"))
+            {
+                kind = PlcPointKind.Status;
+                return true;
+            }
+
+            return PlcPointColumns.TryParseKind(text, out kind);
         }
 
         /// <summary>

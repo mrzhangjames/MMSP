@@ -21,6 +21,7 @@ namespace MMSP.Service.Flow.Steps
             [FlowToolKind.JsonParse] = cfg => new JsonParseFlowTool(cfg),
             [FlowToolKind.Condition] = cfg => new ConditionFlowTool(cfg),
             [FlowToolKind.Script] = cfg => new ScriptFlowTool(cfg),
+            [FlowToolKind.Uph] = cfg => new UphFlowTool(cfg),
             [FlowToolKind.Lux_AlarmLogTool] = cfg => new LuxAlarmLogFlowTool(cfg)
         };
 

@@ -1,4 +1,4 @@
-using MMSP.Service.Device.Scan;
+﻿using MMSP.Service.Device.Scan;
 
 namespace MMSP.App.TemplateMatch.Models
 {
@@ -44,7 +44,7 @@ namespace MMSP.App.TemplateMatch.Models
         public bool IsTcp => Transport == ScanTransport.Tcp;
 
         /// <summary>
-        /// 串口波特率。弹窗不编辑。
+        /// 串口波特率。串口弹窗可改。
         /// </summary>
         public int BaudRate { get; set; } = 9600;
 

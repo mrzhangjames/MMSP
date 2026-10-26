@@ -8,7 +8,8 @@ namespace MMSP.Core.Model.Tool
     public class ConditionToolEntity : PluginToolModel
     {
         /// <summary>
-        /// 条件表达式。
+        /// 条件表达式。用 {变量名} 取当前文本，例如 {条码} 长度 &gt; 8、{条码} == SN001、{条码} 包含 SN。
+        /// 成立时这一步成功；不成立时本轮失败。
         /// </summary>
         public string Expression { get; set; } = "";
 

@@ -11,6 +11,7 @@
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
         ShowIconOnTitleBar="True"
+        Icon="/Resources/app.ico"
         ShowMaxRestoreButton="False"
         ShowMinButton="False"
         WindowStartupLocation="CenterScreen"
@@ -211,7 +212,7 @@
             </Grid>
         </Border>
 
-        <!--  区域 底栏。金色细线加主色条。左侧版本、许可证、设备连接、运行状态。右侧登录用户和时间。文字绑 MainViewModel。底栏占位不盖住这一行。  -->
+        <!--  区域 底栏。金色细线加主色条。左侧版本、许可证、PLC 和扫码枪连接、运行状态。右侧登录用户和时间。文字绑 MainViewModel。底栏占位不盖住这一行。  -->
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="2" />
@@ -221,7 +222,7 @@
             <Border Grid.Row="0" Background="{StaticResource ThemeBrushColorAssist}" />
 
             <Border Grid.Row="1" Background="{StaticResource ThemeBrushColorMajor}">
-                <DockPanel Margin="12,0" LastChildFill="False">
+                <DockPanel Margin="12,0" LastChildFill="True">
                     <StackPanel DockPanel.Dock="Right"
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center">
@@ -243,7 +244,7 @@
                         </TextBlock>
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" ClipToBounds="True">
                         <TextBlock FontSize="12" Foreground="White" VerticalAlignment="Center">
                             <Run Text="{DynamicResource Footer_Version}" />
                             <Run Text=" " />
@@ -251,21 +252,68 @@
                             <Run Text="  " />
                             <Run Text="{Binding LicenseStatusText, Mode=OneWay}" />
                         </TextBlock>
-                        <TextBlock Text="|"
-                                   Margin="10,0"
-                                   FontSize="12"
-                                   Opacity="0.7"
-                                   Foreground="White"
-                                   VerticalAlignment="Center" />
-                        <Ellipse Width="8"
-                                 Height="8"
-                                 Margin="0,0,6,0"
-                                 VerticalAlignment="Center"
-                                 Fill="{StaticResource StatusConnectedBrush}" />
-                        <TextBlock Text="{DynamicResource Footer_DeviceConnected}"
-                                   FontSize="12"
-                                   Foreground="White"
-                                   VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasDeviceLinks}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="|"
+                                       Margin="10,0"
+                                       FontSize="12"
+                                       Opacity="0.7"
+                                       Foreground="White"
+                                       VerticalAlignment="Center" />
+                            <ItemsControl ItemsSource="{Binding DeviceLinks}"
+                                          VerticalAlignment="Center"
+                                          AlternationCount="1000">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Margin" Value="12,0,0,0" />
+                                        <Style.Triggers>
+                                            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                                <Setter Property="Margin" Value="0" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="8"
+                                                     Height="8"
+                                                     Margin="0,0,6,0"
+                                                     VerticalAlignment="Center">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="Ellipse">
+                                                        <Setter Property="Fill" Value="#E8E8E8" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                                                <Setter Property="Fill" Value="{StaticResource StatusConnectedBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Ellipse.Style>
+                                            </Ellipse>
+                                            <TextBlock Text="{Binding Text}"
+                                                       FontSize="12"
+                                                       Foreground="White"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
