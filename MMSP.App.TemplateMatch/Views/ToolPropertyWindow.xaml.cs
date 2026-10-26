@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using MahApps.Metro.Controls;
+using MMSP.App.TemplateMatch.Services;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.Base;

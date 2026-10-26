@@ -56,6 +56,9 @@
     <sys:String x:Key="User_Password">Password</sys:String>
     <sys:String x:Key="User_Role">Role</sys:String>
     <sys:String x:Key="User_Enabled">Enabled</sys:String>
+    <sys:String x:Key="User_SessionTimeout">Session timeout</sys:String>
+    <sys:String x:Key="User_SessionTimeoutHint">Minutes. 0 means no timeout.</sys:String>
+    <sys:String x:Key="User_NeedTimeout">Enter a whole number of minutes, 0 or greater</sys:String>
     <sys:String x:Key="User_CreateTime">Created</sys:String>
     <sys:String x:Key="User_AddTitle">New user</sys:String>
     <sys:String x:Key="User_EditTitle">Edit user</sys:String>

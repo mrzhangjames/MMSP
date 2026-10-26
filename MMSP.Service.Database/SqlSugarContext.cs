@@ -6,7 +6,7 @@ using SqlSugar;
 namespace MMSP.Service.Database
 {
     /// <summary>
-    /// 两套 SQLite。系统配置库是程序目录下的 Config\sys.cfg，客户库是程序目录上一层的 Data\DB\ldm.db。
+    /// 两套 SQLite。系统配置库是程序目录下的 Config\sys.cfgdb，客户库是程序目录上一层的 Data\DB\ldm.db。
     /// </summary>
     public class SqlSugarContext : IDisposable
     {

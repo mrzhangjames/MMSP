@@ -66,5 +66,21 @@ namespace MMSP.Service.Flow.Tests
             Assert.False(UserSessionTimeout.Due(5, login, login.AddMinutes(5).AddTicks(-1)));
             Assert.True(UserSessionTimeout.Due(5, login, login.AddMinutes(5)));
         }
+
+        /// <summary>
+        /// 弹窗只接受 0 和正整数分钟。
+        /// </summary>
+        [Fact]
+        public void Timeout_ParseAcceptsWholeMinutes()
+        {
+            Assert.True(UserSessionTimeout.TryParse("0", out var zero));
+            Assert.Equal(0, zero);
+            Assert.True(UserSessionTimeout.TryParse(" 15 ", out var minutes));
+            Assert.Equal(15, minutes);
+            Assert.False(UserSessionTimeout.TryParse("", out _));
+            Assert.False(UserSessionTimeout.TryParse("-1", out _));
+            Assert.False(UserSessionTimeout.TryParse("1.5", out _));
+            Assert.False(UserSessionTimeout.TryParse("abc", out _));
+        }
     }
 }

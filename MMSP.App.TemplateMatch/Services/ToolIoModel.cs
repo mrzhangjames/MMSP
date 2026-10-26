@@ -1,10 +1,10 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using MMSP.Core.Model.Base;
 using MMSP.Core.Model.Sys;
 using MMSP.Core.Model.Tool;
 using MMSP.Plugin.Tool.ViewModels;
 
-namespace MMSP.App.TemplateMatch.Views
+namespace MMSP.App.TemplateMatch.Services
 {
     /// <summary>
     /// 通用工具窗左右两侧。左侧入参，右侧出参。中间表单仍由各工具自己画。

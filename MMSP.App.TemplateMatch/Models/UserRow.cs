@@ -30,6 +30,11 @@ namespace MMSP.App.TemplateMatch.Models
         public bool IsValid { get; init; }
 
         /// <summary>
+        /// 会话超时，分钟。0 表示不超时。
+        /// </summary>
+        public int SessionTimeout { get; init; }
+
+        /// <summary>
         /// 是否勾选。勾选行用金色底，删除用这些行。
         /// </summary>
         public bool IsChecked

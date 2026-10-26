@@ -934,7 +934,7 @@
             </Grid>
         </Border>
 
-        <!--  区域 编辑窗 UserEditor。控件：登录名（UserEditorLogin）、用户名（UserEditorUserName）、密码（UserEditorPassword）、角色（UserEditorRole）、错误（UserEditorError）。按钮：保存（UserEditorSave）、取消（UserEditorCancel）。样式 UserToolButtonStyle、UserUnderlineBox、UserPasswordBox、UserRoleCombo。  -->
+        <!--  区域 编辑窗 UserEditor。控件：登录名（UserEditorLogin）、用户名（UserEditorUserName）、密码（UserEditorPassword）、角色（UserEditorRole）、会话超时（UserEditorTimeout）、错误（UserEditorError）。按钮：保存（UserEditorSave）、取消（UserEditorCancel）。样式 UserToolButtonStyle、UserUnderlineBox、UserPasswordBox、UserRoleCombo。  -->
         <Grid Panel.ZIndex="2"
               Background="#73000000"
               Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolVis}}"
@@ -986,6 +986,15 @@
                                   ItemsSource="{Binding Roles}"
                                   SelectedItem="{Binding EditorRole}"
                                   AutomationProperties.AutomationId="UserEditorRole" />
+
+                        <TextBlock Text="{DynamicResource User_SessionTimeout}" FontSize="12" Foreground="{DynamicResource FieldLabelBrush}" Margin="0,14,0,4" />
+                        <TextBox Style="{StaticResource UserUnderlineBox}"
+                                 Text="{Binding EditorSessionTimeout, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="UserEditorTimeout" />
+                        <TextBlock Text="{DynamicResource User_SessionTimeoutHint}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource FieldLabelBrush}"
+                                   Margin="0,4,0,0" />
 
                         <TextBlock Text="{Binding EditorError}"
                                    Foreground="{StaticResource HighestRed}"

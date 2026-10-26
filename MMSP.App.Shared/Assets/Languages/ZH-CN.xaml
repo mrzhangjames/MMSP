@@ -55,6 +55,9 @@
     <sys:String x:Key="User_Password">密码</sys:String>
     <sys:String x:Key="User_Role">角色</sys:String>
     <sys:String x:Key="User_Enabled">启用</sys:String>
+    <sys:String x:Key="User_SessionTimeout">会话超时</sys:String>
+    <sys:String x:Key="User_SessionTimeoutHint">分钟。填 0 表示不超时。</sys:String>
+    <sys:String x:Key="User_NeedTimeout">请填写不小于 0 的整数分钟</sys:String>
     <sys:String x:Key="User_CreateTime">创建时间</sys:String>
     <sys:String x:Key="User_AddTitle">新增用户</sys:String>
     <sys:String x:Key="User_EditTitle">编辑用户</sys:String>

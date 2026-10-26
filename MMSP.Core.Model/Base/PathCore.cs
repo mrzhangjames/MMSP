@@ -56,7 +56,7 @@ namespace MMSP.Core.Model.Base
         /// <summary>
         /// 系统配置库文件名。
         /// </summary>
-        public const string File_SysConfig = "sys.cfg";
+        public const string File_SysConfig = "sys.cfgdb";
 
         /// <summary>
         /// NLog 配置文件名。源文件在 Lib\Config，编译后位于程序目录。
@@ -68,7 +68,7 @@ namespace MMSP.Core.Model.Base
         #region << 全路径 >>
 
         /// <summary>
-        /// 系统配置库全路径：程序目录\Config\sys.cfg。
+        /// 系统配置库全路径：程序目录\Config\sys.cfgdb。
         /// </summary>
         public static string SystemDbFilePath => Path.Combine(Folder_App, Folder_Config, File_SysConfig);
 

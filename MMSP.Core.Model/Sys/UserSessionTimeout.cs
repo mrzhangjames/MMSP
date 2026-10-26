@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace MMSP.Core.Model.Sys
 {
@@ -16,6 +17,19 @@ namespace MMSP.Core.Model.Sys
                 return false;
 
             return now >= loginTime.AddMinutes(minutes);
+        }
+
+        /// <summary>
+        /// 把弹窗文字收成分钟。只接受 0 和正整数。空、小数和负数都不收。
+        /// </summary>
+        public static bool TryParse(string? text, out int minutes)
+        {
+            minutes = 0;
+            var value = (text ?? "").Trim();
+            if (value.Length == 0)
+                return false;
+
+            return int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out minutes);
         }
     }
 }

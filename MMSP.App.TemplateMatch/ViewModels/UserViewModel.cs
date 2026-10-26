@@ -31,6 +31,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private string _editorUserName = "";
         private string _editorPassword = "";
         private string _editorRole = "";
+        private string _editorSessionTimeout = "0";
         private string _editorError = "";
         private bool _editorEnabled = true;
         private UserRole _editorRoleEnum = UserRole.Admin;
@@ -275,6 +276,15 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
+        /// 弹窗里的会话超时，分钟。0 表示不超时。
+        /// </summary>
+        public string EditorSessionTimeout
+        {
+            get => _editorSessionTimeout;
+            set => SetProperty(ref _editorSessionTimeout, value);
+        }
+
+        /// <summary>
         /// 弹窗里选中的角色。
         /// </summary>
         public string EditorRole
@@ -353,6 +363,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 Role = entity.RoleLevel,
                 RoleName = RoleText(entity.RoleLevel),
                 IsValid = entity.IsValid,
+                SessionTimeout = entity.SessionTimeout,
                 EnabledText = entity.IsValid ? Text("User_Yes") : Text("User_No"),
                 CreateTimeText = entity.CreateTime.ToString("yyyy-MM-dd HH:mm:ss")
             };
@@ -368,6 +379,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             EditorLoginName = "";
             EditorUserName = "";
             EditorPassword = "";
+            EditorSessionTimeout = "0";
             EditorRole = Roles[0];
             EditorEnabled = true;
             EditorError = "";
@@ -388,6 +400,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             EditorLoginName = row.LoginName;
             EditorUserName = row.UserName;
             EditorPassword = "";
+            EditorSessionTimeout = row.SessionTimeout.ToString(System.Globalization.CultureInfo.InvariantCulture);
             EditorRole = RoleText(row.Role);
             EditorEnabled = row.IsValid;
             EditorError = "";
@@ -478,6 +491,12 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 return false;
             }
 
+            if (!UserSessionTimeout.TryParse(EditorSessionTimeout, out var timeoutMinutes))
+            {
+                EditorError = Text("User_NeedTimeout");
+                return false;
+            }
+
             if (!SqlSugarContext.IsOpen)
             {
                 EditorError = Text("User_SaveFailed");
@@ -506,6 +525,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     entity.UserName = userName;
                     entity.RoleLevel = role;
                     entity.IsValid = EditorEnabled;
+                    entity.SessionTimeout = timeoutMinutes;
                     if (EditorPassword.Length > 0)
                         entity.Password = UserPassword.Hash(EditorPassword);
                     db.Updateable(entity).ExecuteCommand();
@@ -520,7 +540,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                         Password = UserPassword.Hash(EditorPassword),
                         RoleLevel = role,
                         IsValid = EditorEnabled,
-                        SessionTimeout = 0,
+                        SessionTimeout = timeoutMinutes,
                         CreateTime = DateTime.Now
                     }).ExecuteCommand();
                 }
@@ -779,6 +799,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             EditorLoginName = "";
             EditorUserName = "";
             EditorPassword = "";
+            EditorSessionTimeout = "0";
             EditorError = "";
         }
 
