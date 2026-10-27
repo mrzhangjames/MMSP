@@ -50,11 +50,11 @@ namespace MMSP.App.TemplateMatch.ViewModels
         private string _editorStopBits = "One";
         private PlcPointRow? _selectedPoint;
         private ScannerCard? _selectedScanner;
-        private string _plcIp = "192.168.1.10";
+        private string _plcIp = "192.168.1.105";
         private string _plcConnectionType = "";
         private string _plcStation = "1";
         private string _plcPort = "502";
-        private string _plcDataFormat = "ABCD";
+        private string _plcDataFormat = "CDAB";
         private string _plcPoll = "200 ms";
         private string _plcReadTimeout = "1000 ms";
         private string _plcWriteTimeout = "1000 ms";

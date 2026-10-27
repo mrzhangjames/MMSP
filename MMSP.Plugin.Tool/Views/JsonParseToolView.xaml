@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="MMSP.Plugin.Tool.Views.JsonParseToolView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              Background="{DynamicResource CardBackground}"
              FontFamily="Segoe UI, Microsoft YaHei"
              FontSize="14"
@@ -21,7 +22,7 @@
                          Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="来源" Style="{StaticResource ToolLabel}" />
+                <TextBlock Text="来源（入参）" Style="{StaticResource ToolLabel}" />
                 <TextBox Style="{StaticResource ToolBox}"
                          IsReadOnly="True"
                          Text="{Binding Source, Mode=OneWay}" />
@@ -32,7 +33,7 @@
                          Text="{Binding JsonPath, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="结果" Style="{StaticResource ToolLabel}" />
+                <TextBlock Text="结果（出参）" Style="{StaticResource ToolLabel}" />
                 <TextBox Style="{StaticResource ToolBox}"
                          IsReadOnly="True"
                          Text="{Binding Target, Mode=OneWay}" />
@@ -48,10 +49,17 @@
                 <TextBox Style="{StaticResource ToolArea}"
                          Text="{Binding Sample, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
-            <Button Content="试算"
-                    Style="{StaticResource ToolButton}"
-                    Command="{Binding TryCommand}"
-                    Margin="0,0,0,12" />
+            <Button Style="{StaticResource MahApps.Styles.Button}"
+                    Height="32"
+                    MinWidth="88"
+                    HorizontalAlignment="Left"
+                    Margin="0,0,0,12"
+                    Command="{Binding TryCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconPhosphorIcons Kind="Calculator" Width="16" Height="16" VerticalAlignment="Center" />
+                    <TextBlock Text="试算" Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="试算结果" Style="{StaticResource ToolLabel}" />
                 <TextBox IsReadOnly="True"

@@ -1,9 +1,9 @@
 ﻿using System.Globalization;
 using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.Sys;
-using MMSP.Core.Model.Tool;
+using MMSP.Core.Model.Tool.PluginLux;
 
-namespace MMSP.Service.Flow.Steps
+namespace MMSP.Service.Flow.Steps.PluginLux
 {
     /// <summary>
     /// 立讯报警日志。每轮读每一行，上升沿才写流程日志，不挡住后面的流程。

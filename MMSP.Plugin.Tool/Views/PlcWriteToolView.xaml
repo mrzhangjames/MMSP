@@ -41,7 +41,18 @@
                           SelectedItem="{Binding DataType}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="写入值" Style="{StaticResource ToolLabel}" />
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource ToolLabel}">
+                            <Setter Property="Text" Value="写入值" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ValueFromVariable}" Value="True">
+                                    <Setter Property="Text" Value="写入值（入参）" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <Grid MinWidth="300" HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="120" />

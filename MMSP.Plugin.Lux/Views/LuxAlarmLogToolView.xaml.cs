@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using MMSP.App.WpfBase.Services;
 using MMSP.Core.Model.Sys;
-using MMSP.Core.Model.Tool;
+using MMSP.Core.Model.Tool.PluginLux;
 using MMSP.Plugin.Lux.ViewModels;
 
 namespace MMSP.Plugin.Lux.Views

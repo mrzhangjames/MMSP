@@ -128,7 +128,7 @@
             <TextBox Style="{StaticResource ToolBox}"
                      Text="{Binding Count, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
-        <!--  区域 扫码结果。控件 Results。列：扫码枪、出参结果。高度随行数变，表内不滚动。  -->
+        <!--  区域 扫码结果。控件 Results。列：扫码枪、出参。高度随行数变，表内不滚动。  -->
         <TextBlock Text="扫码结果" Style="{StaticResource ToolLabel}" />
         <DataGrid ItemsSource="{Binding Results}"
                   Height="{Binding ResultsHeight}"
@@ -162,7 +162,7 @@
                   Margin="0,0,0,16">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="扫码枪" Width="*" MinWidth="96" Binding="{Binding Scanner}" />
-                <DataGridTextColumn Header="出参结果" Width="*" MinWidth="96" Binding="{Binding Variable}" />
+                <DataGridTextColumn Header="出参" Width="*" MinWidth="96" Binding="{Binding Variable}" />
             </DataGrid.Columns>
         </DataGrid>
         <!--  分割线。下面是写入 PLC。  -->

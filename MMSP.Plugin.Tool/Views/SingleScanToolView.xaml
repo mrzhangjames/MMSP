@@ -32,7 +32,7 @@
                      Text="{Binding Trigger, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
         <StackPanel Margin="0,0,0,16">
-            <TextBlock Text="扫码结果" Style="{StaticResource ToolLabel}" />
+            <TextBlock Text="扫码结果（出参）" Style="{StaticResource ToolLabel}" />
             <TextBox Style="{StaticResource ToolBox}"
                      Text="{Binding Result, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>

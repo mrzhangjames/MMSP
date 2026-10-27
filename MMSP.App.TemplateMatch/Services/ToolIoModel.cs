@@ -22,9 +22,14 @@ namespace MMSP.App.TemplateMatch.Services
         private readonly FlowToolKind _kind;
 
         /// <summary>
-        /// 前序步骤已经当作写出参的名称。
+        /// 前序步骤已经写出的出参。左侧用来显示前序已出参。
         /// </summary>
         private readonly HashSet<string> _prior;
+
+        /// <summary>
+        /// 其它步骤已经占用的出参。右侧这些名字不能再选。
+        /// </summary>
+        private readonly HashSet<string> _taken;
 
         /// <summary>
         /// 写回单出参。Json、PLC 读取和单扫码要走编辑模型，好让中间的结果框一起变。
@@ -42,6 +47,11 @@ namespace MMSP.App.TemplateMatch.Services
         private readonly Action<string> _setInput;
 
         /// <summary>
+        /// CSV 点左侧一行时，让中间对应的数据行进入编辑。
+        /// </summary>
+        private readonly Action<int> _editRow;
+
+        /// <summary>
         /// 建立左右两列。variables 是本流程的变量名，按保存顺序。
         /// </summary>
         public ToolIoModel(
@@ -49,22 +59,28 @@ namespace MMSP.App.TemplateMatch.Services
             PluginToolModel tool,
             IReadOnlyList<string> variables,
             IReadOnlySet<string> priorOutputs,
+            IReadOnlySet<string> takenOutputs,
             Action<string> setOutput,
             Action<string> setInput,
-            Action slotsChanged)
+            Action slotsChanged,
+            Action<int> editRow)
         {
             ArgumentNullException.ThrowIfNull(tool);
             ArgumentNullException.ThrowIfNull(variables);
             ArgumentNullException.ThrowIfNull(priorOutputs);
+            ArgumentNullException.ThrowIfNull(takenOutputs);
             ArgumentNullException.ThrowIfNull(setOutput);
             ArgumentNullException.ThrowIfNull(setInput);
             ArgumentNullException.ThrowIfNull(slotsChanged);
+            ArgumentNullException.ThrowIfNull(editRow);
             _kind = kind;
             _tool = tool;
             _prior = new HashSet<string>(priorOutputs, StringComparer.Ordinal);
+            _taken = new HashSet<string>(takenOutputs, StringComparer.Ordinal);
             _setOutput = setOutput;
             _setInput = setInput;
             _slotsChanged = slotsChanged;
+            _editRow = editRow;
             VariableNames = variables;
             Outputs = [];
             Inputs = [];
@@ -138,7 +154,7 @@ namespace MMSP.App.TemplateMatch.Services
         /// <summary>
         /// 右侧标题下的说明。
         /// </summary>
-        private string _outputHint = "点选本步写入的变量。前序已选用的不能再选";
+        private string _outputHint = "已选用的不能再作为出参。入参可以重复使用。";
 
         /// <summary>
         /// 条码数量、扫码枪或结果变了之后，按配置重画两侧。
@@ -148,7 +164,7 @@ namespace MMSP.App.TemplateMatch.Services
             if (_tool is MultiScanToolEntity multi)
                 ToolVars.FitSlots(multi, ToolVars.OutputSlotCount(multi));
 
-            DropPriorOutputs();
+            DropTakenOutputs();
             RebuildOutputs();
             RebuildInputs();
             if (_tool is MultiScanToolEntity)
@@ -156,8 +172,8 @@ namespace MMSP.App.TemplateMatch.Services
         }
 
         /// <summary>
-        /// 点一行。前序已选用的不能再选。再点本步已选的行则取消。
-        /// PLC 写入没有写出参，点右侧是把变量名填进写入值。
+        /// 点一行。其它步骤已选用的不能再作为出参。再点本步已选的行则取消。
+        /// PLC 写入没有写出参，点右侧是把变量名填进写入值。CSV 不写出参，点右侧不填数据来源。
         /// </summary>
         private void Select(ToolOutputRow row)
         {
@@ -223,6 +239,12 @@ namespace MMSP.App.TemplateMatch.Services
             if (_kind == FlowToolKind.Uph)
             {
                 ApplyUph(row.Selected ? "" : row.Name);
+                return;
+            }
+
+            if (_kind == FlowToolKind.Csv)
+            {
+                _editRow(row.Index);
                 return;
             }
 
@@ -323,6 +345,12 @@ namespace MMSP.App.TemplateMatch.Services
                 return;
             }
 
+            if (_tool is CsvToolEntity csv)
+            {
+                RebuildCsvInputs(csv);
+                return;
+            }
+
             if (VariableNames.Count == 0)
             {
                 InputNote = "本流程还没有变量。";
@@ -346,6 +374,32 @@ namespace MMSP.App.TemplateMatch.Services
                     status = _prior.Contains(name) ? "前序已出参" : "未出参";
 
                 Inputs.Add(new ToolInputRow(name, on, status));
+            }
+        }
+
+        /// <summary>
+        /// CSV 左侧按导出列列出。参数是列名，绑定是数据来源。
+        /// </summary>
+        private void RebuildCsvInputs(CsvToolEntity csv)
+        {
+            var rows = csv.Rows ?? [];
+            InputNote = rows.Count == 0
+                ? "还没有导出列。"
+                : "每一行的数据来源。前序写出的显示前序已出参。";
+            for (var index = 0; index < rows.Count; index++)
+            {
+                var row = rows[index];
+                var column = (row?.Column ?? "").Trim();
+                var source = (row?.Source ?? "").Trim();
+                var status = source.Length == 0
+                    ? "未绑定"
+                    : _prior.Contains(source) ? "前序已出参" : "未出参";
+                Inputs.Add(new ToolInputRow(
+                    column.Length == 0 ? "未填写" : column,
+                    index == csv.EditingIndex,
+                    status,
+                    source,
+                    index));
             }
         }
 
@@ -400,16 +454,16 @@ namespace MMSP.App.TemplateMatch.Services
         }
 
         /// <summary>
-        /// 本步如果选了前序已占用的名称，打开时清掉。取消窗口不会写回。
+        /// 本步如果选了其它步骤已占用的名称，打开时清掉。取消窗口不会写回。
         /// </summary>
-        private void DropPriorOutputs()
+        private void DropTakenOutputs()
         {
             if (_tool is MultiScanToolEntity multi)
             {
                 var slots = ToolVars.Slots(multi);
                 for (var index = 0; index < slots.Count; index++)
                 {
-                    if (_prior.Contains((slots[index] ?? "").Trim()))
+                    if (_taken.Contains((slots[index] ?? "").Trim()))
                         slots[index] = "";
                 }
 
@@ -417,7 +471,7 @@ namespace MMSP.App.TemplateMatch.Services
             }
 
             var current = ToolVars.Output(_tool).Trim();
-            if (current.Length > 0 && _prior.Contains(current))
+            if (current.Length > 0 && _taken.Contains(current))
                 _setOutput("");
         }
 
@@ -430,12 +484,12 @@ namespace MMSP.App.TemplateMatch.Services
             Outputs.Clear();
             OutputHint = _kind == FlowToolKind.PlcWrite
                 ? "点选一个变量，名称显示在写入值。"
-                : "点选本步写入的变量。前序已选用的不能再选";
+                : "已选用的不能再作为出参。入参可以重复使用。";
             foreach (var name in VariableNames)
             {
                 chosen.TryGetValue(name, out var slot);
-                var prior = _kind != FlowToolKind.PlcWrite && _prior.Contains(name);
-                Outputs.Add(new ToolOutputRow(name, prior, Status(prior, slot), slot > 0));
+                var taken = _kind != FlowToolKind.PlcWrite && _taken.Contains(name);
+                Outputs.Add(new ToolOutputRow(name, taken, Status(taken, slot), slot > 0));
             }
 
             OutputNote = Note(chosen);
@@ -482,7 +536,7 @@ namespace MMSP.App.TemplateMatch.Services
         private string Status(bool prior, int slot)
         {
             if (prior)
-                return "前序已选用";
+                return "已选用";
 
             if (slot <= 0)
                 return "未选用";
@@ -512,6 +566,9 @@ namespace MMSP.App.TemplateMatch.Services
 
             if (_kind == FlowToolKind.PlcWrite)
                 return "";
+
+            if (_kind == FlowToolKind.Csv)
+                return "本步写出文件，不写出参。";
 
             if (!ToolVars.HasOutput(_kind) && !ToolVars.HasManyOutputs(_kind))
                 return "本步不写出参。";
@@ -556,7 +613,7 @@ namespace MMSP.App.TemplateMatch.Services
         public string Name { get; }
 
         /// <summary>
-        /// 前序步骤已经把它当作出参。
+        /// 其它步骤已经把它当作出参。这种行不能再选。
         /// </summary>
         public bool UsedByPrior { get; }
 
@@ -597,17 +654,29 @@ namespace MMSP.App.TemplateMatch.Services
         /// <summary>
         /// 创建一行。
         /// </summary>
-        public ToolInputRow(string name, bool selected, string status)
+        public ToolInputRow(string name, bool selected, string status, string binding = "", int index = -1)
         {
             Name = name;
+            Binding = binding ?? "";
+            Index = index;
             _selected = selected;
             _status = status;
         }
 
         /// <summary>
-        /// 变量名。
+        /// 变量名。CSV 这里是列名。
         /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        /// CSV 绑定的流程变量。其它工具为空。
+        /// </summary>
+        public string Binding { get; }
+
+        /// <summary>
+        /// CSV 数据行的位置。其它工具为 -1。
+        /// </summary>
+        public int Index { get; }
 
         /// <summary>
         /// 状态文字。未选用、未出参或前序已出参。

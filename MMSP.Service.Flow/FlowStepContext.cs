@@ -8,11 +8,12 @@
         /// <summary>
         /// 创建一步的执行参数。variables 为空时这一步不能读写流程变量。
         /// </summary>
-        public FlowStepContext(CancellationToken token, IFlowDeviceSession devices, FlowVariables? variables = null)
+        public FlowStepContext(CancellationToken token, IFlowDeviceSession devices, FlowVariables? variables = null, string? flowName = null)
         {
             Token = token;
             Devices = devices;
             Variables = variables ?? FlowVariables.Empty;
+            FlowName = flowName ?? "";
         }
 
         /// <summary>
@@ -29,5 +30,10 @@
         /// 本流程这一次运行的变量。各轮共用，不与其它流程共享。
         /// </summary>
         public FlowVariables Variables { get; }
+
+        /// <summary>
+        /// 流程名称。一轮开始时由执行循环写入，CSV 用它生成目录和默认文件名。
+        /// </summary>
+        public string FlowName { get; set; }
     }
 }

@@ -34,10 +34,10 @@ namespace MMSP.Core.Model.DB
         public int Port { get; set; }
 
         /// <summary>
-        /// 字节序。ABCD、CDAB、BADC、DCBA。
+        /// 字节序。ABCD、CDAB、BADC、DCBA。汇川 H5U 的 32 位量用 CDAB。
         /// </summary>
         [SugarColumn(ColumnName = "data_format", Length = 8)]
-        public string DataFormat { get; set; } = "ABCD";
+        public string DataFormat { get; set; } = "CDAB";
 
         /// <summary>
         /// 站号。0 到 255，默认 1。

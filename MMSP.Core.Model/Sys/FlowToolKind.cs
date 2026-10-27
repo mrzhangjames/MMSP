@@ -3,7 +3,7 @@
 namespace MMSP.Core.Model.Sys
 {
     /// <summary>
-    /// 流程步骤的工具种类。数值与客户库 tool_kind 列一致。0 到 9 是通用工具，100 到 200 是立讯工具。
+    /// 流程步骤的工具种类。数值与客户库 tool_kind 列一致。0 到 10 是通用工具，100 到 200 是立讯工具。
     /// </summary>
     public enum FlowToolKind
     {
@@ -66,6 +66,12 @@ namespace MMSP.Core.Model.Sys
         /// </summary>
         [Description("UPH")]
         Uph = 9,
+
+        /// <summary>
+        /// 导出 CSV。按列把流程变量写成一行，追加到当天的文件。
+        /// </summary>
+        [Description("CSV")]
+        Csv = 10,
 
         /// <summary>
         /// 立讯报警日志。立讯工具从 100 排到 200。

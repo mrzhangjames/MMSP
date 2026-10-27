@@ -1,0 +1,253 @@
+<UserControl x:Class="MMSP.Plugin.Tool.Views.CsvToolView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             Background="{DynamicResource CardBackground}"
+             FontFamily="Segoe UI, Microsoft YaHei"
+             FontSize="14"
+             Foreground="{DynamicResource HighestBlack}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--  字典 工具表单 ToolForm。样式 ToolLabel、ToolBox、ToolButton。  -->
+                <ResourceDictionary Source="pack://application:,,,/MMSP.Plugin.Tool;component/Themes/ToolForm.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <!--  样式 CsvBox：行内列名。Metro 细边框，未编辑时隐藏，聚焦时边框变金。  -->
+            <Style x:Key="CsvBox" TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
+                <Setter Property="Height" Value="28" />
+                <Setter Property="MaxLength" Value="32" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                    <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                        <Setter Property="BorderBrush" Value="#FCC800" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <!--  样式 CsvDropItem：下拉项。悬停、键盘高亮或选中为金色。弹出层由 ComboBox 画出，不被行高裁切。  -->
+            <Style x:Key="CsvDropItem" TargetType="ComboBoxItem" BasedOn="{StaticResource MahApps.Styles.ComboBoxItem}">
+                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="mah:ItemHelper.ActiveSelectionBackgroundBrush" Value="#FCC800" />
+                <Setter Property="mah:ItemHelper.ActiveSelectionForegroundBrush" Value="#333333" />
+                <Setter Property="mah:ItemHelper.HoverBackgroundBrush" Value="#FCC800" />
+                <Setter Property="mah:ItemHelper.HoverForegroundBrush" Value="#333333" />
+                <Setter Property="mah:ItemHelper.HoverSelectedBackgroundBrush" Value="#FCC800" />
+                <Setter Property="mah:ItemHelper.HoverSelectedForegroundBrush" Value="#333333" />
+                <Setter Property="mah:ItemHelper.SelectedBackgroundBrush" Value="#FCC800" />
+                <Setter Property="mah:ItemHelper.SelectedForegroundBrush" Value="#333333" />
+                <Style.Triggers>
+                    <Trigger Property="IsHighlighted" Value="True">
+                        <Setter Property="Background" Value="#FCC800" />
+                        <Setter Property="Foreground" Value="#333333" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <!--  样式 CsvCombo：行内数据来源。Metro 下拉，未编辑时隐藏。  -->
+            <Style x:Key="CsvCombo" TargetType="ComboBox" BasedOn="{StaticResource MahApps.Styles.ComboBox}">
+                <Setter Property="Height" Value="28" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Setter Property="ItemContainerStyle" Value="{StaticResource CsvDropItem}" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <!--  样式 CsvHeader：表头。自己画内容，避免主题表头把列名藏掉。灰底，只有底边。  -->
+            <Style x:Key="CsvHeader" TargetType="DataGridColumnHeader">
+                <Setter Property="Height" Value="36" />
+                <Setter Property="Background" Value="#F5F5F5" />
+                <Setter Property="Foreground" Value="#333333" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="BorderBrush" Value="#DDDDDD" />
+                <Setter Property="BorderThickness" Value="0,0,0,1" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="DataGridColumnHeader">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!--  样式 CsvRow：选中行浅金。  -->
+            <Style x:Key="CsvRow" TargetType="DataGridRow">
+                <Setter Property="Background" Value="White" />
+                <Setter Property="Foreground" Value="#333333" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="#FFF6D2" />
+                        <Setter Property="Foreground" Value="#333333" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <!--  样式 CsvCell：单元格。不自己进入编辑，点到行内输入框。  -->
+            <Style x:Key="CsvCell" TargetType="DataGridCell">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="Foreground" Value="#333333" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="DataGridCell">
+                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter VerticalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="#333333" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <!--  区域 CSV。控件：名称 Name、文件名称 FileName、存放目录 DirectoryText、数据列表 Grid。按钮：新增、编辑、删除。样式 ToolLabel、ToolBox、ToolButton、CsvBox、CsvCombo。  -->
+    <StackPanel Margin="16">
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="名称" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="文件名称" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Margin="0,6,0,0"
+                       FontSize="12"
+                       Foreground="#888888"
+                       Text="默认按运行当天生成：流程名 + 年月日.csv" />
+        </StackPanel>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="存放目录" Style="{StaticResource ToolLabel}" />
+            <TextBox Style="{StaticResource ToolBox}"
+                     IsReadOnly="True"
+                     IsTabStop="False"
+                     Text="{Binding DirectoryText, Mode=OneWay}" />
+            <TextBlock Margin="0,6,0,0"
+                       FontSize="12"
+                       Foreground="#888888"
+                       Text="默认 Data\File\流程名，不可改。" />
+        </StackPanel>
+        <TextBlock Text="数据列表" Style="{StaticResource ToolLabel}" />
+        <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+            <Button Style="{StaticResource MahApps.Styles.Button}" Height="32" MinWidth="88" Margin="0,0,8,0" Click="AddRow">
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconPhosphorIcons Kind="Plus" Width="16" Height="16" VerticalAlignment="Center" />
+                    <TextBlock Text="新增" Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource MahApps.Styles.Button}" Height="32" MinWidth="88" Margin="0,0,8,0" Click="EditRow">
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconPhosphorIcons Kind="PencilSimple" Width="16" Height="16" VerticalAlignment="Center" />
+                    <TextBlock Text="编辑" Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource MahApps.Styles.Button}" Height="32" MinWidth="88" Click="DeleteRow">
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconPhosphorIcons Kind="Trash" Width="16" Height="16" VerticalAlignment="Center" />
+                    <TextBlock Text="删除" Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+        <DataGrid x:Name="Grid"
+                  Style="{x:Null}"
+                  ItemsSource="{Binding Rows}"
+                  SelectedItem="{Binding Selected}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserReorderColumns="False"
+                  CanUserResizeColumns="False"
+                  CanUserResizeRows="False"
+                  CanUserSortColumns="False"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  HorizontalGridLinesBrush="#EEEEEE"
+                  BorderBrush="#E0E0E0"
+                  BorderThickness="1"
+                  RowHeight="36"
+                  ColumnHeaderHeight="36"
+                  MaxHeight="240"
+                  SelectionMode="Single"
+                  SelectionUnit="FullRow"
+                  IsReadOnly="True"
+                  Background="White"
+                  HorizontalAlignment="Stretch"
+                  EnableColumnVirtualization="False"
+                  EnableRowVirtualization="False"
+                  ColumnHeaderStyle="{StaticResource CsvHeader}"
+                  RowStyle="{StaticResource CsvRow}"
+                  CellStyle="{StaticResource CsvCell}"
+                  ScrollViewer.CanContentScroll="False"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="列名" Width="*" MinWidth="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock Text="{Binding Column}" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBox Style="{StaticResource CsvBox}"
+                                         HorizontalAlignment="Stretch"
+                                         Text="{Binding Column, UpdateSourceTrigger=PropertyChanged}" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="数据来源（入参）" Width="*" MinWidth="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock Text="{Binding Source}" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <ComboBox Style="{StaticResource CsvCombo}"
+                                          HorizontalAlignment="Stretch"
+                                          ItemsSource="{Binding SourceChoices}"
+                                          SelectedItem="{Binding Source, UpdateSourceTrigger=PropertyChanged}" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </StackPanel>
+</UserControl>

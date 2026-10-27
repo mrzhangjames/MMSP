@@ -124,7 +124,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 step.Kind,
                 catalog,
                 VariableNames(SelectedFlow),
-                PriorOutputs(SelectedFlow, step));
+                PriorOutputs(SelectedFlow, step),
+                OtherOutputs(SelectedFlow, step),
+                SelectedFlow?.Name ?? "");
             var owner = Application.Current?.MainWindow;
             if (owner is not null && owner.IsLoaded)
                 window.Owner = owner;
@@ -161,19 +163,40 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 当前步骤之前已经占用的出参。入参不算，本步自己的出参也不算。
+        /// 当前步骤之前已经写出的出参。用来标左侧「前序已出参」。本步自己的不算。
         /// </summary>
         private static IReadOnlySet<string> PriorOutputs(FlowCard? flow, FlowStep step)
+        {
+            return OutputNames(flow, step, earlierOnly: true);
+        }
+
+        /// <summary>
+        /// 其它步骤已经占用的出参。右侧不能再选这些名字。本步自己的不算。
+        /// </summary>
+        private static IReadOnlySet<string> OtherOutputs(FlowCard? flow, FlowStep step)
+        {
+            return OutputNames(flow, step, earlierOnly: false);
+        }
+
+        /// <summary>
+        /// 收集出参名。earlierOnly 为真时只要当前步骤前面的。
+        /// </summary>
+        private static HashSet<string> OutputNames(FlowCard? flow, FlowStep step, bool earlierOnly)
         {
             var names = new HashSet<string>(StringComparer.Ordinal);
             if (flow is null)
                 return names;
 
             var index = flow.Steps.IndexOf(step);
-            for (var i = 0; i < index; i++)
+            for (var i = 0; i < flow.Steps.Count; i++)
             {
-                var item = flow.Steps[i];
-                foreach (var name in ToolVars.OutputNames(item.ToolKind, item.CfgValue))
+                if (i == index)
+                    continue;
+
+                if (earlierOnly && i > index)
+                    continue;
+
+                foreach (var name in ToolVars.OutputNames(flow.Steps[i].ToolKind, flow.Steps[i].CfgValue))
                     names.Add(name);
             }
 

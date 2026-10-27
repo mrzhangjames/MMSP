@@ -75,7 +75,7 @@ namespace MMSP.Service.Device.Plc
             if (_device is null || !IsConnected)
                 return PlcIoResult.Fail("尚未连接");
 
-            return PlcValueCodec.Read(_device, address, dataType, length);
+            return PlcValueCodec.Read(_device, SoftAddress(address), dataType, length);
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace MMSP.Service.Device.Plc
             PlcDeviceSetup.SetReceiveTimeout(_device, Connection.WriteTimeout);
             try
             {
-                return PlcValueCodec.Write(_device, address, dataType, value);
+                return PlcValueCodec.Write(_device, SoftAddress(address), dataType, value);
             }
             finally
             {
@@ -124,6 +124,23 @@ namespace MMSP.Service.Device.Plc
         public void Dispose()
         {
             Close();
+        }
+
+        /// <summary>
+        /// Modbus 不认 D 前缀。汇川和其他自带元件名的协议自己翻译，这里不动。
+        /// </summary>
+        private string SoftAddress(string address)
+        {
+            if (Connection.Protocol is not (
+                PlcProtocol.ModbusTcp
+                or PlcProtocol.ModbusUdp
+                or PlcProtocol.ModbusRtu
+                or PlcProtocol.ModbusRtuOverTcp
+                or PlcProtocol.ModbusAscii
+                or PlcProtocol.ModbusAsciiOverTcp))
+                return address;
+
+            return PlcModbusAddress.Normalize(address);
         }
 
         /// <summary>

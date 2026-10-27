@@ -1,7 +1,7 @@
 ﻿using MMSP.Core.Model.Base;
 using MMSP.Core.Model.Sys;
 
-namespace MMSP.Core.Model.Tool
+namespace MMSP.Core.Model.Tool.PluginLux
 {
     /// <summary>
     /// 立讯报警日志工具。每一行是一个要监视的地址。

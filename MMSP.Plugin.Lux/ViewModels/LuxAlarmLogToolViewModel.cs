@@ -6,7 +6,7 @@ using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper;
 using MMSP.Core.Model.Base;
 using MMSP.Core.Model.Sys;
-using MMSP.Core.Model.Tool;
+using MMSP.Core.Model.Tool.PluginLux;
 
 namespace MMSP.Plugin.Lux.ViewModels
 {

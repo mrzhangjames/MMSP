@@ -26,7 +26,8 @@ namespace MMSP.Core.Model.Tool
                 or FlowToolKind.JsonParse
                 or FlowToolKind.Condition
                 or FlowToolKind.Script
-                or FlowToolKind.Uph;
+                or FlowToolKind.Uph
+                or FlowToolKind.Csv;
         }
 
         /// <summary>
@@ -174,6 +175,7 @@ namespace MMSP.Core.Model.Tool
                 ConditionToolEntity condition => condition.Inputs ??= [],
                 ScriptToolEntity script => script.Inputs ??= [],
                 UphToolEntity uph => uph.Inputs ??= [],
+                CsvToolEntity csv => csv.Inputs ??= [],
                 _ => null
             };
         }
@@ -199,6 +201,7 @@ namespace MMSP.Core.Model.Tool
                     FlowToolKind.Condition => Deserialize<ConditionToolEntity>(cfg),
                     FlowToolKind.Script => Deserialize<ScriptToolEntity>(cfg),
                     FlowToolKind.Uph => Deserialize<UphToolEntity>(cfg),
+                    FlowToolKind.Csv => Deserialize<CsvToolEntity>(cfg),
                     _ => null
                 };
             }
@@ -284,6 +287,13 @@ namespace MMSP.Core.Model.Tool
                         yield break;
 
                     yield return uph.Variable ?? "";
+                    break;
+                case CsvToolEntity csv:
+                    if (!includeInputs || csv.Rows is null)
+                        yield break;
+
+                    foreach (var row in csv.Rows)
+                        yield return row?.Source ?? "";
                     break;
             }
         }

@@ -69,7 +69,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         /// <summary>
         /// 已保存的字节序。
         /// </summary>
-        private string _dataFormat = "ABCD";
+        private string _dataFormat = "CDAB";
 
         /// <summary>
         /// 已保存的轮询周期。打开页面不按它读取点位。
@@ -321,10 +321,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
             return new PlcLinkEntity
             {
                 Id = Guid.NewGuid(),
-                Host = "192.168.1.10",
+                Host = "192.168.1.105",
                 Protocol = (int)PlcProtocol.ModbusTcp,
                 Port = 502,
-                DataFormat = "ABCD",
+                DataFormat = "CDAB",
                 Station = 1,
                 PollMs = 200,
                 ReadTimeoutMs = 1000,

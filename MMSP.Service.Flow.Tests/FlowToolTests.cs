@@ -4,6 +4,7 @@ using MMSP.Service.Device.Plc;
 using MMSP.Service.Device.Scan;
 using MMSP.Service.Flow;
 using MMSP.Service.Flow.Steps;
+using MMSP.Service.Flow.Steps.PluginLux;
 
 namespace MMSP.Service.Flow.Tests
 {
@@ -13,7 +14,7 @@ namespace MMSP.Service.Flow.Tests
     public class FlowToolTests
     {
         /// <summary>
-        /// 十一种已知工具都能从登记表创建出来。
+        /// 十二种已知工具都能从登记表创建出来。
         /// </summary>
         [Fact]
         public void Catalog_CreatesEachKind()
@@ -28,6 +29,7 @@ namespace MMSP.Service.Flow.Tests
             Assert.IsType<ConditionFlowTool>(FlowToolCatalog.Create(FlowToolKind.Condition, ""));
             Assert.IsType<ScriptFlowTool>(FlowToolCatalog.Create(FlowToolKind.Script, ""));
             Assert.IsType<UphFlowTool>(FlowToolCatalog.Create(FlowToolKind.Uph, ""));
+            Assert.IsType<CsvFlowTool>(FlowToolCatalog.Create(FlowToolKind.Csv, ""));
             Assert.IsType<LuxAlarmLogFlowTool>(FlowToolCatalog.Create(FlowToolKind.Lux_AlarmLogTool, ""));
         }
 

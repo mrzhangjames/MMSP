@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using MMSP.Core.Model.Base;
 using MMSP.Core.Model.Sys;
 using MMSP.Core.Model.Tool;
+using MMSP.Core.Model.Tool.PluginLux;
 using MMSP.Plugin.Tool.Views;
 
 namespace MMSP.Plugin.Tool
@@ -37,6 +38,7 @@ namespace MMSP.Plugin.Tool
                 FlowToolKind.Condition => Load(new ConditionToolView(), Read<ConditionToolEntity>(cfg), names, choices),
                 FlowToolKind.Script => Load(new ScriptToolView(), Read<ScriptToolEntity>(cfg), names, choices),
                 FlowToolKind.Uph => Load(new UphToolView(), Read<UphToolEntity>(cfg), names, choices),
+                FlowToolKind.Csv => Load(new CsvToolView(), Read<CsvToolEntity>(cfg), names, choices),
                 _ => new UserControl()
             };
         }
@@ -69,6 +71,7 @@ namespace MMSP.Plugin.Tool
                 FlowToolKind.Condition => Read<ConditionToolEntity>(cfg).Expression.Trim(),
                 FlowToolKind.Script => Short(Read<ScriptToolEntity>(cfg).Script),
                 FlowToolKind.Uph => UphText(Read<UphToolEntity>(cfg)),
+                FlowToolKind.Csv => CsvText(Read<CsvToolEntity>(cfg)),
                 FlowToolKind.Lux_AlarmLogTool => AlarmText(Read<LuxAlarmLogToolEntity>(cfg)),
                 _ => ""
             };
@@ -121,6 +124,9 @@ namespace MMSP.Plugin.Tool
                 case UphToolView uph when tool is UphToolEntity value:
                     uph.Load(value);
                     break;
+                case CsvToolView csv when tool is CsvToolEntity value:
+                    csv.Load(value);
+                    break;
             }
 
             return view;
@@ -162,6 +168,7 @@ namespace MMSP.Plugin.Tool
                 FlowToolKind.Condition => Read<ConditionToolEntity>(cfg).Name,
                 FlowToolKind.Script => Read<ScriptToolEntity>(cfg).Name,
                 FlowToolKind.Uph => Read<UphToolEntity>(cfg).Name,
+                FlowToolKind.Csv => Read<CsvToolEntity>(cfg).Name,
                 FlowToolKind.Lux_AlarmLogTool => Read<LuxAlarmLogToolEntity>(cfg).Name,
                 _ => ""
             };
@@ -216,6 +223,16 @@ namespace MMSP.Plugin.Tool
             var interval = tool.Interval > 0 ? "间隔 " + tool.Interval : "";
             var resetValue = tool.Reset && !string.IsNullOrWhiteSpace(tool.ResetValue) ? "重置值 " + tool.ResetValue.Trim() : "";
             return Join(tool.Address, tool.DataType.ToString(), expect, reset, interval, resetValue);
+        }
+
+        /// <summary>
+        /// CSV 说明。按日期生成时不把某天的预览名写死在卡片上。
+        /// </summary>
+        private static string CsvText(CsvToolEntity tool)
+        {
+            var file = tool.NameFromDate || string.IsNullOrWhiteSpace(tool.FileName) ? "按日期" : tool.FileName.Trim();
+            var count = tool.Rows?.Count ?? 0;
+            return count == 0 ? file : Join(file, count.ToString(CultureInfo.InvariantCulture) + " 列");
         }
 
         /// <summary>

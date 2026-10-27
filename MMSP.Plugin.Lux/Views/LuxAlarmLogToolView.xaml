@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="MMSP.Plugin.Lux.Views.LuxAlarmLogToolView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              Background="{DynamicResource MahApps.Brushes.ThemeBackground}"
              FontFamily="Segoe UI, Microsoft YaHei"
              FontSize="14">
@@ -10,16 +11,26 @@
         <DockPanel DockPanel.Dock="Top" Margin="12,12,12,0">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <!--  按钮 导入。事件 ImportClick。  -->
-                <Button Content="导入"
-                        Style="{StaticResource MahApps.Styles.Button}"
-                        MinWidth="72"
+                <Button Style="{StaticResource MahApps.Styles.Button}"
+                        MinWidth="88"
+                        Height="32"
                         Margin="0,0,8,0"
-                        Click="ImportClick" />
+                        Click="ImportClick">
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconPhosphorIcons Kind="DownloadSimple" Width="16" Height="16" VerticalAlignment="Center" />
+                        <TextBlock Text="导入" Margin="6,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
                 <!--  按钮 导出。事件 ExportClick。  -->
-                <Button Content="导出"
-                        Style="{StaticResource MahApps.Styles.Button}"
-                        MinWidth="72"
-                        Click="ExportClick" />
+                <Button Style="{StaticResource MahApps.Styles.Button}"
+                        MinWidth="88"
+                        Height="32"
+                        Click="ExportClick">
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconPhosphorIcons Kind="UploadSimple" Width="16" Height="16" VerticalAlignment="Center" />
+                        <TextBlock Text="导出" Margin="6,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
             <!--  控件 记录日志。绑定 Log。  -->
             <CheckBox Content="记录日志"

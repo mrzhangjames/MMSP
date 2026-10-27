@@ -50,6 +50,67 @@ namespace MMSP.Service.Flow.Tests
         }
 
         /// <summary>
+        /// 字符串按寄存器低字节在前。没有字节变换时跳过。
+        /// </summary>
+        [Fact]
+        public void PlcDeviceSetup_PutsStringLowByteFirst()
+        {
+            var device = new StringOrderDevice();
+            PlcDeviceSetup.UseStringOrder(device);
+            Assert.True(device.ByteTransform.IsStringReverseByteWord);
+
+            PlcDeviceSetup.UseStringOrder(new object());
+        }
+
+        private sealed class StringOrderDevice
+        {
+            public StringOrderTransform ByteTransform { get; } = new();
+        }
+
+        private sealed class StringOrderTransform
+        {
+            public bool IsStringReverseByteWord { get; set; }
+        }
+
+        /// <summary>
+        /// 汇川 H5U 的 D 元件号等于保持寄存器号。其它写法不改。
+        /// </summary>
+        [Fact]
+        public void PlcModbusAddress_StripsOnlyDWordPrefix()
+        {
+            Assert.Equal("5244", PlcModbusAddress.Normalize("D5244"));
+            Assert.Equal("5003", PlcModbusAddress.Normalize("d5003"));
+            Assert.Equal(" 5244", PlcModbusAddress.Normalize(" 5244"));
+            Assert.Equal("D5003.0", PlcModbusAddress.Normalize("D5003.0"));
+            Assert.Equal("M0", PlcModbusAddress.Normalize("M0"));
+            Assert.Equal("R0", PlcModbusAddress.Normalize("R0"));
+            Assert.Equal("  ", PlcModbusAddress.Normalize("  "));
+            Assert.Equal("", PlcModbusAddress.Normalize(null));
+        }
+
+        /// <summary>
+        /// 地址为空不访问设备。整数、浮点和字数组的文本对不上时不发送报文。
+        /// </summary>
+        [Fact]
+        public void PlcValueCodec_RejectsEmptyAddressAndMismatchedWrite()
+        {
+            var empty = PlcValueCodec.Read(null!, "  ", PlcDataType.Int16, 1);
+            Assert.False(empty.IsSuccess);
+            Assert.Equal("地址为空", empty.Message);
+
+            var unknown = PlcValueCodec.Read(null!, "D1", (PlcDataType)99, 1);
+            Assert.False(unknown.IsSuccess);
+            Assert.Equal("不支持的数据类型", unknown.Message);
+
+            Assert.Equal("写入值与数据类型不匹配", PlcValueCodec.Write(null!, "D1", PlcDataType.Int16, "1.5").Message);
+            Assert.Equal("写入值与数据类型不匹配", PlcValueCodec.Write(null!, "D1", PlcDataType.UInt16, "-1").Message);
+            Assert.Equal("写入值与数据类型不匹配", PlcValueCodec.Write(null!, "D1", PlcDataType.Int32, "x").Message);
+            Assert.Equal("写入值与数据类型不匹配", PlcValueCodec.Write(null!, "D1", PlcDataType.Float, "abc").Message);
+            Assert.Equal("写入值与数据类型不匹配", PlcValueCodec.Write(null!, "D1", PlcDataType.UInt16Array, "1,2,3").Message);
+            Assert.Equal("地址为空", PlcValueCodec.Write(null!, "", PlcDataType.String, "SN").Message);
+        }
+
+        /// <summary>
         /// 读取超时给连接和接收。写入超时单独保存，小于等于 0 时按 1000 毫秒。
         /// </summary>
         [Fact]

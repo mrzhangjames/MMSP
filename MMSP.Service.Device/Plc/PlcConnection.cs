@@ -26,9 +26,9 @@
         public byte Station { get; init; } = 1;
 
         /// <summary>
-        /// 字节序。ABCD、CDAB、BADC、DCBA。Modbus 及其派生协议使用。
+        /// 字节序。ABCD、CDAB、BADC、DCBA。Modbus 及其派生协议使用。汇川 H5U 的 32 位量用 CDAB。
         /// </summary>
-        public string DataFormat { get; init; } = "ABCD";
+        public string DataFormat { get; init; } = "CDAB";
 
         /// <summary>
         /// 连接超时，毫秒。

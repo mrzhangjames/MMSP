@@ -17,8 +17,25 @@ namespace MMSP.Service.Device.Plc
         {
             Set(device, "DataFormat", ToDataFormat(connection.DataFormat));
             Set(device, "AddressStartWithZero", true);
+            UseStringOrder(device);
             SetStation(device, connection.Station);
             UseTimeouts(device, connection);
+        }
+
+        /// <summary>
+        /// 一个寄存器放两个字符，低字节是前一个。HSL 默认先取高字节，读出来会两两对调。
+        /// </summary>
+        internal static void UseStringOrder(object device)
+        {
+            var transform = device.GetType().GetProperty("ByteTransform", BindingFlags.Instance | BindingFlags.Public)?.GetValue(device);
+            if (transform is null)
+                return;
+
+            var property = transform.GetType().GetProperty("IsStringReverseByteWord");
+            if (property is null || !property.CanWrite || property.PropertyType != typeof(bool))
+                return;
+
+            property.SetValue(transform, true);
         }
 
         /// <summary>

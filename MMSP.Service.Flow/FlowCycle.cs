@@ -143,6 +143,7 @@
             var executed = 0;
             foreach (var flow in flows)
             {
+                context.FlowName = flow.Name ?? "";
                 if (context.Token.IsCancellationRequested)
                 {
                     SkipFrom(flow, 0, progress);

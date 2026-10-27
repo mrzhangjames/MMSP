@@ -8,7 +8,7 @@ namespace MMSP.Service.Device.Plc.Drivers
     internal static class InovanceDrivers
     {
         /// <summary>
-        /// 登记汇川客户端。Series 交给 HSL 的系列枚举，对不上时保留默认系列。
+        /// 登记汇川客户端。Series 交给 HSL 的系列枚举。空着时用 H5U，否则库默认 AM，不认 D 地址。
         /// </summary>
         public static void Register(Action<PlcProtocol, Func<PlcConnection, HslPlcDriver>> add)
         {
@@ -38,7 +38,7 @@ namespace MMSP.Service.Device.Plc.Drivers
         private static T Prepare<T>(T plc, PlcConnection item, bool serial)
         {
             PlcDeviceSetup.UseModbus(plc!, item);
-            PlcDeviceSetup.SetSeries(plc!, item.Series);
+            PlcDeviceSetup.SetSeries(plc!, string.IsNullOrWhiteSpace(item.Series) ? "H5U" : item.Series);
             if (serial)
                 PlcDeviceSetup.UseSerial(plc!, item);
             return plc;

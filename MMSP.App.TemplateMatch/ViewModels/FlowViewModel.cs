@@ -74,7 +74,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         public ObservableCollection<FlowCard> Flows { get; }
 
         /// <summary>
-        /// 通用工具。编号 0 到 9。
+        /// 通用工具。编号 0 到 10。
         /// </summary>
         public ObservableCollection<FlowTool> GeneralTools { get; }
 
@@ -217,7 +217,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 通用工具固定为 0 到 9。客户工具只取当前插件登记的种类。同一次运行里再次进入不重复生成。
+        /// 通用工具固定为 0 到 10。客户工具只取当前插件登记的种类。同一次运行里再次进入不重复生成。
         /// </summary>
         private void LoadTools()
         {
@@ -226,7 +226,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             foreach (var kind in Enum.GetValues<FlowToolKind>())
             {
-                if ((int)kind > (int)FlowToolKind.Uph)
+                if ((int)kind > (int)FlowToolKind.Csv)
                     continue;
 
                 GeneralTools.Add(MakeTool(kind));
@@ -616,6 +616,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 FlowToolKind.JsonParse => PackIconPhosphorIconsKind.BracketsCurly,
                 FlowToolKind.Condition => PackIconPhosphorIconsKind.GitFork,
                 FlowToolKind.Uph => PackIconPhosphorIconsKind.ChartLine,
+                FlowToolKind.Csv => PackIconPhosphorIconsKind.FileArrowDown,
                 FlowToolKind.Lux_AlarmLogTool => PackIconPhosphorIconsKind.Warning,
                 _ => PackIconPhosphorIconsKind.Code
             };

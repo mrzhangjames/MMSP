@@ -1,9 +1,10 @@
 ﻿using MMSP.Core.Model.Sys;
-using MMSP.Core.Model.Tool;
+using MMSP.Core.Model.Tool.PluginLux;
 using MMSP.Service.Device.Plc;
 using MMSP.Service.Device.Scan;
 using MMSP.Service.Flow;
 using MMSP.Service.Flow.Steps;
+using MMSP.Service.Flow.Steps.PluginLux;
 
 namespace MMSP.Service.Flow.Tests
 {

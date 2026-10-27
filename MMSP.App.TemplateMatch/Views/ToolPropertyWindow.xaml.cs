@@ -11,6 +11,7 @@ using MMSP.Core.Model.Sys;
 using MMSP.Core.Model.Tool;
 using MMSP.Plugin.Tool;
 using MMSP.Plugin.Tool.ViewModels;
+using MMSP.Plugin.Tool.Views;
 using MMSP.Service.Database;
 
 namespace MMSP.App.TemplateMatch.Views
@@ -41,9 +42,20 @@ namespace MMSP.App.TemplateMatch.Views
         private INotifyPropertyChanged? _toolChanges;
 
         /// <summary>
+        /// 当前流程名。CSV 用它预览默认文件名和存放目录。
+        /// </summary>
+        private readonly string _flowName;
+
+        /// <summary>
+        /// 其它步骤已经占用的出参。
+        /// </summary>
+        private readonly IReadOnlySet<string> _takenOutputs;
+
+        /// <summary>
         /// 打开一种工具的配置。fallbackTitle 是种类名称，工具名称为空时用它。
         /// 客户工具从已登记的插件取界面。当前客户没有这个工具时只提示，不能保存。
-        /// variables 是本流程的变量名。priorOutputs 是前序步骤已经占用的出参。
+        /// variables 是本流程的变量名。priorOutputs 是前序已经写出的出参。
+        /// takenOutputs 是其它步骤已经占用的出参。flowName 是当前流程名。
         /// </summary>
         public ToolPropertyWindow(
             FlowToolKind kind,
@@ -51,10 +63,14 @@ namespace MMSP.App.TemplateMatch.Views
             string fallbackTitle,
             CustomerPluginCatalog? catalog,
             IReadOnlyList<string>? variables = null,
-            IReadOnlySet<string>? priorOutputs = null)
+            IReadOnlySet<string>? priorOutputs = null,
+            IReadOnlySet<string>? takenOutputs = null,
+            string? flowName = null)
         {
             _kind = kind;
             _fallbackTitle = fallbackTitle;
+            _flowName = flowName ?? "";
+            _takenOutputs = takenOutputs ?? new HashSet<string>(StringComparer.Ordinal);
             InitializeComponent();
             if (catalog?.Create(kind, cfg) is UserControl customer)
             {
@@ -72,13 +88,27 @@ namespace MMSP.App.TemplateMatch.Views
                 var scanners = kind is FlowToolKind.SingleScan or FlowToolKind.MultiScan ? ReadScanners() : [];
                 var points = kind is FlowToolKind.PlcRead or FlowToolKind.PlcWrite or FlowToolKind.PlcMonitor ? ReadPoints() : [];
                 Body.Content = ToolCatalog.Create(kind, cfg, scanners, points);
+                if (kind == FlowToolKind.Csv)
+                {
+                    UseCsvSize();
+                    Title = string.IsNullOrWhiteSpace(_fallbackTitle) ? "CSV" : _fallbackTitle;
+                    if (Body.Content is CsvToolView csv)
+                        csv.Bind(_flowName, variables ?? []);
+
+                    InputHead.Visibility = Visibility.Visible;
+                    InputList.ItemTemplate = (DataTemplate)FindResource("CsvInputRow");
+                }
+
                 if (kind is FlowToolKind.PlcMonitor or FlowToolKind.Delay)
                 {
                     HideSides();
                     UseFormSize();
                 }
                 else
-                    AttachSides(variables ?? [], priorOutputs ?? new HashSet<string>(StringComparer.Ordinal));
+                    AttachSides(
+                        variables ?? [],
+                        priorOutputs ?? new HashSet<string>(StringComparer.Ordinal),
+                        _takenOutputs);
 
                 _editable = true;
                 return;
@@ -102,17 +132,17 @@ namespace MMSP.App.TemplateMatch.Views
         }
 
         /// <summary>
-        /// 通用工具是枚举里的 0 到 9。
+        /// 通用工具是枚举里的 0 到 10。
         /// </summary>
         private static bool IsGeneral(FlowToolKind kind)
         {
-            return (int)kind <= (int)FlowToolKind.Uph;
+            return (int)kind <= (int)FlowToolKind.Csv;
         }
 
         /// <summary>
         /// 通用工具加上左右两列。中间仍是原来的表单。
         /// </summary>
-        private void AttachSides(IReadOnlyList<string> variables, IReadOnlySet<string> priorOutputs)
+        private void AttachSides(IReadOnlyList<string> variables, IReadOnlySet<string> priorOutputs, IReadOnlySet<string> takenOutputs)
         {
             if (Body.Content is not UserControl view || view.DataContext?.GetType().GetProperty("EditedTool")?.GetValue(view.DataContext) is not PluginToolModel tool)
             {
@@ -125,9 +155,11 @@ namespace MMSP.App.TemplateMatch.Views
                 tool,
                 variables,
                 priorOutputs,
+                takenOutputs,
                 name => SetOutput(view.DataContext, tool, name),
                 name => SetInput(view.DataContext, name),
-                () => RefreshScanResults(view.DataContext));
+                () => RefreshScanResults(view.DataContext),
+                index => EditCsvRow(view.DataContext, index));
             Panes.DataContext = model;
             if (view.DataContext is INotifyPropertyChanged changes)
             {
@@ -194,11 +226,20 @@ namespace MMSP.App.TemplateMatch.Views
         }
 
         /// <summary>
+        /// CSV 左侧点一行时，中间同一行进入编辑。
+        /// </summary>
+        private static void EditCsvRow(object viewModel, int index)
+        {
+            if (viewModel is CsvToolViewModel csv)
+                csv.EditAt(index);
+        }
+
+        /// <summary>
         /// 条码数量、扫码枪、结果或写入值变化后，按工具上的值重画左右两列。
         /// </summary>
         private void OnToolChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName is not ("Count" or "Scanner" or "Target" or "Result" or "Value" or "ValueMode" or "Source" or "Variable"))
+            if (e.PropertyName is not ("Count" or "Scanner" or "Target" or "Result" or "Value" or "ValueMode" or "Source" or "Variable" or "CsvIo"))
                 return;
 
             if (Panes.DataContext is ToolIoModel model)
@@ -225,6 +266,21 @@ namespace MMSP.App.TemplateMatch.Views
             OutputColumn.Width = new GridLength(0);
             InputPane.Visibility = Visibility.Collapsed;
             OutputPane.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// CSV 中间有数据列表，窗口比其它通用工具更高更宽。
+        /// </summary>
+        private void UseCsvSize()
+        {
+            const double width = 1100;
+            const double height = 740;
+            Width = width;
+            MinWidth = width;
+            MaxWidth = width;
+            Height = height;
+            MinHeight = height;
+            MaxHeight = height;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using MMSP.Core.Model.Sys;
+using MMSP.Service.Flow.Steps.PluginLux;
 
 namespace MMSP.Service.Flow.Steps
 {
@@ -22,6 +23,7 @@ namespace MMSP.Service.Flow.Steps
             [FlowToolKind.Condition] = cfg => new ConditionFlowTool(cfg),
             [FlowToolKind.Script] = cfg => new ScriptFlowTool(cfg),
             [FlowToolKind.Uph] = cfg => new UphFlowTool(cfg),
+            [FlowToolKind.Csv] = cfg => new CsvFlowTool(cfg),
             [FlowToolKind.Lux_AlarmLogTool] = cfg => new LuxAlarmLogFlowTool(cfg)
         };
 
