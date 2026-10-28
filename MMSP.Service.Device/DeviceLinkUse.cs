@@ -1,4 +1,6 @@
-﻿namespace MMSP.Service.Device
+﻿using MMSP.Core.Model.Helper;
+
+namespace MMSP.Service.Device
 {
     /// <summary>
     /// 设备页和流程已经连上的 PLC、扫码枪。底栏看到占用时直接显示已连接，不再另开短连接。
@@ -19,6 +21,16 @@
         /// 读取某一把扫码枪是否正由设备页或流程连着。
         /// </summary>
         private static readonly List<Func<Guid, bool>> ScanReaders = new();
+
+        /// <summary>
+        /// 这一轮 PLC 占用查询失败已经写过日志。有一次成功后清掉。
+        /// </summary>
+        private static bool _plcErrorLogged;
+
+        /// <summary>
+        /// 这一轮扫码枪占用查询失败已经写过日志。有一次成功后清掉。
+        /// </summary>
+        private static bool _scanErrorLogged;
 
         /// <summary>
         /// 登记一个 PLC 占用查询。同一个委托只保留一份。
@@ -76,11 +88,18 @@
                 try
                 {
                     if (read())
+                    {
+                        _plcErrorLogged = false;
                         return true;
+                    }
                 }
-                catch (Exception)
+                catch (ObjectDisposedException ex)
                 {
-                    // 查询失败当作没占用，改由心跳或短连接判断。
+                    NoteUse(ref _plcErrorLogged, CaughtLogChannel.Plc, ex);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    NoteUse(ref _plcErrorLogged, CaughtLogChannel.Plc, ex);
                 }
             }
 
@@ -101,15 +120,34 @@
                 try
                 {
                     if (read(id))
+                    {
+                        _scanErrorLogged = false;
                         return true;
+                    }
                 }
-                catch (Exception)
+                catch (ObjectDisposedException ex)
                 {
-                    // 查询失败当作没占用，改由短连接判断。
+                    NoteUse(ref _scanErrorLogged, CaughtLogChannel.Scan, ex);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    NoteUse(ref _scanErrorLogged, CaughtLogChannel.Scan, ex);
                 }
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 占用查询失败只记一次，直到下一次查到已连接。
+        /// </summary>
+        private static void NoteUse(ref bool logged, CaughtLogChannel channel, Exception exception)
+        {
+            if (logged)
+                return;
+
+            logged = true;
+            CaughtLog.Report(channel, "读取设备占用失败", exception);
         }
     }
 }

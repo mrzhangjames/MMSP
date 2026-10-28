@@ -39,7 +39,7 @@ namespace MMSP.Service.Flow.Steps.PluginLux
         /// 解析报警配置，日志写到流程日志。
         /// </summary>
         public LuxAlarmLogFlowTool(string cfg)
-            : this(cfg, LogHelper.FlowInfo, LogAlarmError)
+            : this(cfg, LogHelper.FlowRunInfo, LogAlarmError)
         {
         }
 
@@ -104,7 +104,7 @@ namespace MMSP.Service.Flow.Steps.PluginLux
         /// </summary>
         private static void LogAlarmError(string message)
         {
-            LogHelper.FlowError(message);
+            LogHelper.FlowRunError(message);
         }
 
         /// <summary>

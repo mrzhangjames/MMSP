@@ -1,4 +1,7 @@
-﻿using MMSP.Core.Model.DB;
+﻿using System.ComponentModel;
+using System.Net.Sockets;
+using MMSP.Common.Helper.Logger;
+using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using MMSP.Service.Device;
 using MMSP.Service.Device.Plc;
@@ -182,7 +185,27 @@ namespace MMSP.Service.Flow
                 {
                     client.Dispose();
                 }
-                catch (Exception ex)
+                catch (ObjectDisposedException)
+                {
+                    // 已经关掉。
+                }
+                catch (SocketException ex)
+                {
+                    error ??= ex;
+                }
+                catch (Win32Exception ex)
+                {
+                    error ??= ex;
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    error ??= ex;
+                }
+                catch (IOException ex)
+                {
+                    error ??= ex;
+                }
+                catch (InvalidOperationException ex)
                 {
                     error ??= ex;
                 }
@@ -192,7 +215,27 @@ namespace MMSP.Service.Flow
             {
                 plc?.Dispose();
             }
-            catch (Exception ex)
+            catch (ObjectDisposedException)
+            {
+                // 已经关掉。
+            }
+            catch (SocketException ex)
+            {
+                error ??= ex;
+            }
+            catch (Win32Exception ex)
+            {
+                error ??= ex;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                error ??= ex;
+            }
+            catch (IOException ex)
+            {
+                error ??= ex;
+            }
+            catch (InvalidOperationException ex)
             {
                 error ??= ex;
             }
@@ -279,9 +322,16 @@ namespace MMSP.Service.Flow
                     {
                         found = _openScan(ToScan(entity));
                     }
-                    catch (Exception ex)
+                    catch (InvalidOperationException ex)
                     {
-                        failure = ScanIoResult.Fail(ex.Message);
+                        LogHelper.FlowRunError("连接扫码枪失败", ex);
+                        failure = ScanIoResult.Fail("连接失败");
+                        return null;
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        LogHelper.FlowRunError("连接扫码枪失败", ex);
+                        failure = ScanIoResult.Fail("连接失败");
                         return null;
                     }
 
@@ -326,9 +376,16 @@ namespace MMSP.Service.Flow
                     {
                         _plc = _openPlc(ToPlc(_link));
                     }
-                    catch (Exception ex)
+                    catch (InvalidOperationException ex)
                     {
-                        failure = PlcIoResult.Fail(ex.Message);
+                        LogHelper.FlowRunError("连接 PLC 失败", ex);
+                        failure = PlcIoResult.Fail("连接失败");
+                        return null;
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        LogHelper.FlowRunError("连接 PLC 失败", ex);
+                        failure = PlcIoResult.Fail("连接失败");
                         return null;
                     }
                 }

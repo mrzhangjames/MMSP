@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
+using MMSP.Core.License;
 using MMSP.Core.Model.Base;
 using MMSP.Core.Model.DB;
+using MMSP.Core.Model.Helper;
 using MMSP.Core.Model.Sys;
 using MMSP.Service.Database;
 using NLog;
@@ -13,14 +15,34 @@ using SqlSugar;
 namespace MMSP.Common.Helper.Logger
 {
     /// <summary>
-    /// 全局日志。写入当天文件和客户库，再通知主页。
+    /// 全局日志。按 NLog.config 写入运行日志，需要时再抄一份专项文件，并写入客户库、通知主页。
     /// </summary>
     public static class LogHelper
     {
         /// <summary>
-        /// 文件和库里的来源名。
+        /// 客户库里的来源名。文件记录器的名字在 NLog.config 里分开。
         /// </summary>
         private const string LoggerName = "MMSP";
+
+        /// <summary>
+        /// 运行日志。每条日志都写这一份。
+        /// </summary>
+        private const string RunLoggerName = "MMSP.Run";
+
+        /// <summary>
+        /// 设备日志。只收设备读写。
+        /// </summary>
+        private const string DeviceLoggerName = "MMSP.Device";
+
+        /// <summary>
+        /// 流程日志。只收流程运行。
+        /// </summary>
+        private const string FlowLoggerName = "MMSP.Flow";
+
+        /// <summary>
+        /// MES 日志。只收 MES 交互。
+        /// </summary>
+        private const string MesLoggerName = "MMSP.Mes";
 
         /// <summary>
         /// 只配置一次文件日志。
@@ -38,9 +60,30 @@ namespace MMSP.Common.Helper.Logger
         private static IEventAggregator? _aggregator;
 
         /// <summary>
-        /// 写入文件的 NLog 记录器。
+        /// 除运行日志外再写哪一份专项文件。
         /// </summary>
-        private static NLog.Logger? _fileLogger;
+        private enum LogCopy
+        {
+            /// <summary>
+            /// 只写运行日志。
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            /// 再写设备日志。
+            /// </summary>
+            Device = 1,
+
+            /// <summary>
+            /// 再写流程日志。
+            /// </summary>
+            Flow = 2,
+
+            /// <summary>
+            /// 再写 MES 日志。
+            /// </summary>
+            Mes = 3
+        }
 
         /// <summary>
         /// 主页每个列表最多保留的条数。只限制本次进程的内存和界面，不删文件和客户库。
@@ -58,7 +101,37 @@ namespace MMSP.Common.Helper.Logger
         public static void Use(IEventAggregator aggregator)
         {
             _aggregator = aggregator ?? throw new ArgumentNullException(nameof(aggregator));
+            BindCaughtLog();
             EnsureFile();
+        }
+
+        /// <summary>
+        /// 把下层库捕获到的异常接到本日志。不要求事件聚合器，启动读许可证之前就要接上。
+        /// </summary>
+        public static void BindCaughtLog()
+        {
+            CaughtLog.Error = (channel, message, exception) =>
+            {
+                switch (channel)
+                {
+                    case CaughtLogChannel.Plc:
+                        PlcIoError(message, exception);
+                        break;
+                    case CaughtLogChannel.Scan:
+                        ScanIoError(message, exception);
+                        break;
+                    case CaughtLogChannel.Flow:
+                        FlowRunError(message, exception);
+                        break;
+                    case CaughtLogChannel.Mes:
+                        MesIoError(message, exception);
+                        break;
+                    default:
+                        SysError(message, exception);
+                        break;
+                }
+            };
+            LicenseCaughtLog.Error = (message, exception) => SysError(message, exception);
         }
 
         /// <summary>
@@ -142,6 +215,62 @@ namespace MMSP.Common.Helper.Logger
         }
 
         /// <summary>
+        /// 写一条 PLC 读写日志。运行日志和设备日志各一份。
+        /// </summary>
+        public static void PlcIoInfo(string message)
+        {
+            Write(RunLogBiz.Plc, RunLogLevel.Info, message, null, LogCopy.Device);
+        }
+
+        /// <summary>
+        /// 写一条 PLC 读写失败日志。运行日志和设备日志各一份。
+        /// </summary>
+        public static void PlcIoError(string message, Exception? exception = null)
+        {
+            Write(RunLogBiz.Plc, RunLogLevel.Error, message, exception, LogCopy.Device);
+        }
+
+        /// <summary>
+        /// 写一条扫码读写日志。运行日志和设备日志各一份。
+        /// </summary>
+        public static void ScanIoInfo(string message)
+        {
+            Write(RunLogBiz.Scan, RunLogLevel.Info, message, null, LogCopy.Device);
+        }
+
+        /// <summary>
+        /// 写一条扫码读写失败日志。运行日志和设备日志各一份。
+        /// </summary>
+        public static void ScanIoError(string message, Exception? exception = null)
+        {
+            Write(RunLogBiz.Scan, RunLogLevel.Error, message, exception, LogCopy.Device);
+        }
+
+        /// <summary>
+        /// 写一条流程运行日志。运行日志和流程日志各一份。
+        /// </summary>
+        public static void FlowRunInfo(string message)
+        {
+            Write(RunLogBiz.Flow, RunLogLevel.Info, message, null, LogCopy.Flow);
+        }
+
+        /// <summary>
+        /// 写一条流程运行失败日志。运行日志和流程日志各一份。
+        /// </summary>
+        public static void FlowRunError(string message, Exception? exception = null)
+        {
+            Write(RunLogBiz.Flow, RunLogLevel.Error, message, exception, LogCopy.Flow);
+        }
+
+        /// <summary>
+        /// 写一条 MES 交互失败日志。运行日志和 MES 日志各一份。
+        /// </summary>
+        public static void MesIoError(string message, Exception? exception = null)
+        {
+            Write(RunLogBiz.Mes, RunLogLevel.Error, message, exception, LogCopy.Mes);
+        }
+
+        /// <summary>
         /// 读取本次进程写出的日志，旧的在前。不包括本次启动之前的历史。
         /// </summary>
         public static IReadOnlyList<RunLogMessage> LoadSession()
@@ -153,9 +282,27 @@ namespace MMSP.Common.Helper.Logger
         }
 
         /// <summary>
+        /// 拼文件里的一行。线程名空白时只留线程号。客户库和主页不用这一行。
+        /// </summary>
+        internal static string FormatLine(
+            DateTime time,
+            int threadId,
+            string? threadName,
+            RunLogBiz biz,
+            string levelText,
+            string message)
+        {
+            var id = threadId.ToString(CultureInfo.InvariantCulture);
+            var thread = string.IsNullOrWhiteSpace(threadName)
+                ? "线程 " + id
+                : "线程 " + id + " " + threadName.Trim();
+            return $"{time:yyyy-MM-dd HH:mm:ss} [{thread}] [{biz}] [{levelText}] {message}";
+        }
+
+        /// <summary>
         /// 写文件、写客户库，然后发布消息。任一步失败都不抛给调用方。
         /// </summary>
-        private static void Write(RunLogBiz biz, RunLogLevel level, string message, Exception? exception)
+        private static void Write(RunLogBiz biz, RunLogLevel level, string message, Exception? exception, LogCopy copy = LogCopy.None)
         {
             if (string.IsNullOrWhiteSpace(message))
                 return;
@@ -176,11 +323,13 @@ namespace MMSP.Common.Helper.Logger
 
             try
             {
+                var thread = Thread.CurrentThread;
+                var line = FormatLine(time, thread.ManagedThreadId, thread.Name, biz, levelText, message);
                 EnsureFile();
-                var line = $"{time:yyyy-MM-dd HH:mm:ss} [{biz}] [{levelText}] {message}";
                 var nlogLevel = ToNLogLevel(level);
-                var evt = new LogEventInfo(nlogLevel, LoggerName, CultureInfo.InvariantCulture, "{0}", new object[] { line });
-                _fileLogger?.Log(evt);
+                LogFile(RunLoggerName, nlogLevel, line);
+                if (LoggerNameFor(copy) is string extra)
+                    LogFile(extra, nlogLevel, line);
             }
             catch (Exception)
             {
@@ -232,9 +381,31 @@ namespace MMSP.Common.Helper.Logger
                 Directory.CreateDirectory(PathCore.LogDirectory);
                 LogManager.Setup().LoadConfigurationFromFile(PathCore.LogFilePath);
                 LogManager.Configuration.Variables["logDir"] = PathCore.LogDirectory;
-                _fileLogger = LogManager.GetLogger(LoggerName);
                 _fileReady = true;
             }
+        }
+
+        /// <summary>
+        /// 按记录器名字写一行。文件夹由 NLog.config 决定。
+        /// </summary>
+        private static void LogFile(string loggerName, NLog.LogLevel level, string line)
+        {
+            var evt = new LogEventInfo(level, loggerName, CultureInfo.InvariantCulture, "{0}", new object[] { line });
+            LogManager.GetLogger(loggerName).Log(evt);
+        }
+
+        /// <summary>
+        /// 专项文件使用的记录器。只写运行日志时返回空。
+        /// </summary>
+        private static string? LoggerNameFor(LogCopy copy)
+        {
+            return copy switch
+            {
+                LogCopy.Device => DeviceLoggerName,
+                LogCopy.Flow => FlowLoggerName,
+                LogCopy.Mes => MesLoggerName,
+                _ => null
+            };
         }
 
         /// <summary>

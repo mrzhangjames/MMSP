@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using System.Net.Sockets;
+using MMSP.Core.Model.Helper;
 using MMSP.Core.Model.Sys;
 
 namespace MMSP.Service.Device.Plc
@@ -55,9 +57,9 @@ namespace MMSP.Service.Device.Plc
         public static PlcHeartbeat Shared { get; } = new();
 
         /// <summary>
-        /// 失败时调用一次。同一条原因不重复调用。由壳接到 PLC 错误日志。
+        /// 失败时调用一次。同一条原因不重复调用。由壳接到 PLC 错误日志。第二个参数是捕获到的异常，没有时为空。
         /// </summary>
-        public Action<string>? Failure { get; set; }
+        public Action<string, Exception?>? Failure { get; set; }
 
         /// <summary>
         /// 最近一次心跳写入是否成功。
@@ -255,10 +257,46 @@ namespace MMSP.Service.Device.Plc
                 opened = null;
                 return true;
             }
-            catch (Exception ex)
+            catch (TimeoutException ex)
             {
                 DisposeClient(opened);
-                Report(ref lastError, ex.Message);
+                Report(ref lastError, "连接 PLC 失败", ex);
+                return false;
+            }
+            catch (SocketException ex)
+            {
+                DisposeClient(opened);
+                Report(ref lastError, "连接 PLC 失败", ex);
+                return false;
+            }
+            catch (ObjectDisposedException ex)
+            {
+                DisposeClient(opened);
+                Report(ref lastError, "连接 PLC 失败", ex);
+                return false;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                DisposeClient(opened);
+                Report(ref lastError, "连接 PLC 失败", ex);
+                return false;
+            }
+            catch (IOException ex)
+            {
+                DisposeClient(opened);
+                Report(ref lastError, "连接 PLC 失败", ex);
+                return false;
+            }
+            catch (InvalidOperationException ex)
+            {
+                DisposeClient(opened);
+                Report(ref lastError, "连接 PLC 失败", ex);
+                return false;
+            }
+            catch (ArgumentException ex)
+            {
+                DisposeClient(opened);
+                Report(ref lastError, "连接 PLC 失败", ex);
                 return false;
             }
         }
@@ -277,9 +315,34 @@ namespace MMSP.Service.Device.Plc
                 Report(ref lastError, written.Message);
                 return false;
             }
-            catch (Exception ex)
+            catch (TimeoutException ex)
             {
-                Report(ref lastError, ex.Message);
+                Report(ref lastError, "写入心跳失败", ex);
+                return false;
+            }
+            catch (SocketException ex)
+            {
+                Report(ref lastError, "写入心跳失败", ex);
+                return false;
+            }
+            catch (ObjectDisposedException ex)
+            {
+                Report(ref lastError, "写入心跳失败", ex);
+                return false;
+            }
+            catch (IOException ex)
+            {
+                Report(ref lastError, "写入心跳失败", ex);
+                return false;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Report(ref lastError, "写入心跳失败", ex);
+                return false;
+            }
+            catch (ArgumentException ex)
+            {
+                Report(ref lastError, "写入心跳失败", ex);
                 return false;
             }
         }
@@ -295,20 +358,22 @@ namespace MMSP.Service.Device.Plc
         /// <summary>
         /// 同一条原因只交给 Failure 一次。
         /// </summary>
-        private void Report(ref string? lastError, string? message)
+        private void Report(ref string? lastError, string? message, Exception? exception = null)
         {
-            var text = string.IsNullOrWhiteSpace(message) ? "心跳失败" : "心跳 " + message.Trim();
+            var text = exception is null
+                ? (string.IsNullOrWhiteSpace(message) ? "心跳失败" : "心跳 " + message.Trim())
+                : (string.IsNullOrWhiteSpace(message) ? "心跳失败" : message.Trim());
             if (text == lastError)
                 return;
 
             lastError = text;
             try
             {
-                Failure?.Invoke(text);
+                Failure?.Invoke(text, exception);
             }
-            catch (Exception)
+            catch (InvalidOperationException)
             {
-                // 日志失败不打断心跳循环。
+                // 日志订阅失败不打断心跳循环。
             }
         }
 
@@ -343,9 +408,16 @@ namespace MMSP.Service.Device.Plc
             {
                 client.Dispose();
             }
-            catch (Exception)
+            catch (ObjectDisposedException)
             {
-                // 退出或重连时，驱动已经关掉就忽略。
+            }
+            catch (SocketException ex)
+            {
+                CaughtLog.Report(CaughtLogChannel.Plc, "关闭 PLC 连接失败", ex);
+            }
+            catch (IOException ex)
+            {
+                CaughtLog.Report(CaughtLogChannel.Plc, "关闭 PLC 连接失败", ex);
             }
         }
 

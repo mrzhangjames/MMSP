@@ -13,6 +13,11 @@ namespace MMSP.Core.Model.Sys
         private const int DayFileNameLength = 12;
 
         /// <summary>
+        /// 按天子目录名的长度，例如 20261020。
+        /// </summary>
+        private const int DayFolderNameLength = 8;
+
+        /// <summary>
         /// 读保留天数。只接受 0 到 <see cref="AppConfigDefaults.MaxKeepDays"/> 的整数。
         /// </summary>
         public static bool TryParseDays(string? text, out int days)
@@ -63,6 +68,30 @@ namespace MMSP.Core.Model.Sys
                 return false;
 
             return fileDate.Date < cutoff.Value;
+        }
+
+        /// <summary>
+        /// 这个按天子目录是否早于保留天数。目录名不是 yyyyMMdd 时不删。
+        /// </summary>
+        public static bool IsExpiredDayFolder(string path, DateTime today, int days)
+        {
+            var cutoff = CutoffDate(today, days);
+            if (cutoff is null || string.IsNullOrWhiteSpace(path))
+                return false;
+
+            var name = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            if (name.Length != DayFolderNameLength)
+                return false;
+
+            if (!DateTime.TryParseExact(
+                    name,
+                    "yyyyMMdd",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var folderDate))
+                return false;
+
+            return folderDate.Date < cutoff.Value;
         }
     }
 }

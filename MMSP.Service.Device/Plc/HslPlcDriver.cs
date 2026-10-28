@@ -1,4 +1,6 @@
-﻿using HslCommunication.Core;
+﻿using System.ComponentModel;
+using System.Net.Sockets;
+using HslCommunication.Core;
 using HslCommunication.Core.Device;
 using MMSP.Core.Model.Sys;
 
@@ -50,20 +52,19 @@ namespace MMSP.Service.Device.Plc
             if (invalid is not null)
                 return invalid;
 
+            var opened = false;
             try
             {
                 _device = CreateDevice(Connection);
                 var result = Open(_device);
                 IsConnected = result.IsSuccess;
-                if (!result.IsSuccess)
-                    Close();
-
+                opened = result.IsSuccess;
                 return result;
             }
-            catch (Exception ex)
+            finally
             {
-                Close();
-                return PlcIoResult.Fail(ex.Message);
+                if (!opened)
+                    Close();
             }
         }
 
@@ -112,9 +113,29 @@ namespace MMSP.Service.Device.Plc
             {
                 Shutdown(device);
             }
-            catch (Exception)
+            catch (ObjectDisposedException)
             {
-                // 关闭失败不再向外抛。下次 Connect 会新建对象。
+                // 已经关掉。下次 Connect 会新建对象。
+            }
+            catch (SocketException)
+            {
+                // 关闭失败不再向外抛，避免盖住这次连接或读写的异常。
+            }
+            catch (Win32Exception)
+            {
+                // 串口关闭失败不再向外抛。
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // 关闭失败不再向外抛。
+            }
+            catch (IOException)
+            {
+                // 关闭失败不再向外抛。
+            }
+            catch (InvalidOperationException)
+            {
+                // 关闭失败不再向外抛。
             }
         }
 

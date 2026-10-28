@@ -203,7 +203,7 @@ namespace MMSP.Service.Database
                 db.Ado.ExecuteCommand("DROP TABLE biz_flow_steps_legacy");
                 db.Ado.CommitTran();
             }
-            catch
+            catch (SqlSugarException)
             {
                 db.Ado.RollbackTran();
                 throw;

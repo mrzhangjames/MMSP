@@ -81,7 +81,35 @@
             catch (OperationCanceledException)
             {
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                error("流程执行失败", ex);
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                error("流程执行失败", ex);
+            }
+            catch (TimeoutException ex)
+            {
+                error("流程执行失败", ex);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                error("流程执行失败", ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                error("流程执行失败", ex);
+            }
+            catch (IOException ex)
+            {
+                error("流程执行失败", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                error("流程执行失败", ex);
+            }
+            catch (SqlSugar.SqlSugarException ex)
             {
                 error("流程执行失败", ex);
             }

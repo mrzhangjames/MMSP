@@ -6,7 +6,7 @@ using MMSP.Service.Database;
 namespace MMSP.Common.Helper.Logger
 {
     /// <summary>
-    /// 按保留天数删除客户库运行日志和 Data\Log 里的按日文件。
+    /// 按保留天数删除客户库运行日志、Data\Log 根上的旧按日文件，以及业务目录下的按天子目录。
     /// </summary>
     public static class LogRetentionCleaner
     {
@@ -42,7 +42,7 @@ namespace MMSP.Common.Helper.Logger
         }
 
         /// <summary>
-        /// 删除日志目录里早于截止日期的 yyyyMMdd.log。
+        /// 删除日志根目录里早于截止日期的 yyyyMMdd.log，以及各业务目录下早于截止日期的按天子目录。
         /// </summary>
         private static void DeleteFiles(int days, DateTime today)
         {
@@ -63,9 +63,39 @@ namespace MMSP.Common.Helper.Logger
                 {
                     File.Delete(file);
                 }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                catch (UnauthorizedAccessException ex)
                 {
+                    LogHelper.SysError("删除过期日志失败", ex);
                     failed.Add(Path.GetFileName(file));
+                }
+                catch (IOException ex)
+                {
+                    LogHelper.SysError("删除过期日志失败", ex);
+                    failed.Add(Path.GetFileName(file));
+                }
+            }
+
+            foreach (var category in Directory.EnumerateDirectories(directory))
+            {
+                foreach (var day in Directory.EnumerateDirectories(category))
+                {
+                    if (!LogRetention.IsExpiredDayFolder(day, today, days))
+                        continue;
+
+                    try
+                    {
+                        Directory.Delete(day, true);
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        LogHelper.SysError("删除过期日志失败", ex);
+                        failed.Add(Path.GetFileName(category) + "\\" + Path.GetFileName(day));
+                    }
+                    catch (IOException ex)
+                    {
+                        LogHelper.SysError("删除过期日志失败", ex);
+                        failed.Add(Path.GetFileName(category) + "\\" + Path.GetFileName(day));
+                    }
                 }
             }
 

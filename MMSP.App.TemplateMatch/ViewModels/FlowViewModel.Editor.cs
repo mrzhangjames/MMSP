@@ -6,6 +6,7 @@ using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Tool;
 using MMSP.Service.Database;
+using SqlSugar;
 
 namespace MMSP.App.TemplateMatch.ViewModels
 {
@@ -102,8 +103,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 Load(savedId);
                 return true;
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("保存流程失败", ex);
                 return false;
             }
         }
@@ -129,8 +131,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     .OrderBy(item => item.SortIndex)
                     .ToList();
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("读取流程变量失败", ex);
                 await MetroDialogService.ShowMessageAsync(Text("Flow_VarEdit", "变量编辑"), "变量无法读取");
                 return;
             }
@@ -203,7 +206,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                     db.Ado.CommitTran();
                 }
-                catch (Exception)
+                catch (SqlSugarException)
                 {
                     db.Ado.RollbackTran();
                     throw;
@@ -212,8 +215,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 LogHelper.FlowInfo($"保存流程变量 {card.Name}");
                 return true;
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("保存流程变量失败", ex);
                 return false;
             }
         }
@@ -256,7 +260,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     db.Deleteable<FlowEntity>().Where(item => item.Id == id).ExecuteCommand();
                     db.Ado.CommitTran();
                 }
-                catch (Exception)
+                catch (SqlSugarException)
                 {
                     db.Ado.RollbackTran();
                     throw;
@@ -265,8 +269,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 LogHelper.FlowInfo($"删除流程 {name}");
                 Load(next);
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("删除流程失败", ex);
                 await MetroDialogService.ShowMessageAsync(
                     Text("Flow_DeleteTitle", "删除流程"),
                     Text("Flow_DeleteFailed", "删除失败"));

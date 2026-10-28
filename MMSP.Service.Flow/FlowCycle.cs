@@ -1,4 +1,6 @@
-﻿namespace MMSP.Service.Flow
+﻿using MMSP.Common.Helper.Logger;
+
+namespace MMSP.Service.Flow
 {
     /// <summary>
     /// 一轮要跑的一条流程。配置在启动时抄下，本轮内不再改。
@@ -173,9 +175,37 @@
                         SkipFrom(flow, index + 1, progress);
                         return FlowCycleStop.Cancelled;
                     }
-                    catch (Exception ex)
+                    catch (ArgumentException ex)
                     {
-                        result = FlowStepResult.Fail(ex.Message);
+                        result = FailStep(ex);
+                    }
+                    catch (System.Text.Json.JsonException ex)
+                    {
+                        result = FailStep(ex);
+                    }
+                    catch (TimeoutException ex)
+                    {
+                        result = FailStep(ex);
+                    }
+                    catch (ObjectDisposedException ex)
+                    {
+                        result = FailStep(ex);
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        result = FailStep(ex);
+                    }
+                    catch (IOException ex)
+                    {
+                        result = FailStep(ex);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        result = FailStep(ex);
+                    }
+                    catch (SqlSugar.SqlSugarException ex)
+                    {
+                        result = FailStep(ex);
                     }
 
                     watch.Stop();
@@ -232,6 +262,15 @@
         {
             for (var skip = index; skip < flow.Steps.Count; skip++)
                 Report(progress, flow.Steps[skip], FlowStepRunState.Skipped, 0, "");
+        }
+
+        /// <summary>
+        /// 步骤抛出的异常写入流程日志。步骤结果只用短句，不带异常原文。
+        /// </summary>
+        private static FlowStepResult FailStep(Exception exception)
+        {
+            LogHelper.FlowRunError("流程步骤失败", exception);
+            return FlowStepResult.Fail("步骤失败");
         }
     }
 

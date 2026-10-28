@@ -6,6 +6,7 @@ using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Tool;
 using MMSP.Service.Database;
+using SqlSugar;
 
 namespace MMSP.App.TemplateMatch.ViewModels
 {
@@ -54,8 +55,24 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 File.WriteAllText(dialog.FileName, json, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
                 LogHelper.FlowInfo("导出流程配置");
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("导出流程配置失败", ex);
+                await MetroDialogService.ShowMessageAsync(Text("Flow_Export", "导出"), Text("Flow_ExportFailed", "导出失败"));
+            }
+            catch (ArgumentException ex)
+            {
+                LogHelper.FlowError("导出流程配置失败", ex);
+                await MetroDialogService.ShowMessageAsync(Text("Flow_Export", "导出"), Text("Flow_ExportFailed", "导出失败"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.FlowError("导出流程配置失败", ex);
+                await MetroDialogService.ShowMessageAsync(Text("Flow_Export", "导出"), Text("Flow_ExportFailed", "导出失败"));
+            }
+            catch (IOException ex)
+            {
+                LogHelper.FlowError("导出流程配置失败", ex);
                 await MetroDialogService.ShowMessageAsync(Text("Flow_Export", "导出"), Text("Flow_ExportFailed", "导出失败"));
             }
             finally
@@ -88,8 +105,21 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 {
                     json = File.ReadAllText(dialog.FileName);
                 }
-                catch (Exception)
+                catch (ArgumentException ex)
                 {
+                    LogHelper.FlowError("读取流程配置失败", ex);
+                    await MetroDialogService.ShowMessageAsync(Text("Flow_Import", "导入"), Text("Flow_ImportFailed", "导入失败"));
+                    return;
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    LogHelper.FlowError("读取流程配置失败", ex);
+                    await MetroDialogService.ShowMessageAsync(Text("Flow_Import", "导入"), Text("Flow_ImportFailed", "导入失败"));
+                    return;
+                }
+                catch (IOException ex)
+                {
+                    LogHelper.FlowError("读取流程配置失败", ex);
                     await MetroDialogService.ShowMessageAsync(Text("Flow_Import", "导入"), Text("Flow_ImportFailed", "导入失败"));
                     return;
                 }
@@ -150,8 +180,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 db.Ado.CommitTran();
                 return true;
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("导入流程配置失败", ex);
                 db.Ado.RollbackTran();
                 return false;
             }

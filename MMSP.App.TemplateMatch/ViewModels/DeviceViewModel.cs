@@ -1,5 +1,8 @@
 ﻿using System.Collections.ObjectModel;
+using System.IO;
+using System.Security;
 using System.Windows;
+using CsvHelper;
 using Microsoft.Win32;
 using MMSP.App.TemplateMatch.Models;
 using MMSP.App.WpfBase.Core;
@@ -9,6 +12,7 @@ using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using MMSP.Service.Database;
+using SqlSugar;
 using MMSP.Service.Device.Plc;
 using MMSP.Service.Device.Scan;
 
@@ -958,10 +962,41 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 SelectedPoint = Points.FirstOrDefault();
                 LogHelper.PlcInfo($"导入点位配置 {imported.Count}");
             }
-            catch (Exception)
+            catch (ArgumentException ex)
             {
-                LogHelper.PlcError("导入点位配置失败");
-                await MetroDialogService.ShowMessageAsync(Text("Device_Import"), Text("Device_ImportFailed"));
+                await FailPointImport(ex);
+            }
+            catch (NotSupportedException ex)
+            {
+                await FailPointImport(ex);
+            }
+            catch (SecurityException ex)
+            {
+                await FailPointImport(ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                await FailPointImport(ex);
+            }
+            catch (IOException ex)
+            {
+                await FailPointImport(ex);
+            }
+            catch (CsvHelperException ex)
+            {
+                await FailPointImport(ex);
+            }
+            catch (InvalidDataException ex)
+            {
+                await FailPointImport(ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                await FailPointImport(ex);
+            }
+            catch (SqlSugarException ex)
+            {
+                await FailPointImport(ex);
             }
         }
 
@@ -1015,10 +1050,48 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 CsvFileHelper.Write(dialog.FileName, lines);
             }
-            catch (Exception)
+            catch (ArgumentException ex)
             {
-                await MetroDialogService.ShowMessageAsync(Text("Device_Export"), Text("Device_ExportFailed"));
+                await FailPointExport(ex);
             }
+            catch (NotSupportedException ex)
+            {
+                await FailPointExport(ex);
+            }
+            catch (SecurityException ex)
+            {
+                await FailPointExport(ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                await FailPointExport(ex);
+            }
+            catch (IOException ex)
+            {
+                await FailPointExport(ex);
+            }
+            catch (CsvHelperException ex)
+            {
+                await FailPointExport(ex);
+            }
+        }
+
+        /// <summary>
+        /// 导入失败时写运行日志并提示。
+        /// </summary>
+        private async Task FailPointImport(Exception exception)
+        {
+            LogHelper.PlcError("导入点位配置失败", exception);
+            await MetroDialogService.ShowMessageAsync(Text("Device_Import"), Text("Device_ImportFailed"));
+        }
+
+        /// <summary>
+        /// 导出失败时写运行日志并提示。
+        /// </summary>
+        private async Task FailPointExport(Exception exception)
+        {
+            LogHelper.PlcError("导出点位配置失败", exception);
+            await MetroDialogService.ShowMessageAsync(Text("Device_Export"), Text("Device_ExportFailed"));
         }
 
         /// <summary>
@@ -1401,7 +1474,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 return;
             }
 
-            NotePlc(DeviceLogKind.Send, "读取 地址 " + address + " 类型 " + type + " 长度 " + length, false);
+            NotePlc(DeviceLogKind.Send, "读取 地址 " + address + " 类型 " + type + " 长度 " + length, false, true);
             var bitIndex = BitOf(point, type, length);
             var formatStatus = point is not null
                 && bitIndex is null
@@ -1414,11 +1487,11 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             if (!result.IsSuccess)
             {
-                NotePlc(DeviceLogKind.Timeout, result.Message, true);
+                NotePlc(DeviceLogKind.Timeout, result.Message, true, true);
                 return;
             }
 
-            NotePlc(DeviceLogKind.Receive, "应答 读取值 " + result.Value, false);
+            NotePlc(DeviceLogKind.Receive, "应答 读取值 " + result.Value, false, true);
             RememberValue(point, address, type, result.Value);
         }
 
@@ -1455,18 +1528,18 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 return;
             }
 
-            NotePlc(DeviceLogKind.Send, "写入 地址 " + address + " 类型 " + type + " 值 " + value, false);
+            NotePlc(DeviceLogKind.Send, "写入 地址 " + address + " 类型 " + type + " 值 " + value, false, true);
             var result = await ExchangePlc(address, type, "1", value, BitOf(point, type, "1"), false);
             if (result is null)
                 return;
 
             if (!result.IsSuccess)
             {
-                NotePlc(DeviceLogKind.Timeout, result.Message, true);
+                NotePlc(DeviceLogKind.Timeout, result.Message, true, true);
                 return;
             }
 
-            NotePlc(DeviceLogKind.Receive, "写入成功", false);
+            NotePlc(DeviceLogKind.Receive, "写入成功", false, true);
             RememberValue(point, address, type, value);
         }
 
@@ -1512,10 +1585,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 return;
 
             var trigger = string.IsNullOrWhiteSpace(scanner.TriggerText) ? "LON" : scanner.TriggerText.Trim();
-            NoteScan(DeviceLogKind.Send, scanner.Name + " 触发字符串 " + trigger, false);
+            NoteScan(DeviceLogKind.Send, scanner.Name + " 触发字符串 " + trigger, false, true);
             if (!scanner.IsEnabled)
             {
-                NoteScan(DeviceLogKind.Timeout, scanner.Name + " 1000 ms 无应答", true);
+                NoteScan(DeviceLogKind.Timeout, scanner.Name + " 1000 ms 无应答", true, true);
                 return;
             }
 
@@ -1525,7 +1598,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             if (!result.IsSuccess)
             {
-                NoteScan(DeviceLogKind.Timeout, scanner.Name + " " + result.Message, true);
+                NoteScan(DeviceLogKind.Timeout, scanner.Name + " " + result.Message, true, true);
                 return;
             }
 
@@ -1533,7 +1606,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             if (SelectedScanner == scanner)
                 ScanResult = result.Value;
 
-            NoteScan(DeviceLogKind.Receive, scanner.Name + " " + result.Value, false);
+            NoteScan(DeviceLogKind.Receive, scanner.Name + " " + result.Value, false, true);
         }
 
         /// <summary>

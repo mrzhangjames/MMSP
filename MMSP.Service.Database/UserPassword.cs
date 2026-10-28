@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using MMSP.Core.Model.Helper;
 
 namespace MMSP.Service.Database
 {
@@ -99,6 +100,8 @@ namespace MMSP.Service.Database
             }
             catch (FormatException)
             {
+                // 原文里可能有盐或哈希，日志不附带这个异常。
+                CaughtLog.Report(CaughtLogChannel.Sys, "口令记录无法解析", new FormatException("口令记录无法解析"));
                 return false;
             }
 

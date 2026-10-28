@@ -45,7 +45,7 @@ namespace MMSP.Service.Flow.Steps
                 return missing;
 
             var text = _tool.Script ?? "";
-            LogHelper.FlowInfo(text);
+            LogHelper.FlowRunInfo(text);
             return Ok(text);
         }
     }

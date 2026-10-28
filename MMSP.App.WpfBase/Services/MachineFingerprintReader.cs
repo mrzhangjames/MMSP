@@ -2,6 +2,7 @@ using System.IO;
 using System.Security;
 using Microsoft.Win32;
 using MMSP.Core.License;
+using MMSP.Core.Model.Helper;
 
 namespace MMSP.App.WpfBase.Services
 {
@@ -28,8 +29,24 @@ namespace MMSP.App.WpfBase.Services
                 var raw = crypto?.GetValue("MachineGuid") as string;
                 return MachineFingerprintFormat.TryFromMachineGuid(raw, out fingerprint);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException)
+            catch (IOException ex)
             {
+                CaughtLog.Report(CaughtLogChannel.Sys, "读取机器指纹失败", ex);
+                return false;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                CaughtLog.Report(CaughtLogChannel.Sys, "读取机器指纹失败", ex);
+                return false;
+            }
+            catch (SecurityException ex)
+            {
+                CaughtLog.Report(CaughtLogChannel.Sys, "读取机器指纹失败", ex);
+                return false;
+            }
+            catch (InvalidOperationException ex)
+            {
+                CaughtLog.Report(CaughtLogChannel.Sys, "读取机器指纹失败", ex);
                 return false;
             }
         }

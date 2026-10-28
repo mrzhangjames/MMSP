@@ -15,6 +15,8 @@ using MMSP.Core.Model.Sys;
 using MMSP.Plugin.Tool;
 using MMSP.Service.Database;
 using MMSP.Service.Flow;
+using SqlSugar;
+using System.Text.Json;
 
 namespace MMSP.App.TemplateMatch.ViewModels
 {
@@ -329,8 +331,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 entity.LogOutput = card.LogOutput;
                 db.Updateable(entity).ExecuteCommand();
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("保存流程开关失败", ex);
                 RestoreFlags(card);
             }
         }
@@ -356,9 +359,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 card.IsEnabled = entity.IsEnabled;
                 card.LogOutput = entity.LogOutput;
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
-                // 库也读不回来时，保留界面上这次拨动。
+                LogHelper.FlowError("读取流程开关失败", ex);
             }
             finally
             {
@@ -403,8 +406,23 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     MesCfgJson.Read(model, json);
                     json = MesCfgJson.Write(model);
                 }
-                catch (Exception)
+                catch (JsonException ex)
                 {
+                    LogHelper.FlowError("读取 MES 配置失败", ex);
+                    MesCfgJson.Read(model, "");
+                    json = MesCfgJson.Write(model);
+                    MesError = "MES 配置无法读取";
+                }
+                catch (InvalidOperationException ex)
+                {
+                    LogHelper.FlowError("读取 MES 配置失败", ex);
+                    MesCfgJson.Read(model, "");
+                    json = MesCfgJson.Write(model);
+                    MesError = "MES 配置无法读取";
+                }
+                catch (SqlSugarException ex)
+                {
+                    LogHelper.FlowError("读取 MES 配置失败", ex);
                     MesCfgJson.Read(model, "");
                     json = MesCfgJson.Write(model);
                     MesError = "MES 配置无法读取";
@@ -448,8 +466,15 @@ namespace MMSP.App.TemplateMatch.ViewModels
             {
                 MesCfgJson.Read(model, _savedCfg);
             }
-            catch (Exception)
+            catch (JsonException ex)
             {
+                LogHelper.FlowError("读取 MES 配置失败", ex);
+                MesCfgJson.Read(model, "");
+                MesError = "MES 配置无法读取";
+            }
+            catch (InvalidOperationException ex)
+            {
+                LogHelper.FlowError("读取 MES 配置失败", ex);
                 MesCfgJson.Read(model, "");
                 MesError = "MES 配置无法读取";
             }
@@ -520,8 +545,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 ShowFields(model);
                 LogHelper.FlowInfo("保存 MES 配置");
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("保存 MES 配置失败", ex);
                 MesError = Text("User_SaveFailed", "保存失败");
             }
         }

@@ -13,7 +13,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="MMSP.Service.Flow.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MMSP.Core.Model\MMSP.Core.Model.csproj" />
+    <ProjectReference Include="..\MMSP.Core.License\MMSP.Core.License.csproj" />
     <ProjectReference Include="..\MMSP.Service.Database\MMSP.Service.Database.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using MMSP.Common.Helper.Logger;
 
 namespace MMSP.Plugin.Lux.WMI
 {
@@ -48,8 +49,16 @@ namespace MMSP.Plugin.Lux.WMI
                 plain = Encoding.UTF8.GetString(raw);
                 return true;
             }
-            catch (Exception)
+            catch (FormatException)
             {
+                // 密文本身不写入日志。
+                LogHelper.MesIoError("AES 密文无法解密");
+                error = "AES 密文无法解密";
+                return false;
+            }
+            catch (CryptographicException)
+            {
+                LogHelper.MesIoError("AES 密文无法解密");
                 error = "AES 密文无法解密";
                 return false;
             }

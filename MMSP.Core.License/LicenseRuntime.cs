@@ -26,8 +26,14 @@ namespace MMSP.Core.License
 
                 return CheckBytes(files, utf8, machineFingerprint, utcNow);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
+                LicenseCaughtLog.Report("读取许可证失败", ex);
+                return LicenseEvaluation.Only(LicenseFailureCode.FileUnreadable);
+            }
+            catch (IOException ex)
+            {
+                LicenseCaughtLog.Report("读取许可证失败", ex);
                 return LicenseEvaluation.Only(LicenseFailureCode.FileUnreadable);
             }
         }
@@ -51,6 +57,8 @@ namespace MMSP.Core.License
             }
             catch (ArgumentException)
             {
+                // 内部加密异常可能带上密钥材料，日志不附带原来的异常。
+                LicenseCaughtLog.Report("公钥无效", new ArgumentException("公钥无效"));
                 return LicenseEvaluation.Only(LicenseFailureCode.PublicKeyInvalid);
             }
 
@@ -78,6 +86,7 @@ namespace MMSP.Core.License
             }
             catch (ArgumentException)
             {
+                LicenseCaughtLog.Report("公钥无效", new ArgumentException("公钥无效"));
                 return LicenseEvaluation.Only(LicenseFailureCode.PublicKeyInvalid);
             }
 
@@ -86,8 +95,14 @@ namespace MMSP.Core.License
             {
                 seen = files.ReadSeen();
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
+                LicenseCaughtLog.Report("读取许可证水位失败", ex);
+                seen = null;
+            }
+            catch (IOException ex)
+            {
+                LicenseCaughtLog.Report("读取许可证水位失败", ex);
                 seen = null;
             }
 

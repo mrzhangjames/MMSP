@@ -8,6 +8,7 @@ using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using MMSP.Service.Database;
+using SqlSugar;
 
 namespace MMSP.App.TemplateMatch.ViewModels
 {
@@ -547,9 +548,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 return true;
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
                 EditorError = Text("User_SaveFailed");
+                LogHelper.SysError("保存用户失败", ex);
                 return false;
             }
         }
@@ -753,7 +755,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     matches[0].SessionTimeout);
                 LogHelper.SysInfo($"登录成功 {loginName} 角色={selectedRole}");
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
                 LoginError = Text("Login_Failed");
                 LogHelper.SysError($"登录失败 {loginName}", ex);

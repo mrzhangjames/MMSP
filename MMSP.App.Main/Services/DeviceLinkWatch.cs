@@ -1,8 +1,13 @@
-﻿using MMSP.Core.Model.DB;
+﻿using System.ComponentModel;
+using System.IO;
+using System.Net.Sockets;
+using MMSP.Common.Helper.Logger;
+using MMSP.Core.Model.DB;
 using MMSP.Service.Database;
 using MMSP.Service.Device;
 using MMSP.Service.Device.Plc;
 using MMSP.Service.Device.Scan;
+using SqlSugar;
 
 namespace MMSP.App.Main.Services
 {
@@ -32,7 +37,8 @@ namespace MMSP.App.Main.Services
     }
 
     /// <summary>
-    /// 按客户库里的 PLC 和启用扫码枪看连接。一轮结束后再等 3 秒，不写运行日志。
+    /// 按客户库里的 PLC 和启用扫码枪看连接。一轮结束后再等 3 秒。
+    /// 读库或短连接失败时各记一次，恢复成功后再允许下一条。
     /// 设备页或流程已经连着时直接显示已连接。PLC 配了心跳地址就看心跳写入，否则短连接。
     /// 短连接失败时连续再连，一共 3 次，间隔 200 毫秒，仍然失败才显示未连接。
     /// </summary>
@@ -62,6 +68,21 @@ namespace MMSP.App.Main.Services
         /// 上一轮读数。没变化时不通知界面。
         /// </summary>
         private IReadOnlyList<DeviceLinkReading> _last = [];
+
+        /// <summary>
+        /// 这一轮读库失败已经写过日志。恢复成功后清掉，避免每 3 秒重复记同一条。
+        /// </summary>
+        private bool _readErrorLogged;
+
+        /// <summary>
+        /// 界面更新失败已经写过日志。下一次更新成功后清掉。
+        /// </summary>
+        private bool _publishErrorLogged;
+
+        /// <summary>
+        /// 短连接失败已经写过日志的设备名。连上后从这里去掉。
+        /// </summary>
+        private readonly HashSet<string> _probeLogged = new();
 
         /// <summary>
         /// 进程内这一条探测。
@@ -127,10 +148,15 @@ namespace MMSP.App.Main.Services
                 try
                 {
                     Publish(ReadLinks());
+                    _readErrorLogged = false;
                 }
-                catch (Exception)
+                catch (SqlSugarException ex)
                 {
-                    // 读库失败不写运行日志，下一轮再试。
+                    if (!_readErrorLogged)
+                    {
+                        _readErrorLogged = true;
+                        LogHelper.SysError("读取设备连接失败", ex);
+                    }
                 }
 
                 _wake.Wait(3000);
@@ -172,7 +198,7 @@ namespace MMSP.App.Main.Services
             if (!string.IsNullOrWhiteSpace(link.HeartbeatAddress))
                 return PlcHeartbeat.Shared.LinkUp;
 
-            return ConnectRepeated(() => ProbePlc(link));
+            return ConnectRepeated(() => Probe("PLC", () => ProbePlc(link), true));
         }
 
         /// <summary>
@@ -183,7 +209,7 @@ namespace MMSP.App.Main.Services
             if (DeviceLinkUse.ScanConnected(entity.Id))
                 return true;
 
-            return ConnectRepeated(() => ProbeScan(entity));
+            return ConnectRepeated(() => Probe(ScannerName(entity), () => ProbeScan(entity), false));
         }
 
         /// <summary>
@@ -239,10 +265,6 @@ namespace MMSP.App.Main.Services
                     link.WriteTimeoutMs));
                 return client.Connect().IsSuccess;
             }
-            catch (Exception)
-            {
-                return false;
-            }
             finally
             {
                 Dispose(client);
@@ -259,10 +281,6 @@ namespace MMSP.App.Main.Services
             {
                 client = ScanClients.Open(ToScan(entity));
                 return client.Connect().IsSuccess;
-            }
-            catch (Exception)
-            {
-                return false;
             }
             finally
             {
@@ -323,10 +341,15 @@ namespace MMSP.App.Main.Services
             try
             {
                 handler(next);
+                _publishErrorLogged = false;
             }
-            catch (Exception)
+            catch (InvalidOperationException ex)
             {
-                // 界面更新失败不打断探测。
+                if (_publishErrorLogged)
+                    return;
+
+                _publishErrorLogged = true;
+                LogHelper.SysError("更新设备连接状态失败", ex);
             }
         }
 
@@ -359,10 +382,89 @@ namespace MMSP.App.Main.Services
             {
                 client.Dispose();
             }
-            catch (Exception)
+            catch (ObjectDisposedException)
             {
                 // 探测结束时，通道已经关掉就忽略。
             }
+            catch (SocketException)
+            {
+                // 关掉短连接的失败不另记，连接失败那一条已经记下。
+            }
+            catch (Win32Exception)
+            {
+                // 关掉串口的失败不另记。
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // 关掉短连接的失败不另记。
+            }
+            catch (IOException)
+            {
+                // 关掉短连接的失败不另记。
+            }
+            catch (InvalidOperationException)
+            {
+                // 关掉短连接的失败不另记。
+            }
+        }
+
+        /// <summary>
+        /// 做一次短连接。失败时同一台设备只记一条，连上后允许再记。
+        /// </summary>
+        private bool Probe(string name, Func<bool> once, bool plc)
+        {
+            try
+            {
+                var connected = once();
+                if (connected)
+                    _probeLogged.Remove(name);
+
+                return connected;
+            }
+            catch (TimeoutException ex)
+            {
+                return NoteProbe(name, plc, ex);
+            }
+            catch (SocketException ex)
+            {
+                return NoteProbe(name, plc, ex);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                return NoteProbe(name, plc, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return NoteProbe(name, plc, ex);
+            }
+            catch (IOException ex)
+            {
+                return NoteProbe(name, plc, ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NoteProbe(name, plc, ex);
+            }
+            catch (ArgumentException ex)
+            {
+                return NoteProbe(name, plc, ex);
+            }
+        }
+
+        /// <summary>
+        /// 短连接抛出的异常记一条设备日志，并当作没连上。
+        /// </summary>
+        private bool NoteProbe(string name, bool plc, Exception exception)
+        {
+            if (_probeLogged.Add(name))
+            {
+                if (plc)
+                    LogHelper.PlcIoError("连接 PLC 失败", exception);
+                else
+                    LogHelper.ScanIoError("连接扫码枪失败", exception);
+            }
+
+            return false;
         }
     }
 }

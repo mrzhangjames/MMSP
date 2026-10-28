@@ -1,4 +1,5 @@
 using MMSP.Common.Helper;
+using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.Tool;
 
 namespace MMSP.Service.Flow
@@ -67,8 +68,19 @@ namespace MMSP.Service.Flow
                     written = fileName;
                     return "";
                 }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+                catch (ArgumentException ex)
                 {
+                    LogHelper.FlowRunError("写入 CSV 失败", ex);
+                    return "文件无法写入";
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    LogHelper.FlowRunError("写入 CSV 失败", ex);
+                    return "文件无法写入";
+                }
+                catch (IOException ex)
+                {
+                    LogHelper.FlowRunError("写入 CSV 失败", ex);
                     return "文件无法写入";
                 }
             }

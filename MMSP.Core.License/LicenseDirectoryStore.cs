@@ -77,8 +77,15 @@ namespace MMSP.Core.License
                 code = LicenseFailureCode.None;
                 return true;
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or FormatException)
+            catch (UnauthorizedAccessException ex)
             {
+                LicenseCaughtLog.Report("读取公钥失败", ex);
+                code = LicenseFailureCode.PublicKeyInvalid;
+                return false;
+            }
+            catch (IOException ex)
+            {
+                LicenseCaughtLog.Report("读取公钥失败", ex);
                 code = LicenseFailureCode.PublicKeyInvalid;
                 return false;
             }
@@ -100,6 +107,7 @@ namespace MMSP.Core.License
             }
             catch (FormatException)
             {
+                LicenseCaughtLog.Report("公钥无法解析", new FormatException("公钥无法解析"));
                 return false;
             }
         }
@@ -130,8 +138,14 @@ namespace MMSP.Core.License
             {
                 bytes = File.ReadAllBytes(SeenPath);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
+                LicenseCaughtLog.Report("读取许可证水位失败", ex);
+                return null;
+            }
+            catch (IOException ex)
+            {
+                LicenseCaughtLog.Report("读取许可证水位失败", ex);
                 return null;
             }
 

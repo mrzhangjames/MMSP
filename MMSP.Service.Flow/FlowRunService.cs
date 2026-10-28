@@ -1,6 +1,10 @@
-﻿using MMSP.Common.Helper.Logger;
+﻿using System.Net.Http;
+using System.Net.Sockets;
+using System.Text.Json;
+using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Service.Database;
+using SqlSugar;
 using MMSP.Service.Flow.Steps;
 
 namespace MMSP.Service.Flow
@@ -91,7 +95,7 @@ namespace MMSP.Service.Flow
                     return false;
                 }
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
                 LogHelper.FlowError("读取流程失败", ex);
                 return false;
@@ -212,7 +216,7 @@ namespace MMSP.Service.Flow
             FlowDeviceSession? session = null;
             try
             {
-                LogHelper.FlowInfo("流程启动");
+                LogHelper.FlowRunInfo("流程启动");
                 try
                 {
                     started.Wait(token);
@@ -237,14 +241,50 @@ namespace MMSP.Service.Flow
 
                 session = new FlowDeviceSession(LoadLink(), LoadScanners());
                 var context = new FlowStepContext(token, session);
-                FlowRunLoop.Execute(flows, context, LogHelper.FlowInfo, LogHelper.FlowError);
+                FlowRunLoop.Execute(flows, context, LogHelper.FlowRunInfo, LogHelper.FlowRunError);
             }
             catch (OperationCanceledException)
             {
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                LogHelper.FlowError("流程执行失败", ex);
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (JsonException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (TimeoutException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (SocketException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (IOException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (SqlSugarException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
             }
             finally
             {
@@ -281,7 +321,7 @@ namespace MMSP.Service.Flow
                 var flow = LoadOne(flowId);
                 if (flow is null)
                 {
-                    LogHelper.FlowError("流程不存在");
+                    LogHelper.FlowRunError("流程不存在");
                     return false;
                 }
 
@@ -290,16 +330,16 @@ namespace MMSP.Service.Flow
                     var step = flow.Steps.FirstOrDefault(item => item.Id == only);
                     if (step is null)
                     {
-                        LogHelper.FlowError("步骤不存在");
+                        LogHelper.FlowRunError("步骤不存在");
                         return false;
                     }
 
-                    LogHelper.FlowInfo($"执行步骤 {flow.Name.Trim()} {step.Title.Trim()}");
+                    LogHelper.FlowRunInfo($"执行步骤 {flow.Name.Trim()} {step.Title.Trim()}");
                     flow = new RunnableFlow(flow.Name, flow.LogOutput, new[] { step }, flow.Variables);
                 }
                 else
                 {
-                    LogHelper.FlowInfo($"执行流程 {flow.Name.Trim()}");
+                    LogHelper.FlowRunInfo($"执行流程 {flow.Name.Trim()}");
                 }
 
                 if (token.IsCancellationRequested)
@@ -310,11 +350,11 @@ namespace MMSP.Service.Flow
                 var stop = FlowCycle.Execute(
                     new[] { flow },
                     local,
-                    LogHelper.FlowInfo,
-                    message => LogHelper.FlowError(message),
+                    LogHelper.FlowRunInfo,
+                    message => LogHelper.FlowRunError(message),
                     progress: progress is null ? null : progress.Report);
                 if (stop == FlowCycleStop.Empty)
-                    LogHelper.FlowError("没有可执行的步骤");
+                    LogHelper.FlowRunError("没有可执行的步骤");
 
                 return !token.IsCancellationRequested;
             }
@@ -322,9 +362,54 @@ namespace MMSP.Service.Flow
             {
                 return false;
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                LogHelper.FlowError("流程执行失败", ex);
+                LogHelper.FlowRunError("流程执行失败", ex);
+                return false;
+            }
+            catch (JsonException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+                return false;
+            }
+            catch (HttpRequestException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+                return false;
+            }
+            catch (TimeoutException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+                return false;
+            }
+            catch (SocketException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+                return false;
+            }
+            catch (ObjectDisposedException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+                return false;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+                return false;
+            }
+            catch (IOException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+                return false;
+            }
+            catch (InvalidOperationException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+                return false;
+            }
+            catch (SqlSugarException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
                 return false;
             }
             finally
@@ -345,9 +430,21 @@ namespace MMSP.Service.Flow
                 {
                     session.Dispose();
                 }
-                catch (Exception ex)
+                catch (ObjectDisposedException ex)
                 {
-                    LogHelper.FlowError("释放设备连接失败", ex);
+                    LogHelper.FlowRunError("释放设备连接失败", ex);
+                }
+                catch (SocketException ex)
+                {
+                    LogHelper.FlowRunError("释放设备连接失败", ex);
+                }
+                catch (IOException ex)
+                {
+                    LogHelper.FlowRunError("释放设备连接失败", ex);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    LogHelper.FlowRunError("释放设备连接失败", ex);
                 }
             }
 
@@ -373,13 +470,13 @@ namespace MMSP.Service.Flow
             {
                 started.Dispose();
             }
-            catch (Exception ex)
+            catch (ObjectDisposedException ex)
             {
-                LogHelper.FlowError("释放启动等待失败", ex);
+                LogHelper.FlowRunError("释放启动等待失败", ex);
             }
 
             if (cancelled)
-                LogHelper.FlowInfo("流程停止");
+                LogHelper.FlowRunInfo("流程停止");
 
             if (notifyStop)
                 Notify(false);
@@ -497,9 +594,9 @@ namespace MMSP.Service.Flow
             {
                 handler(running);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                LogHelper.FlowError("运行状态通知失败", ex);
+                LogHelper.FlowRunError("运行状态通知失败", ex);
             }
         }
     }

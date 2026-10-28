@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using MMSP.App.WpfBase.Services;
+using MMSP.Common.Helper.Logger;
 using MMSP.Core.License;
 
 namespace MMSP.App.TemplateMatch.ViewModels
@@ -49,9 +50,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
             {
                 await MetroDialogService.ShowMessageAsync(Title(), Message());
             }
-            catch (Exception)
+            catch (InvalidOperationException ex)
             {
-                // 窗口还没起来时不再追加提示。
+                LogHelper.SysError("显示许可证提示失败", ex);
             }
             finally
             {

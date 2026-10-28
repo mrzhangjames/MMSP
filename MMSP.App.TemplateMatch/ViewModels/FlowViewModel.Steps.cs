@@ -156,8 +156,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     .Where(name => name.Length > 0)
                     .ToList();
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("读取流程变量失败", ex);
                 return [];
             }
         }
@@ -242,7 +243,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     WriteOrder(db, flow);
                     db.Ado.CommitTran();
                 }
-                catch (Exception)
+                catch (SqlSugarException)
                 {
                     db.Ado.RollbackTran();
                     throw;
@@ -250,8 +251,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 LogHelper.FlowInfo($"删除流程步 {title}");
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("删除流程步失败", ex);
                 await MetroDialogService.ShowMessageAsync(
                     Text("Flow_DeleteStepTitle", "删除步骤"),
                     Text("Flow_DeleteFailed", "删除失败"));
@@ -296,8 +298,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 WriteOrder(db, flow);
                 SelectStep(step);
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("插入流程步失败", ex);
                 Load(flow.Id);
             }
         }
@@ -325,8 +328,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 step.CfgValue = result.CfgValue;
                 return true;
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("保存流程步失败", ex);
                 return false;
             }
         }
@@ -367,8 +371,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 WriteOrder(SqlSugarContext.CustomerDb, flow);
                 SelectStep(step);
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("移动流程步失败", ex);
                 Load(flow.Id);
             }
         }

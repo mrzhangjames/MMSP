@@ -1,9 +1,14 @@
 ﻿using System.Globalization;
+using System.IO;
+using System.Net.Http;
+using System.Net.Sockets;
+using System.Text.Json;
 using MMSP.App.TemplateMatch.Models;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Service.Database;
+using SqlSugar;
 using MMSP.Service.Flow;
 
 namespace MMSP.App.TemplateMatch.ViewModels
@@ -52,9 +57,45 @@ namespace MMSP.App.TemplateMatch.ViewModels
             {
                 await _flowRun.RunOnceAsync(card.Id, progress);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                LogHelper.FlowError("流程执行失败", ex);
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (JsonException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (TimeoutException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (SocketException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (IOException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (SqlSugarException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
             }
             finally
             {
@@ -84,9 +125,45 @@ namespace MMSP.App.TemplateMatch.ViewModels
             {
                 await _flowRun.RunStepAsync(card.Id, step.Id, progress);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                LogHelper.FlowError("流程执行失败", ex);
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (JsonException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (TimeoutException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (SocketException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (IOException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
+            }
+            catch (SqlSugarException ex)
+            {
+                LogHelper.FlowRunError("流程执行失败", ex);
             }
             finally
             {
@@ -156,8 +233,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 LogHelper.FlowInfo($"复制流程 {saved.Value.Source} 为 {saved.Value.Name}");
                 Load(saved.Value.Id);
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowError("复制流程失败", ex);
                 await MetroDialogService.ShowMessageAsync(
                     Text("Flow_Copy", "复制"),
                     Text("Flow_CopyFailed", "复制失败"));
@@ -240,7 +318,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 db.Ado.CommitTran();
             }
-            catch (Exception)
+            catch (SqlSugarException)
             {
                 db.Ado.RollbackTran();
                 throw;

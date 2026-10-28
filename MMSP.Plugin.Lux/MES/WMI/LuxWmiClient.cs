@@ -1,5 +1,8 @@
-﻿using System.Net.Http;
+﻿using System.IO;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using MMSP.Common.Helper.Logger;
 
 namespace MMSP.Plugin.Lux.WMI
@@ -53,9 +56,17 @@ namespace MMSP.Plugin.Lux.WMI
             {
                 plain = LuxWmiEnvelope.Plain(config.ServerName, method.Name, parameters, method.ParameterAsString);
             }
-            catch (Exception)
+            catch (JsonException ex)
             {
-                return Fail(method.Name, "参数无法编码");
+                return Fail(method.Name, "参数无法编码", ex);
+            }
+            catch (NotSupportedException ex)
+            {
+                return Fail(method.Name, "参数无法编码", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Fail(method.Name, "参数无法编码", ex);
             }
 
             if (!LuxWmiCrypto.TryEncrypt(plain, config.AesKey, out var cipher, out var cryptoError))
@@ -65,20 +76,23 @@ namespace MMSP.Plugin.Lux.WMI
             var attempts = 1 + Math.Max(0, config.RetryCount);
             var timeoutMs = config.TimeoutMs > 0 ? config.TimeoutMs : 10000;
             LuxWmiResult? last = null;
+            Exception? transport = null;
             for (var attempt = 0; attempt < attempts; attempt++)
             {
-                last = await OnceAsync(address, soap, timeoutMs, cancellationToken).ConfigureAwait(false);
+                var once = await OnceAsync(address, soap, timeoutMs, cancellationToken).ConfigureAwait(false);
+                last = once.Result;
+                transport = once.Exception;
                 if (last.IsSuccess)
                     return last;
             }
 
-            return Fail(method.Name, last?.Error ?? "WMI 调用失败");
+            return Fail(method.Name, last?.Error ?? "WMI 调用失败", transport);
         }
 
         /// <summary>
         /// 发一次 SOAP。异常变成失败结果，不带上请求正文。
         /// </summary>
-        private static async Task<LuxWmiResult> OnceAsync(
+        private static async Task<(LuxWmiResult Result, Exception? Exception)> OnceAsync(
             string address,
             string soap,
             int timeoutMs,
@@ -94,34 +108,54 @@ namespace MMSP.Plugin.Lux.WMI
                 using var response = await Http.SendAsync(request, timeout.Token).ConfigureAwait(false);
                 var body = await response.Content.ReadAsStringAsync(timeout.Token).ConfigureAwait(false);
                 if (!LuxWmiEnvelope.TryRead(body, out var state, out var content, out var error))
-                    return LuxWmiResult.Fail("响应无法解析");
+                    return (LuxWmiResult.Fail("响应无法解析"), null);
 
                 if (!LuxWmiEnvelope.IsOk(state))
-                    return LuxWmiResult.Fail(string.IsNullOrWhiteSpace(error) ? content : error);
+                    return (LuxWmiResult.Fail(string.IsNullOrWhiteSpace(error) ? content : error), null);
 
-                return LuxWmiResult.Ok(content);
+                return (LuxWmiResult.Ok(content), null);
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             {
-                return LuxWmiResult.Fail("调用超时");
+                return (LuxWmiResult.Fail("调用超时"), null);
             }
             catch (OperationCanceledException)
             {
-                return LuxWmiResult.Fail("调用已取消");
+                return (LuxWmiResult.Fail("调用已取消"), null);
             }
-            catch (Exception)
+            catch (HttpRequestException ex)
             {
-                return LuxWmiResult.Fail("WMI 调用失败");
+                return (LuxWmiResult.Fail("WMI 调用失败"), ex);
+            }
+            catch (SocketException ex)
+            {
+                return (LuxWmiResult.Fail("WMI 调用失败"), ex);
+            }
+            catch (IOException ex)
+            {
+                return (LuxWmiResult.Fail("WMI 调用失败"), ex);
+            }
+            catch (TimeoutException ex)
+            {
+                return (LuxWmiResult.Fail("WMI 调用失败"), ex);
+            }
+            catch (FormatException ex)
+            {
+                return (LuxWmiResult.Fail("WMI 调用失败"), ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return (LuxWmiResult.Fail("WMI 调用失败"), ex);
             }
         }
 
         /// <summary>
         /// 记下失败。原因里如果夹带密钥或密文，就改成固定说法。
         /// </summary>
-        private static LuxWmiResult Fail(string method, string reason)
+        private static LuxWmiResult Fail(string method, string reason, Exception? exception = null)
         {
             var text = Sanitize(reason);
-            LogHelper.MesError("WMI " + method + " " + text);
+            LogHelper.MesIoError("WMI " + method + " " + text, exception);
             return LuxWmiResult.Fail(text);
         }
 

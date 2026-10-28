@@ -1,9 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
+using System.Security;
 using System.Text.Json;
+using CsvHelper;
 using Microsoft.Win32;
 using MMSP.App.WpfBase.Services;
 using MMSP.Common.Helper;
+using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.Base;
 using MMSP.Core.Model.Sys;
 using MMSP.Core.Model.Tool.PluginLux;
@@ -118,8 +121,39 @@ namespace MMSP.Plugin.Lux.ViewModels
                 foreach (var row in imported)
                     Rows.Add(row);
             }
-            catch (Exception)
+            catch (ArgumentException ex)
             {
+                LogHelper.FlowError("导入报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导入", "文件格式不正确");
+            }
+            catch (NotSupportedException ex)
+            {
+                LogHelper.FlowError("导入报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导入", "文件格式不正确");
+            }
+            catch (SecurityException ex)
+            {
+                LogHelper.FlowError("导入报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导入", "文件格式不正确");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.FlowError("导入报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导入", "文件格式不正确");
+            }
+            catch (IOException ex)
+            {
+                LogHelper.FlowError("导入报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导入", "文件格式不正确");
+            }
+            catch (CsvHelperException ex)
+            {
+                LogHelper.FlowError("导入报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导入", "文件格式不正确");
+            }
+            catch (InvalidDataException ex)
+            {
+                LogHelper.FlowError("导入报警配置失败", ex);
                 MetroDialogService.ShowModalMessage("导入", "文件格式不正确");
             }
         }
@@ -152,8 +186,34 @@ namespace MMSP.Plugin.Lux.ViewModels
                     });
                 CsvFileHelper.WriteTable(dialog.FileName, Columns, table);
             }
-            catch (Exception)
+            catch (ArgumentException ex)
             {
+                LogHelper.FlowError("导出报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导出", "文件无法保存");
+            }
+            catch (NotSupportedException ex)
+            {
+                LogHelper.FlowError("导出报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导出", "文件无法保存");
+            }
+            catch (SecurityException ex)
+            {
+                LogHelper.FlowError("导出报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导出", "文件无法保存");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.FlowError("导出报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导出", "文件无法保存");
+            }
+            catch (IOException ex)
+            {
+                LogHelper.FlowError("导出报警配置失败", ex);
+                MetroDialogService.ShowModalMessage("导出", "文件无法保存");
+            }
+            catch (CsvHelperException ex)
+            {
+                LogHelper.FlowError("导出报警配置失败", ex);
                 MetroDialogService.ShowModalMessage("导出", "文件无法保存");
             }
         }
@@ -216,8 +276,14 @@ namespace MMSP.Plugin.Lux.ViewModels
                 tool.Rows ??= [];
                 return new LuxAlarmLogToolViewModel(tool);
             }
-            catch (JsonException)
+            catch (JsonException ex)
             {
+                LogHelper.FlowError("读取报警配置失败", ex);
+                return new LuxAlarmLogToolViewModel(new LuxAlarmLogToolEntity());
+            }
+            catch (NotSupportedException ex)
+            {
+                LogHelper.FlowError("读取报警配置失败", ex);
                 return new LuxAlarmLogToolViewModel(new LuxAlarmLogToolEntity());
             }
         }

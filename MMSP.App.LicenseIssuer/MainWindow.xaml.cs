@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using Microsoft.Win32;
+using MMSP.Common.Helper.Logger;
 using MMSP.Core.License;
 
 namespace MMSP.App.LicenseIssuer
@@ -35,6 +36,7 @@ namespace MMSP.App.LicenseIssuer
         /// </summary>
         public MainWindow()
         {
+            LogHelper.BindCaughtLog();
             InitializeComponent();
         }
 
@@ -79,8 +81,27 @@ namespace MMSP.App.LicenseIssuer
                 var (privateKey, _) = LicenseKeys.Generate();
                 File.WriteAllBytes(privateKeyPath, privateKey);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch (ArgumentException ex)
             {
+                LicenseCaughtLog.Report("写入私钥失败", ex);
+                ResultText.Text = "私钥没有写成功。" + ex.Message;
+                return;
+            }
+            catch (NotSupportedException ex)
+            {
+                LicenseCaughtLog.Report("写入私钥失败", ex);
+                ResultText.Text = "私钥没有写成功。" + ex.Message;
+                return;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LicenseCaughtLog.Report("写入私钥失败", ex);
+                ResultText.Text = "私钥没有写成功。" + ex.Message;
+                return;
+            }
+            catch (IOException ex)
+            {
+                LicenseCaughtLog.Report("写入私钥失败", ex);
                 ResultText.Text = "私钥没有写成功。" + ex.Message;
                 return;
             }
@@ -128,10 +149,22 @@ namespace MMSP.App.LicenseIssuer
             }
             catch (ArgumentException ex)
             {
+                LicenseCaughtLog.Report("导出许可证失败", new ArgumentException("导出许可证失败"));
                 ResultText.Text = ex.Message;
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch (NotSupportedException ex)
             {
+                LicenseCaughtLog.Report("导出许可证失败", ex);
+                ResultText.Text = "没有导出。" + ex.Message;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LicenseCaughtLog.Report("导出许可证失败", ex);
+                ResultText.Text = "没有导出。" + ex.Message;
+            }
+            catch (IOException ex)
+            {
+                LicenseCaughtLog.Report("导出许可证失败", ex);
                 ResultText.Text = "没有导出。" + ex.Message;
             }
         }

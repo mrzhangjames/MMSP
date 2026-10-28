@@ -1,3 +1,4 @@
+using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using SqlSugar;
 
@@ -17,6 +18,7 @@ namespace MMSP.Service.Flow
             ArgumentNullException.ThrowIfNull(db);
             var hour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, DateTimeKind.Unspecified);
             var day = hour.Date;
+            Exception? last = null;
             for (var attempt = 0; attempt < 2; attempt++)
             {
                 try
@@ -50,11 +52,15 @@ namespace MMSP.Service.Flow
                     db.Ado.CommitTran();
                     return null;
                 }
-                catch (Exception)
+                catch (SqlSugarException ex)
                 {
+                    last = ex;
                     Rollback(db);
                 }
             }
+
+            if (last is not null)
+                LogHelper.FlowRunError("写入产量失败", last);
 
             return "写入失败";
         }
@@ -68,8 +74,9 @@ namespace MMSP.Service.Flow
             {
                 db.Ado.RollbackTran();
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
+                LogHelper.FlowRunError("回滚产量写入失败", ex);
             }
         }
     }

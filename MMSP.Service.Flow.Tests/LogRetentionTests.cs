@@ -61,5 +61,19 @@ namespace MMSP.Service.Flow.Tests
             Assert.False(LogRetention.IsExpiredFile(@"D:\Data\Log\NLog.config", Today, 30));
             Assert.False(LogRetention.IsExpiredFile(@"D:\Data\Log\20260919.log", Today, 0));
         }
+
+        /// <summary>
+        /// 早于截止日的按天子目录要删。截止日当天、小时文件和业务目录留下。
+        /// </summary>
+        [Fact]
+        public void IsExpiredDayFolder_UsesDayName()
+        {
+            Assert.True(LogRetention.IsExpiredDayFolder(@"D:\Data\Log\运行日志\20260919", Today, 30));
+            Assert.False(LogRetention.IsExpiredDayFolder(@"D:\Data\Log\运行日志\20260920", Today, 30));
+            Assert.False(LogRetention.IsExpiredDayFolder(@"D:\Data\Log\运行日志\20261020", Today, 30));
+            Assert.False(LogRetention.IsExpiredDayFolder(@"D:\Data\Log\运行日志\20260919\14.log", Today, 30));
+            Assert.False(LogRetention.IsExpiredDayFolder(@"D:\Data\Log\运行日志", Today, 30));
+            Assert.False(LogRetention.IsExpiredDayFolder(@"D:\Data\Log\运行日志\20260919", Today, 0));
+        }
     }
 }

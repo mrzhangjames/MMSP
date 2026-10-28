@@ -95,6 +95,7 @@ namespace MMSP.Core.License
             }
             catch (CryptographicException)
             {
+                LicenseCaughtLog.Report("许可证签名无法校验", new CryptographicException("许可证签名无法校验"));
                 return false;
             }
         }

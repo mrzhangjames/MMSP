@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Windows;
+using DryIoc;
 using MMSP.App.TemplateMatch.Models;
 using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
@@ -13,6 +15,7 @@ using MMSP.Service.Device.Plc;
 using MMSP.Service.Device.Scan;
 using MMSP.Service.Flow;
 using Prism.Ioc;
+using SqlSugar;
 
 namespace MMSP.App.TemplateMatch.ViewModels
 {
@@ -225,12 +228,12 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 LoadPoints(pointId);
                 LoadScanners(scannerId);
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
                 lock (_plcLock)
                     _pollMs = 0;
 
-                NotePlc(DeviceLogKind.Timeout, ex.Message, true);
+                NotePlc(DeviceLogKind.Timeout, "读取设备配置失败", true, exception: ex);
             }
         }
 
@@ -501,9 +504,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 ApplyHeartbeat();
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
-                NotePlc(DeviceLogKind.Timeout, ex.Message, true);
+                NotePlc(DeviceLogKind.Timeout, "保存连接参数失败", true, exception: ex);
             }
         }
 
@@ -615,9 +618,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 return true;
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
-                NotePlc(DeviceLogKind.Timeout, ex.Message, true);
+                NotePlc(DeviceLogKind.Timeout, "保存点位失败", true, exception: ex);
                 return false;
             }
         }
@@ -643,9 +646,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                         .ExecuteCommand();
                 }
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
-                NotePlc(DeviceLogKind.Timeout, ex.Message, true);
+                NotePlc(DeviceLogKind.Timeout, "保存点位顺序失败", true, exception: ex);
             }
         }
 
@@ -665,9 +668,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     .ExecuteCommand();
                 StorePointOrder();
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
-                NotePlc(DeviceLogKind.Timeout, ex.Message, true);
+                NotePlc(DeviceLogKind.Timeout, "删除点位失败", true, exception: ex);
             }
         }
 
@@ -703,7 +706,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 db.Ado.CommitTran();
             }
-            catch
+            catch (SqlSugarException)
             {
                 db.Ado.RollbackTran();
                 throw;
@@ -798,9 +801,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 else
                     db.Updateable(entity).ExecuteCommand();
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
-                NoteScan(DeviceLogKind.Timeout, ex.Message, true);
+                NoteScan(DeviceLogKind.Timeout, "保存扫码枪失败", true, exception: ex);
             }
         }
 
@@ -825,9 +828,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                         .ExecuteCommand();
                 }
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
-                NoteScan(DeviceLogKind.Timeout, ex.Message, true);
+                NoteScan(DeviceLogKind.Timeout, "保存扫码枪顺序失败", true, exception: ex);
             }
         }
 
@@ -847,9 +850,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     .ExecuteCommand();
                 StoreScannerOrder();
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
-                NoteScan(DeviceLogKind.Timeout, ex.Message, true);
+                NoteScan(DeviceLogKind.Timeout, "删除扫码枪失败", true, exception: ex);
             }
         }
 
@@ -899,30 +902,48 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
-        /// 记下一条 PLC 页面日志，并写入运行日志。
+        /// 记下一条 PLC 页面日志。deviceIo 为真时再抄一份到设备日志。
         /// </summary>
-        private void NotePlc(DeviceLogKind kind, string text, bool error)
+        private void NotePlc(DeviceLogKind kind, string text, bool error, bool deviceIo = false, Exception? exception = null)
         {
             Post(() =>
             {
                 AddPlc(kind, text);
+                if (deviceIo)
+                {
+                    if (error)
+                        LogHelper.PlcIoError(text, exception);
+                    else
+                        LogHelper.PlcIoInfo(text);
+                    return;
+                }
+
                 if (error)
-                    LogHelper.PlcError(text);
+                    LogHelper.PlcError(text, exception);
                 else
                     LogHelper.PlcInfo(text);
             });
         }
 
         /// <summary>
-        /// 记下一条扫码页面日志，并写入运行日志。
+        /// 记下一条扫码页面日志。deviceIo 为真时再抄一份到设备日志。
         /// </summary>
-        private void NoteScan(DeviceLogKind kind, string text, bool error)
+        private void NoteScan(DeviceLogKind kind, string text, bool error, bool deviceIo = false, Exception? exception = null)
         {
             Post(() =>
             {
                 AddScan(kind, text);
+                if (deviceIo)
+                {
+                    if (error)
+                        LogHelper.ScanIoError(text, exception);
+                    else
+                        LogHelper.ScanIoInfo(text);
+                    return;
+                }
+
                 if (error)
-                    LogHelper.ScanError(text);
+                    LogHelper.ScanError(text, exception);
                 else
                     LogHelper.ScanInfo(text);
             });
@@ -971,9 +992,25 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     {
                         return ExchangeLocked(_plc, address, dataType, length, writeValue, bitIndex, formatStatus);
                     }
-                    catch (Exception ex)
+                    catch (TimeoutException ex)
                     {
-                        return PlcIoResult.Fail(ex.Message);
+                        return FailPlcIo("读取点位失败", ex, writeValue is not null);
+                    }
+                    catch (SocketException ex)
+                    {
+                        return FailPlcIo("读取点位失败", ex, writeValue is not null);
+                    }
+                    catch (ObjectDisposedException ex)
+                    {
+                        return FailPlcIo("读取点位失败", ex, writeValue is not null);
+                    }
+                    catch (IOException ex)
+                    {
+                        return FailPlcIo("读取点位失败", ex, writeValue is not null);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        return FailPlcIo("读取点位失败", ex, writeValue is not null);
                     }
                 }
             });
@@ -1035,8 +1072,9 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 return ContainerExt.Resolve<IFlowRunService>().IsRunning;
             }
-            catch (Exception)
+            catch (ContainerException ex)
             {
+                LogHelper.SysError("读取流程运行状态失败", ex);
                 return false;
             }
         }
@@ -1115,9 +1153,33 @@ namespace MMSP.App.TemplateMatch.ViewModels
                         return session == Session ? result : null;
                     }
                 }
-                catch (Exception ex)
+                catch (TimeoutException ex)
                 {
-                    return ScanIoResult.Fail(ex.Message);
+                    return FailScanIo(ex);
+                }
+                catch (SocketException ex)
+                {
+                    return FailScanIo(ex);
+                }
+                catch (ObjectDisposedException ex)
+                {
+                    return FailScanIo(ex);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return FailScanIo(ex);
+                }
+                catch (IOException ex)
+                {
+                    return FailScanIo(ex);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return FailScanIo(ex);
+                }
+                catch (ArgumentException ex)
+                {
+                    return FailScanIo(ex);
                 }
             });
         }
@@ -1159,11 +1221,19 @@ namespace MMSP.App.TemplateMatch.ViewModels
                         _plc = PlcClients.Open(PlcConnections.Create((PlcProtocol)protocol, host, port, station, format, timeout, writeTimeout));
                         _plcSignature = signature;
                     }
-                    catch (Exception ex)
+                    catch (InvalidOperationException ex)
                     {
                         _plc = null;
                         _plcSignature = "";
-                        return PlcIoResult.Fail(ex.Message);
+                        NotePlc(DeviceLogKind.Timeout, "连接 PLC 失败", true, deviceIo: true, exception: ex);
+                        return PlcIoResult.Fail("连接失败");
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        _plc = null;
+                        _plcSignature = "";
+                        NotePlc(DeviceLogKind.Timeout, "连接 PLC 失败", true, deviceIo: true, exception: ex);
+                        return PlcIoResult.Fail("连接失败");
                     }
                 }
 
@@ -1209,17 +1279,69 @@ namespace MMSP.App.TemplateMatch.ViewModels
         }
 
         /// <summary>
+        /// 读写失败时写入设备日志，并把短原因交回页面。
+        /// </summary>
+        private PlcIoResult FailPlcIo(string readText, Exception exception, bool write)
+        {
+            var text = write ? "写入点位失败" : readText;
+            NotePlc(DeviceLogKind.Timeout, text, true, deviceIo: true, exception: exception);
+            return PlcIoResult.Fail(text);
+        }
+
+        /// <summary>
+        /// 扫码失败时写入设备日志。
+        /// </summary>
+        private ScanIoResult FailScanIo(Exception exception)
+        {
+            NoteScan(DeviceLogKind.Timeout, "扫码失败", true, deviceIo: true, exception: exception);
+            return ScanIoResult.Fail("扫码失败");
+        }
+
+        /// <summary>
+        /// 连接失败时写入设备日志。
+        /// </summary>
+        private PlcIoResult FailPlcConnect(Exception exception)
+        {
+            NotePlc(DeviceLogKind.Timeout, "连接 PLC 失败", true, deviceIo: true, exception: exception);
+            return PlcIoResult.Fail("连接失败");
+        }
+
+        /// <summary>
         /// 调用连接。异常变成失败结果。
         /// </summary>
-        private static PlcIoResult CallConnect(IPlcClient client)
+        private PlcIoResult CallConnect(IPlcClient client)
         {
             try
             {
                 return client.Connect();
             }
-            catch (Exception ex)
+            catch (TimeoutException ex)
             {
-                return PlcIoResult.Fail(ex.Message);
+                return FailPlcConnect(ex);
+            }
+            catch (SocketException ex)
+            {
+                return FailPlcConnect(ex);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                return FailPlcConnect(ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return FailPlcConnect(ex);
+            }
+            catch (IOException ex)
+            {
+                return FailPlcConnect(ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return FailPlcConnect(ex);
+            }
+            catch (ArgumentException ex)
+            {
+                return FailPlcConnect(ex);
             }
         }
 

@@ -12,7 +12,9 @@ using MMSP.Plugin.Lux;
 using MMSP.Service.Database;
 using MMSP.Service.Device.Plc;
 using MMSP.Service.Flow;
+using SqlSugar;
 using System.IO;
+using System.Security;
 using System.Windows;
 
 namespace MMSP.App.Main
@@ -59,18 +61,47 @@ namespace MMSP.App.Main
         /// </summary>
         protected override void OnStartup(StartupEventArgs e)
         {
+            LogHelper.BindCaughtLog();
             try
             {
                 AppProfile.Use(AppProfileLoader.Load());
                 LoadLicense();
                 base.OnStartup(e);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                LogHelper.SysError("应用程序配置无效", ex);
-                MessageBox.Show(ex.Message, "MMSP", MessageBoxButton.OK, MessageBoxImage.Error);
-                Shutdown(1);
+                StopForConfig(ex);
             }
+            catch (NotSupportedException ex)
+            {
+                StopForConfig(ex);
+            }
+            catch (SecurityException ex)
+            {
+                StopForConfig(ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                StopForConfig(ex);
+            }
+            catch (IOException ex)
+            {
+                StopForConfig(ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                StopForConfig(ex);
+            }
+        }
+
+        /// <summary>
+        /// 安装身份读不出来时记下日志并退出。
+        /// </summary>
+        private void StopForConfig(Exception exception)
+        {
+            LogHelper.SysError("应用程序配置无效", exception);
+            MessageBox.Show(exception.Message, "MMSP", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
         }
 
         /// <summary>
@@ -99,7 +130,12 @@ namespace MMSP.App.Main
             {
                 evaluation = LicenseRuntime.Check(_licenseFiles, fingerprint, DateTimeOffset.UtcNow);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.SysError("读取许可证失败", ex);
+                evaluation = LicenseEvaluation.Only(LicenseFailureCode.FileUnreadable);
+            }
+            catch (IOException ex)
             {
                 LogHelper.SysError("读取许可证失败", ex);
                 evaluation = LicenseEvaluation.Only(LicenseFailureCode.FileUnreadable);
@@ -111,7 +147,11 @@ namespace MMSP.App.Main
                 {
                     LicenseRuntime.Remember(_licenseFiles, DateTimeOffset.UtcNow);
                 }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                catch (UnauthorizedAccessException ex)
+                {
+                    LogHelper.SysError("写入许可证水位失败", ex);
+                }
+                catch (IOException ex)
                 {
                     LogHelper.SysError("写入许可证水位失败", ex);
                 }
@@ -138,7 +178,15 @@ namespace MMSP.App.Main
             {
                 LogRetentionCleaner.Apply(config.DbLogDays, config.FileLogDays);
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
+            {
+                LogHelper.SysError("清理过期日志失败", ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.SysError("清理过期日志失败", ex);
+            }
+            catch (IOException ex)
             {
                 LogHelper.SysError("清理过期日志失败", ex);
             }
@@ -183,16 +231,16 @@ namespace MMSP.App.Main
         /// </summary>
         private static void StartPlcHeartbeat()
         {
-            PlcHeartbeat.Shared.Failure = message => LogHelper.PlcError(message);
+            PlcHeartbeat.Shared.Failure = (message, exception) => LogHelper.PlcIoError(message, exception);
             PlcLinkEntity? row = null;
             try
             {
                 if (SqlSugarContext.IsOpen)
                     row = SqlSugarContext.CustomerDb.Queryable<PlcLinkEntity>().ToList().FirstOrDefault();
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
-                LogHelper.PlcError("读取心跳配置失败 " + ex.Message);
+                LogHelper.PlcError("读取心跳配置失败", ex);
             }
 
             if (row is null)

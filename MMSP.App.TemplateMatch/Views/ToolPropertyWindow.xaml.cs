@@ -13,6 +13,7 @@ using MMSP.Plugin.Tool;
 using MMSP.Plugin.Tool.ViewModels;
 using MMSP.Plugin.Tool.Views;
 using MMSP.Service.Database;
+using SqlSugar;
 
 namespace MMSP.App.TemplateMatch.Views
 {
@@ -362,7 +363,7 @@ namespace MMSP.App.TemplateMatch.Views
                     })
                     .ToList();
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
                 LogHelper.PlcError("读取点位失败", ex);
                 return [];
@@ -387,7 +388,7 @@ namespace MMSP.App.TemplateMatch.Views
                     .Distinct()
                     .ToList();
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
                 LogHelper.ScanError("读取扫码枪失败", ex);
                 return [];

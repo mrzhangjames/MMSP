@@ -94,7 +94,7 @@ namespace MMSP.Core.Model.Base
         public static string CustomerDbFilePath => Path.Combine(DataDirectory, Folder_DB, File_SqliteDB);
 
         /// <summary>
-        /// 日志目录：程序目录上一层\Data\Log。按年月日各写一个文件。
+        /// 日志目录：程序目录上一层\Data\Log。业务子目录、按天目录和按小时文件由 NLog.config 决定。
         /// </summary>
         public static string LogDirectory => Path.Combine(DataDirectory, Folder_Log);
 

@@ -19,21 +19,14 @@ namespace MMSP.Service.Device.Plc
             if (string.IsNullOrWhiteSpace(address))
                 return PlcIoResult.Fail("地址为空");
 
-            try
+            return dataType switch
             {
-                return dataType switch
-                {
-                    PlcDataType.Int16 or PlcDataType.UInt16 or PlcDataType.Int32 => Integer.Read(device, address, dataType),
-                    PlcDataType.Float => Real.Read(device, address),
-                    PlcDataType.String => Text.Read(device, address, length),
-                    PlcDataType.UInt16Array => Words.Read(device, address, length),
-                    _ => PlcIoResult.Fail("不支持的数据类型")
-                };
-            }
-            catch (Exception ex)
-            {
-                return PlcIoResult.Fail(ex.Message);
-            }
+                PlcDataType.Int16 or PlcDataType.UInt16 or PlcDataType.Int32 => Integer.Read(device, address, dataType),
+                PlcDataType.Float => Real.Read(device, address),
+                PlcDataType.String => Text.Read(device, address, length),
+                PlcDataType.UInt16Array => Words.Read(device, address, length),
+                _ => PlcIoResult.Fail("不支持的数据类型")
+            };
         }
 
         /// <summary>
@@ -45,21 +38,14 @@ namespace MMSP.Service.Device.Plc
                 return PlcIoResult.Fail("地址为空");
 
             var text = value ?? "";
-            try
+            return dataType switch
             {
-                return dataType switch
-                {
-                    PlcDataType.Int16 or PlcDataType.UInt16 or PlcDataType.Int32 => Integer.Write(device, address, dataType, text),
-                    PlcDataType.Float => Real.Write(device, address, text),
-                    PlcDataType.String => Text.Write(device, address, text),
-                    PlcDataType.UInt16Array => Words.Write(),
-                    _ => Mismatch()
-                };
-            }
-            catch (Exception ex)
-            {
-                return PlcIoResult.Fail(ex.Message);
-            }
+                PlcDataType.Int16 or PlcDataType.UInt16 or PlcDataType.Int32 => Integer.Write(device, address, dataType, text),
+                PlcDataType.Float => Real.Write(device, address, text),
+                PlcDataType.String => Text.Write(device, address, text),
+                PlcDataType.UInt16Array => Words.Write(),
+                _ => Mismatch()
+            };
         }
 
         /// <summary>

@@ -130,6 +130,7 @@ namespace MMSP.Core.License
             }
             catch (JsonException)
             {
+                LicenseCaughtLog.Report("许可证无法解析", new JsonException("许可证无法解析"));
                 return false;
             }
         }
@@ -261,6 +262,7 @@ namespace MMSP.Core.License
             }
             catch (FormatException)
             {
+                LicenseCaughtLog.Report("许可证签名无法解析", new FormatException("许可证签名无法解析"));
                 return false;
             }
 

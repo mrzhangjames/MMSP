@@ -10,6 +10,9 @@ using MMSP.Core.License;
 using MMSP.Core.Model.Base;
 using MMSP.Core.Model.Sys;
 using MMSP.Service.Database;
+using SqlSugar;
+using System.ComponentModel;
+using System.Security;
 
 namespace MMSP.App.TemplateMatch.ViewModels
 {
@@ -368,7 +371,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 AppConfigStore.SaveGeneral(title, dbDays, fileDays);
                 AppAppearance.ApplyTitle(title);
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
                 SaveError = Text("Config_SaveFailed");
                 LogHelper.SysError("保存常规配置失败", ex);
@@ -379,7 +382,17 @@ namespace MMSP.App.TemplateMatch.ViewModels
             {
                 LogRetentionCleaner.Apply(dbDays, fileDays);
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
+            {
+                SaveError = Text("Config_CleanFailed");
+                LogHelper.SysError("清理过期日志失败", ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                SaveError = Text("Config_CleanFailed");
+                LogHelper.SysError("清理过期日志失败", ex);
+            }
+            catch (IOException ex)
             {
                 SaveError = Text("Config_CleanFailed");
                 LogHelper.SysError("清理过期日志失败", ex);
@@ -403,7 +416,15 @@ namespace MMSP.App.TemplateMatch.ViewModels
                     UseShellExecute = true
                 });
             }
-            catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception or IOException)
+            catch (InvalidOperationException ex)
+            {
+                LogHelper.SysError("打开日志目录失败", ex);
+            }
+            catch (Win32Exception ex)
+            {
+                LogHelper.SysError("打开日志目录失败", ex);
+            }
+            catch (IOException ex)
             {
                 LogHelper.SysError("打开日志目录失败", ex);
             }
@@ -444,7 +465,13 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 license = File.ReadAllBytes(licensePath);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
+            {
+                LicenseMessage = Text("License_FileUnreadable");
+                LogHelper.SysError("读取许可证失败", ex);
+                return;
+            }
+            catch (IOException ex)
             {
                 LicenseMessage = Text("License_FileUnreadable");
                 LogHelper.SysError("读取许可证失败", ex);
@@ -470,7 +497,13 @@ namespace MMSP.App.TemplateMatch.ViewModels
                 _licenseFiles.WriteLicense(license);
                 LicenseRuntime.Remember(_licenseFiles, DateTimeOffset.UtcNow);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
+            {
+                LicenseMessage = Text("License_FileUnreadable");
+                LogHelper.SysError("写入许可证失败", ex);
+                return;
+            }
+            catch (IOException ex)
             {
                 LicenseMessage = Text("License_FileUnreadable");
                 LogHelper.SysError("写入许可证失败", ex);
@@ -537,11 +570,12 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
             IsLightTheme = light;
             AppAppearance.ApplyTheme(light);
+            var theme = light ? AppConfigDefaults.ThemeLight : AppConfigDefaults.ThemeDark;
             try
             {
-                AppConfigStore.SaveTheme(light ? AppConfigDefaults.ThemeLight : AppConfigDefaults.ThemeDark);
+                AppConfigStore.SaveTheme(theme);
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
                 LogHelper.SysError("保存主题失败", ex);
             }
@@ -562,7 +596,7 @@ namespace MMSP.App.TemplateMatch.ViewModels
             {
                 AppConfigStore.SaveLanguage(language);
             }
-            catch (Exception ex)
+            catch (SqlSugarException ex)
             {
                 LogHelper.SysError("保存语言失败", ex);
             }

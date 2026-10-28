@@ -12,6 +12,7 @@ using MMSP.Common.Helper.Logger;
 using MMSP.Core.Model.DB;
 using MMSP.Core.Model.Sys;
 using MMSP.Service.Database;
+using SqlSugar;
 using SkiaSharp;
 
 namespace MMSP.App.TemplateMatch.ViewModels
@@ -767,9 +768,10 @@ namespace MMSP.App.TemplateMatch.ViewModels
 
                 return true;
             }
-            catch (Exception)
+            catch (SqlSugarException ex)
             {
                 EditorError = Text("User_SaveFailed");
+                LogHelper.SysError("保存图表失败", ex);
                 return false;
             }
         }

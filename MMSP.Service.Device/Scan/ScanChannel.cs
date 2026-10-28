@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.IO.Ports;
 using System.Net.Sockets;
 using System.Text;
@@ -47,19 +48,18 @@ namespace MMSP.Service.Device.Scan
             if (invalid is not null)
                 return invalid;
 
+            var opened = false;
             try
             {
                 var result = OpenCore();
                 IsConnected = result.IsSuccess;
-                if (!result.IsSuccess)
-                    Close();
-
+                opened = result.IsSuccess;
                 return result;
             }
-            catch (Exception ex)
+            finally
             {
-                Close();
-                return ScanIoResult.Fail(ex.Message);
+                if (!opened)
+                    Close();
             }
         }
 
@@ -82,13 +82,17 @@ namespace MMSP.Service.Device.Scan
                 SendCore(encoding.GetBytes(command + terminator));
                 return ReadLine(encoding, encoding.GetBytes(terminator));
             }
-            catch (Exception ex) when (IsTimeout(ex))
+            catch (TimeoutException)
             {
                 return ScanIoResult.Fail("接收超时");
             }
-            catch (Exception ex)
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.TimedOut)
             {
-                return ScanIoResult.Fail(ex.Message);
+                return ScanIoResult.Fail("接收超时");
+            }
+            catch (IOException ex) when (IsSocketTimeout(ex))
+            {
+                return ScanIoResult.Fail("接收超时");
             }
         }
 
@@ -102,9 +106,29 @@ namespace MMSP.Service.Device.Scan
             {
                 CloseCore();
             }
-            catch (Exception)
+            catch (ObjectDisposedException)
             {
-                // 关闭失败不再向外抛。下次 Connect 会新建对象。
+                // 已经关掉。下次 Connect 会新建对象。
+            }
+            catch (SocketException)
+            {
+                // 关闭失败不再向外抛，避免盖住这次连接或触发的异常。
+            }
+            catch (Win32Exception)
+            {
+                // 串口关闭失败不再向外抛。
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // 关闭失败不再向外抛。
+            }
+            catch (IOException)
+            {
+                // 关闭失败不再向外抛。
+            }
+            catch (InvalidOperationException)
+            {
+                // 关闭失败不再向外抛。
             }
         }
 
@@ -175,7 +199,15 @@ namespace MMSP.Service.Device.Scan
                 {
                     next = ReadCore((int)Math.Min(left, int.MaxValue));
                 }
-                catch (Exception ex) when (IsTimeout(ex))
+                catch (TimeoutException)
+                {
+                    return ScanIoResult.Fail("接收超时");
+                }
+                catch (SocketException ex) when (ex.SocketErrorCode == SocketError.TimedOut)
+                {
+                    return ScanIoResult.Fail("接收超时");
+                }
+                catch (IOException ex) when (IsSocketTimeout(ex))
                 {
                     return ScanIoResult.Fail("接收超时");
                 }
@@ -234,17 +266,14 @@ namespace MMSP.Service.Device.Scan
         }
 
         /// <summary>
-        /// 套接字或串口的读超时。
+        /// 套接字读超时包在 IO 异常里。串口超时是 TimeoutException，由调用处单独捕获。
         /// </summary>
-        private static bool IsTimeout(Exception exception)
+        private static bool IsSocketTimeout(IOException exception)
         {
-            if (exception is TimeoutException)
-                return true;
-
             if (exception.InnerException is TimeoutException)
                 return true;
 
-            return exception is IOException && exception.InnerException is SocketException socket && socket.SocketErrorCode == SocketError.TimedOut;
+            return exception.InnerException is SocketException socket && socket.SocketErrorCode == SocketError.TimedOut;
         }
     }
 
@@ -288,13 +317,12 @@ namespace MMSP.Service.Device.Scan
             }
             catch (OperationCanceledException)
             {
-                client.Dispose();
                 return ScanIoResult.Fail("连接超时");
             }
-            catch
+            finally
             {
-                client.Dispose();
-                throw;
+                if (_client is null)
+                    client.Dispose();
             }
         }
 
