@@ -393,12 +393,12 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="MenuItem">
                         <Border x:Name="Box"
-                                Height="32"
-                                Margin="0,0,0,6"
+                                Height="30"
+                                Margin="0,0,0,2"
                                 Background="{DynamicResource CardBackground}"
                                 BorderBrush="#CCCCCC"
                                 BorderThickness="1"
-                                Padding="10,0">
+                                Padding="8,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <ContentPresenter ContentSource="Icon" Width="16" Height="16" Margin="0,0,8,0" />
                                 <ContentPresenter ContentSource="Header" VerticalAlignment="Center" />
